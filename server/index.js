@@ -9,6 +9,8 @@ const allowedOrigins = [
   'http://localhost:5173',
   'https://bonpan.co',
   'https://www.bonpan.co',
+  'https://bon-pan.vercel.app',
+  /\.vercel\.app$/,
 ]
 app.use(cors({
   origin: (origin, cb) => {
