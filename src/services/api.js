@@ -1,5 +1,6 @@
-// En desarrollo apunta a localhost, en producción a la API real
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api'
+// En desarrollo apunta a localhost, en producción a Railway
+const BASE = import.meta.env.VITE_API_URL
+  || (import.meta.env.DEV ? 'http://localhost:4000/api' : 'https://bonpan-production.up.railway.app/api')
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, {
