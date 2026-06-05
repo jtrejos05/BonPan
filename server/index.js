@@ -5,19 +5,7 @@ const cors    = require('cors')
 const app = express()
 
 // ── Middleware ────────────────────────────────────────────────
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://bonpan.co',
-  'https://www.bonpan.co',
-  'https://bon-pan.vercel.app',
-  /\.vercel\.app$/,
-]
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.includes(origin)) cb(null, true)
-    else cb(new Error('No permitido por CORS'))
-  }
-}))
+app.use(cors())
 app.use(express.json())
 
 // ── Request logger ────────────────────────────────────────────
