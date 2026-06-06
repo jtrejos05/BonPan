@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShoppingCart, X, MapPin, Store, ChevronDown } from 'lucide-react'
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShoppingCart, X, MapPin, Store, ChevronDown, Tag, Check } from 'lucide-react'
 import { useApp } from '../context/AppContext'
+import { api } from '../services/api'
 
 const TIENDA = {
   nombre: 'Bon Pan — Centro',
@@ -122,7 +123,35 @@ export default function Order() {
   const [submitting,   setSubmitting]   = useState(false)
   const [submitError,  setSubmitError]  = useState('')
   const [showModal,    setShowModal]    = useState(false)
-  const [delivery,     setDelivery]     = useState(null) // { tipo, ciudad, direccion }
+  const [delivery,     setDelivery]     = useState(null)
+  const [codigoInput,  setCodigoInput]  = useState('')
+  const [promo,        setPromo]        = useState(null)
+  const [promoError,   setPromoError]   = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
+
+  async function aplicarCodigo() {
+    if (!codigoInput.trim()) return
+    setPromoLoading(true)
+    setPromoError('')
+    setPromo(null)
+    try {
+      const data = await api.promociones.getByCodigo(codigoInput.trim())
+      setPromo(data)
+    } catch {
+      setPromoError('Código inválido o expirado')
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+
+  function calcDescuento() {
+    if (!promo) return 0
+    if (promo.tipo === 'porcentaje') return Math.round(cartTotal * promo.valor / 100)
+    return Math.min(promo.valor, cartTotal)
+  }
+
+  const descuento  = calcDescuento()
+  const totalFinal = cartTotal - descuento // { tipo, ciudad, direccion }
 
   function validate() {
     const e = {}
@@ -360,9 +389,56 @@ export default function Order() {
                 ))}
               </div>
 
+              {/* Código promocional */}
+              <div className="mb-4">
+                <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+                  <Tag size={11} className="inline mr-1" /> Código promocional
+                </label>
+                <div className="flex gap-2">
+                  <input value={codigoInput}
+                    onChange={e => { setCodigoInput(e.target.value.toUpperCase()); setPromo(null); setPromoError('') }}
+                    placeholder="Ej: BONPAN20"
+                    className="flex-1 border-b-2 border-stone-200 bg-transparent py-2 text-stone-700
+                               font-mono font-bold text-sm focus:outline-none focus:border-red-800
+                               tracking-widest placeholder:font-normal placeholder:tracking-normal transition-colors" />
+                  <button type="button" onClick={aplicarCodigo} disabled={promoLoading || !codigoInput}
+                    className="text-xs font-bold text-red-800 border-b-2 border-red-800 pb-1
+                               hover:text-red-950 disabled:opacity-40 transition-colors shrink-0">
+                    {promoLoading ? '...' : 'Aplicar'}
+                  </button>
+                </div>
+                {promoError && <p className="text-red-500 text-xs mt-1 font-medium">{promoError}</p>}
+                {promo && (
+                  <div className="flex items-center gap-2 mt-2 bg-green-50 border border-green-200 px-3 py-2 rounded-xl">
+                    <Check size={14} className="text-green-600 shrink-0" />
+                    <p className="text-green-700 text-xs font-bold">
+                      {promo.tipo === 'porcentaje' ? `${promo.valor}% de descuento` : `$${Number(promo.valor).toLocaleString()} de descuento`} aplicado
+                    </p>
+                    <button onClick={() => { setPromo(null); setCodigoInput('') }}
+                      className="ml-auto text-green-500 hover:text-green-700">
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Subtotal y descuento */}
+              <div className="space-y-2 mb-4 border-t border-stone-100 pt-4">
+                <div className="flex justify-between text-sm text-stone-500">
+                  <span>Subtotal</span>
+                  <span>${cartTotal.toLocaleString()}</span>
+                </div>
+                {descuento > 0 && (
+                  <div className="flex justify-between text-sm text-green-600 font-bold">
+                    <span>Descuento ({promo.nombre})</span>
+                    <span>-${descuento.toLocaleString()}</span>
+                  </div>
+                )}
+              </div>
+
               <div className="flex justify-between items-center mb-6">
-                <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Subtotal</span>
-                <span className="font-black text-2xl text-red-950">${cartTotal.toLocaleString()}</span>
+                <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Total</span>
+                <span className="font-black text-2xl text-red-950">${totalFinal.toLocaleString()}</span>
               </div>
 
               {/* Formulario */}

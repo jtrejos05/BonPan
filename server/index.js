@@ -21,7 +21,8 @@ app.use('/api/clientes',  require('./routes/clientes'))
 app.use('/api/actividad', require('./routes/actividad'))
 app.use('/api/auth',      require('./routes/auth'))
 app.use('/api/usuarios',  require('./routes/usuarios'))
-app.use('/api/upload',    require('./routes/upload'))
+app.use('/api/upload',      require('./routes/upload'))
+app.use('/api/promociones', require('./routes/promociones'))
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {

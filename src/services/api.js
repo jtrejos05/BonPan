@@ -53,6 +53,17 @@ export const api = {
     login: (password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
   },
 
+  promociones: {
+    getAll:       ()       => request('/promociones/admin'),
+    getActivas:   ()       => request('/promociones'),
+    getByCodigo:  (codigo) => request(`/promociones/codigo/${codigo}`),
+    create:       (data)   => request('/promociones',           { method: 'POST',  body: JSON.stringify(data) }),
+    update:       (id, d)  => request(`/promociones/${id}`,     { method: 'PUT',   body: JSON.stringify(d) }),
+    toggle:       (id)     => request(`/promociones/${id}/toggle`, { method: 'PATCH' }),
+    remove:       (id)     => request(`/promociones/${id}`,     { method: 'DELETE' }),
+    usar:         (id)     => request(`/promociones/${id}/usar`, { method: 'POST' }),
+  },
+
   upload: {
     imagen: async (file) => {
       const formData = new FormData()

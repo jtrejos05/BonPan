@@ -1,39 +1,27 @@
-import { useState } from 'react'
-import { Plus, X, Check, Tag, ToggleLeft, ToggleRight, Trash2, Calendar, Percent, DollarSign } from 'lucide-react'
-
-// Hook local para promociones (más adelante se conecta al backend)
-function usePromociones() {
-  const [promociones, setPromociones] = useState([
-    {
-      id: 1,
-      nombre: '2x1 en Croissants',
-      descripcion: 'Lleva 2 croissants de mantequilla y paga solo 1.',
-      tipo: 'porcentaje',
-      valor: 50,
-      categorias: ['Croissants'],
-      activa: true,
-      fechaInicio: '2026-06-01',
-      fechaFin: '2026-06-30',
-      codigo: 'CROIS2X1',
-      usos: 12,
-    },
-  ])
-
-  function add(promo)    { setPromociones(p => [{ ...promo, id: Date.now(), usos: 0 }, ...p]) }
-  function toggle(id)    { setPromociones(p => p.map(x => x.id === id ? { ...x, activa: !x.activa } : x)) }
-  function remove(id)    { setPromociones(p => p.filter(x => x.id !== id)) }
-  function update(promo) { setPromociones(p => p.map(x => x.id === promo.id ? promo : x)) }
-
-  return { promociones, add, toggle, remove, update }
-}
+import { useState, useEffect } from 'react'
+import { api } from '../services/api'
+import { Plus, X, Check, Tag, ToggleLeft, ToggleRight, Trash2, Calendar, Percent, DollarSign, Pencil, RefreshCw } from 'lucide-react'
 
 const CATEGORIAS = ['Todos los productos', 'Croissants', 'Pasteles Salados', 'Hojaldre Dulce', 'Bebidas']
 
+// ── Modal crear/editar ───────────────────────────────────────
 function PromoModal({ initial, onSave, onClose }) {
-  const [form, setForm] = useState(initial || {
+  const [form, setForm] = useState(initial ? {
+    nombre:      initial.nombre      || '',
+    descripcion: initial.descripcion || '',
+    tipo:        initial.tipo        || 'porcentaje',
+    valor:       initial.valor       || '',
+    codigo:      initial.codigo      || '',
+    categorias:  initial.categorias  || [],
+    activa:      initial.activa !== false,
+    fecha_inicio: initial.fecha_inicio ? initial.fecha_inicio.slice(0,10) : '',
+    fecha_fin:    initial.fecha_fin   ? initial.fecha_fin.slice(0,10)   : '',
+  } : {
     nombre: '', descripcion: '', tipo: 'porcentaje', valor: '',
-    categorias: [], activa: true, fechaInicio: '', fechaFin: '', codigo: '',
+    codigo: '', categorias: [], activa: true, fecha_inicio: '', fecha_fin: '',
   })
+  const [saving, setSaving] = useState(false)
+  const [error,  setError]  = useState('')
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   function toggleCat(c) {
@@ -45,18 +33,28 @@ function PromoModal({ initial, onSave, onClose }) {
     }))
   }
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault()
-    if (!form.nombre || !form.valor) return
-    onSave(form)
-    onClose()
+    if (!form.nombre || !form.valor) return setError('Nombre y valor son requeridos')
+    setSaving(true)
+    setError('')
+    try {
+      await onSave(form)
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full max-w-lg shadow-2xl z-10 rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
-        <div className="bg-red-950 px-6 py-5 flex items-center justify-between sticky top-0">
+
+        {/* Header */}
+        <div className="bg-red-950 px-6 py-5 flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-white font-black text-xl" style={{fontFamily:'Playfair Display,serif'}}>
             {initial ? '✏️ Editar Promoción' : '🎉 Nueva Promoción'}
           </h2>
@@ -66,9 +64,7 @@ function PromoModal({ initial, onSave, onClose }) {
         <form onSubmit={submit} className="p-6 space-y-5">
           {/* Nombre */}
           <div>
-            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-              Nombre de la promoción *
-            </label>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">Nombre *</label>
             <input value={form.nombre} onChange={e => set('nombre', e.target.value)} required
               placeholder="Ej: 2x1 en Croissants"
               className="w-full border-b-2 border-stone-200 bg-transparent py-2.5 text-stone-700
@@ -87,11 +83,9 @@ function PromoModal({ initial, onSave, onClose }) {
                          font-medium text-sm focus:outline-none focus:border-red-300 resize-none" />
           </div>
 
-          {/* Tipo de descuento */}
+          {/* Tipo */}
           <div>
-            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-              Tipo de descuento
-            </label>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">Tipo de descuento</label>
             <div className="grid grid-cols-2 gap-3">
               {[
                 { key: 'porcentaje', label: '% Porcentaje', icon: <Percent size={16} />, ex: 'Ej: 20% de descuento' },
@@ -115,9 +109,7 @@ function PromoModal({ initial, onSave, onClose }) {
               {form.tipo === 'porcentaje' ? 'Porcentaje de descuento *' : 'Valor a descontar (COP) *'}
             </label>
             <div className="flex items-center border-b-2 border-stone-200 focus-within:border-red-800 transition-colors">
-              <span className="text-stone-400 font-bold mr-2">
-                {form.tipo === 'porcentaje' ? '%' : '$'}
-              </span>
+              <span className="text-stone-400 font-bold mr-2">{form.tipo === 'porcentaje' ? '%' : '$'}</span>
               <input type="number" value={form.valor} onChange={e => set('valor', e.target.value)}
                 required min="1" max={form.tipo === 'porcentaje' ? 100 : undefined}
                 placeholder={form.tipo === 'porcentaje' ? '20' : '5000'}
@@ -125,7 +117,7 @@ function PromoModal({ initial, onSave, onClose }) {
             </div>
           </div>
 
-          {/* Código promocional */}
+          {/* Código */}
           <div>
             <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
               Código promocional (opcional)
@@ -134,14 +126,12 @@ function PromoModal({ initial, onSave, onClose }) {
               placeholder="Ej: BONPAN20"
               className="w-full border-b-2 border-stone-200 bg-transparent py-2.5 text-stone-700
                          font-mono font-bold focus:outline-none focus:border-red-800 transition-colors tracking-widest" />
-            <p className="text-stone-400 text-xs mt-1">Si lo dejas vacío, el descuento se aplica automáticamente.</p>
+            <p className="text-stone-400 text-xs mt-1">Si lo dejas vacío, aplica automáticamente.</p>
           </div>
 
           {/* Categorías */}
           <div>
-            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-              Aplicar a
-            </label>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">Aplicar a</label>
             <div className="flex flex-wrap gap-2">
               {CATEGORIAS.map(c => (
                 <button key={c} type="button" onClick={() => toggleCat(c)}
@@ -161,7 +151,7 @@ function PromoModal({ initial, onSave, onClose }) {
               <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
                 <Calendar size={12} className="inline mr-1" /> Fecha inicio
               </label>
-              <input type="date" value={form.fechaInicio} onChange={e => set('fechaInicio', e.target.value)}
+              <input type="date" value={form.fecha_inicio} onChange={e => set('fecha_inicio', e.target.value)}
                 className="w-full border-b-2 border-stone-200 bg-transparent py-2 text-stone-700
                            font-medium text-sm focus:outline-none focus:border-red-800 transition-colors" />
             </div>
@@ -169,22 +159,27 @@ function PromoModal({ initial, onSave, onClose }) {
               <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
                 <Calendar size={12} className="inline mr-1" /> Fecha fin
               </label>
-              <input type="date" value={form.fechaFin} onChange={e => set('fechaFin', e.target.value)}
+              <input type="date" value={form.fecha_fin} onChange={e => set('fecha_fin', e.target.value)}
                 className="w-full border-b-2 border-stone-200 bg-transparent py-2 text-stone-700
                            font-medium text-sm focus:outline-none focus:border-red-800 transition-colors" />
             </div>
           </div>
 
-          {/* Botones */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <p className="text-red-600 text-sm font-medium">{error}</p>
+            </div>
+          )}
+
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose}
               className="flex-1 border-2 border-stone-200 text-stone-600 font-bold py-3 rounded-xl text-sm">
               Cancelar
             </button>
-            <button type="submit"
+            <button type="submit" disabled={saving}
               className="flex-1 bg-red-950 text-white font-bold py-3 rounded-xl text-sm
-                         hover:bg-red-900 transition-colors flex items-center justify-center gap-2">
-              <Check size={16} /> {initial ? 'Guardar cambios' : 'Crear promoción'}
+                         hover:bg-red-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+              {saving ? '⏳ Guardando...' : <><Check size={16} /> {initial ? 'Guardar cambios' : 'Crear promoción'}</>}
             </button>
           </div>
         </form>
@@ -193,8 +188,9 @@ function PromoModal({ initial, onSave, onClose }) {
   )
 }
 
+// ── Tarjeta de promoción ─────────────────────────────────────
 function PromoCard({ p, onToggle, onEdit, onDelete }) {
-  const isExpired = p.fechaFin && new Date(p.fechaFin) < new Date()
+  const isExpired = p.fecha_fin && new Date(p.fecha_fin) < new Date()
   const isActive  = p.activa && !isExpired
 
   return (
@@ -202,7 +198,7 @@ function PromoCard({ p, onToggle, onEdit, onDelete }) {
       ${isActive ? 'border-stone-100 hover:border-red-200 hover:shadow-md' : 'border-stone-100 opacity-60'}`}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0
             ${isActive ? 'bg-red-50' : 'bg-stone-100'}`}>
             🎉
           </div>
@@ -210,34 +206,44 @@ function PromoCard({ p, onToggle, onEdit, onDelete }) {
             <h3 className="font-black text-red-950 text-base leading-tight"
                 style={{fontFamily:'Playfair Display,serif'}}>{p.nombre}</h3>
             {p.codigo && (
-              <span className="text-xs font-mono font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded mt-0.5 inline-block">
+              <span className="text-xs font-mono font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded mt-0.5 inline-block tracking-widest">
                 {p.codigo}
               </span>
             )}
           </div>
         </div>
         <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0
-          ${isExpired ? 'bg-stone-100 text-stone-400' : isActive ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-stone-500'}`}>
-          {isExpired ? 'Expirada' : isActive ? 'Activa' : 'Pausada'}
+          ${isExpired ? 'bg-stone-100 text-stone-400' : isActive ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+          {isExpired ? 'Expirada' : isActive ? '● Activa' : '⏸ Pausada'}
         </span>
       </div>
 
-      <p className="text-stone-500 text-sm mb-3">{p.descripcion}</p>
+      {p.descripcion && <p className="text-stone-500 text-sm mb-3">{p.descripcion}</p>}
 
       <div className="flex items-center gap-3 flex-wrap text-xs text-stone-400 font-medium mb-4">
-        <span className="flex items-center gap-1">
+        <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
           {p.tipo === 'porcentaje' ? <Percent size={12} /> : <DollarSign size={12} />}
           {p.tipo === 'porcentaje' ? `${p.valor}% de descuento` : `$${Number(p.valor).toLocaleString()} menos`}
         </span>
-        {p.fechaFin && (
-          <span className="flex items-center gap-1">
-            <Calendar size={12} /> Hasta {new Date(p.fechaFin).toLocaleDateString('es-CO')}
+        {p.fecha_fin && (
+          <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
+            <Calendar size={12} /> Hasta {new Date(p.fecha_fin).toLocaleDateString('es-CO')}
           </span>
         )}
-        <span className="flex items-center gap-1">
-          <Tag size={12} /> {p.usos} usos
+        <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
+          <Tag size={12} /> {p.usos || 0} usos
         </span>
       </div>
+
+      {p.categorias?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {p.categorias.map(c => (
+            <span key={c} className="text-[10px] font-bold bg-red-50 text-red-700 px-2 py-0.5 rounded-full uppercase tracking-wide">
+              {c}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="flex gap-2">
         <button onClick={() => onToggle(p.id)}
@@ -260,19 +266,46 @@ function PromoCard({ p, onToggle, onEdit, onDelete }) {
   )
 }
 
-// Importamos Pencil que nos faltaba
-import { Pencil } from 'lucide-react'
-
+// ── Página principal ─────────────────────────────────────────
 export default function AdminPromociones() {
-  const { promociones, add, toggle, remove, update } = usePromociones()
-  const [showModal, setShowModal] = useState(false)
-  const [editing,   setEditing]   = useState(null)
+  const [promociones, setPromociones] = useState([])
+  const [loading,     setLoading]     = useState(true)
+  const [showModal,   setShowModal]   = useState(false)
+  const [editing,     setEditing]     = useState(null)
+  const [confirmDel,  setConfirmDel]  = useState(null)
+
+  async function fetchPromociones() {
+    setLoading(true)
+    try {
+      const data = await api.promociones.getAll()
+      setPromociones(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchPromociones() }, [])
 
   function openNew()   { setEditing(null); setShowModal(true) }
   function openEdit(p) { setEditing(p);    setShowModal(true) }
-  function handleSave(data) {
-    if (editing) update({ ...data, id: editing.id, usos: editing.usos })
-    else         add(data)
+
+  async function handleSave(data) {
+    if (editing) await api.promociones.update(editing.id, data)
+    else         await api.promociones.create(data)
+    await fetchPromociones()
+  }
+
+  async function handleToggle(id) {
+    await api.promociones.toggle(id)
+    await fetchPromociones()
+  }
+
+  async function handleDelete(id) {
+    await api.promociones.remove(id)
+    setConfirmDel(null)
+    await fetchPromociones()
   }
 
   const activas  = promociones.filter(p => p.activa)
@@ -280,8 +313,33 @@ export default function AdminPromociones() {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Modal */}
       {showModal && (
         <PromoModal initial={editing} onSave={handleSave} onClose={() => setShowModal(false)} />
+      )}
+
+      {/* Confirm delete */}
+      {confirmDel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDel(null)} />
+          <div className="relative bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl z-10">
+            <div className="text-5xl mb-4">🗑️</div>
+            <h3 className="font-black text-red-950 text-xl mb-2" style={{fontFamily:'Playfair Display,serif'}}>
+              ¿Eliminar promoción?
+            </h3>
+            <p className="text-stone-400 text-sm mb-6">Esta acción no se puede deshacer.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDel(null)}
+                className="flex-1 border-2 border-stone-200 text-stone-600 font-bold py-3 rounded-xl text-sm">
+                Cancelar
+              </button>
+              <button onClick={() => handleDelete(confirmDel)}
+                className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl text-sm hover:bg-red-700">
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Header */}
@@ -290,29 +348,42 @@ export default function AdminPromociones() {
           <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Playfair Display,serif'}}>
             Promociones
           </h1>
-          <p className="text-stone-400 text-sm mt-1">{activas.length} activas · {pausadas.length} pausadas</p>
+          <p className="text-stone-400 text-sm mt-1">
+            {activas.length} activas · {pausadas.length} pausadas
+          </p>
         </div>
-        <button onClick={openNew}
-          className="flex items-center gap-2 bg-red-950 text-white font-bold px-6 py-3 rounded-xl
-                     hover:bg-red-900 transition-colors shadow-sm text-sm">
-          <Plus size={18} /> Nueva Promoción
-        </button>
+        <div className="flex gap-2">
+          <button onClick={fetchPromociones}
+            className="flex items-center gap-2 border border-stone-200 text-stone-500 font-bold px-4 py-3
+                       rounded-xl hover:border-red-300 transition-colors text-sm">
+            <RefreshCw size={16} />
+          </button>
+          <button onClick={openNew}
+            className="flex items-center gap-2 bg-red-950 text-white font-bold px-6 py-3 rounded-xl
+                       hover:bg-red-900 transition-colors shadow-sm text-sm">
+            <Plus size={18} /> Nueva Promoción
+          </button>
+        </div>
       </div>
 
-      {/* Info box */}
+      {/* Info */}
       <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
         <span className="text-2xl shrink-0">💡</span>
         <div className="text-left">
           <p className="font-bold text-amber-900 text-sm">¿Cómo funcionan las promociones?</p>
           <p className="text-amber-700 text-xs mt-1">
-            Crea descuentos por porcentaje o valor fijo. Puedes asignar un código que el cliente ingresa al pedir,
-            o dejarlo sin código para que aplique automáticamente a todos los productos de la categoría.
+            Las promociones se guardan en la base de datos y no se pierden. Puedes crear descuentos por porcentaje o valor fijo,
+            asignar un código que el cliente ingresa al pedir, y definir fechas de vigencia. Se activan y pausan con un clic.
           </p>
         </div>
       </div>
 
       {/* Lista */}
-      {promociones.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {[1,2,3].map(i => <div key={i} className="bg-white rounded-2xl h-48 animate-pulse border border-stone-100" />)}
+        </div>
+      ) : promociones.length === 0 ? (
         <div className="text-center py-20 text-stone-400">
           <div className="text-5xl mb-3">🎉</div>
           <p className="font-semibold">No hay promociones creadas aún</p>
@@ -324,9 +395,9 @@ export default function AdminPromociones() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {promociones.map(p => (
             <PromoCard key={p.id} p={p}
-              onToggle={toggle}
+              onToggle={handleToggle}
               onEdit={openEdit}
-              onDelete={remove} />
+              onDelete={(id) => setConfirmDel(id)} />
           ))}
         </div>
       )}
