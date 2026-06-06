@@ -63,55 +63,6 @@ export default function Menu() {
         </svg>
       </div>
 
-      {/* Banner de promociones */}
-      {promociones.length > 0 && (
-        <div className="bg-red-800 text-white">
-          <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
-            <button onClick={() => setPromoIndex(i => i === 0 ? promociones.length - 1 : i - 1)}
-              className="text-red-200 hover:text-white transition-colors shrink-0"
-              style={{visibility: promociones.length > 1 ? 'visible' : 'hidden'}}>
-              <ChevronLeft size={18} />
-            </button>
-
-            <div className="flex-1 text-center">
-              {(() => {
-                const p = promociones[promoIndex]
-                return (
-                  <div className="flex items-center justify-center gap-2 flex-wrap">
-                    <Tag size={14} className="text-red-300 shrink-0" />
-                    <span className="font-black text-sm">{p.nombre}</span>
-                    {p.descripcion && (
-                      <span className="text-red-200 text-sm">— {p.descripcion}</span>
-                    )}
-                    {p.codigo && (
-                      <span className="bg-white text-red-800 font-black text-xs px-2 py-0.5 rounded font-mono tracking-widest">
-                        {p.codigo}
-                      </span>
-                    )}
-                  </div>
-                )
-              })()}
-            </div>
-
-            <button onClick={() => setPromoIndex(i => i === promociones.length - 1 ? 0 : i + 1)}
-              className="text-red-200 hover:text-white transition-colors shrink-0"
-              style={{visibility: promociones.length > 1 ? 'visible' : 'hidden'}}>
-              <ChevronRight size={18} />
-            </button>
-          </div>
-
-          {/* Dots si hay varias */}
-          {promociones.length > 1 && (
-            <div className="flex justify-center gap-1.5 pb-2">
-              {promociones.map((_, i) => (
-                <button key={i} onClick={() => setPromoIndex(i)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${i === promoIndex ? 'bg-white' : 'bg-red-600'}`} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Search */}
         <div className="max-w-lg mx-auto mb-10">
@@ -134,6 +85,37 @@ export default function Menu() {
             </button>
           ))}
         </div>
+
+        {/* Promociones activas */}
+        {promociones.length > 0 && (
+          <div className="mb-10">
+            <p className="text-xs font-bold tracking-[0.2em] uppercase text-stone-400 text-center mb-4">
+              🎉 Promociones disponibles
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {promociones.map(p => (
+                <div key={p.id}
+                  className="flex items-center gap-4 bg-red-950 text-white px-5 py-4 relative overflow-hidden">
+                  {/* Fondo decorativo */}
+                  <div className="absolute right-0 top-0 bottom-0 w-20 bg-red-900/40" />
+                  <div className="w-12 h-12 bg-red-800 rounded flex items-center justify-center shrink-0 text-xl font-black"
+                       style={{fontFamily:'Playfair Display,serif'}}>
+                    {p.tipo === 'porcentaje' ? `${p.valor}%` : `-$${Number(p.valor) >= 1000 ? Math.round(p.valor/1000)+'K' : p.valor}`}
+                  </div>
+                  <div className="flex-1 min-w-0 relative z-10">
+                    <p className="font-black text-sm leading-tight truncate">{p.nombre}</p>
+                    {p.descripcion && <p className="text-red-200 text-xs mt-0.5 truncate">{p.descripcion}</p>}
+                    {p.codigo && (
+                      <span className="inline-block mt-1 bg-white text-red-950 font-black text-xs px-2 py-0.5 font-mono tracking-widest">
+                        {p.codigo}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Count */}
         {filtered.length > 0 && (
