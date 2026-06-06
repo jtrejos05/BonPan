@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShoppingCart, X, MapPin, Store, ChevronDown, Tag, Check } from 'lucide-react'
 import { useApp } from '../context/AppContext'
@@ -13,7 +13,7 @@ function DeliveryModal({ onClose, onConfirm }) {
   const [localId,    setLocalId]    = useState('')
   const [loadingPV,  setLoadingPV]  = useState(true)
 
-  useState(() => {
+  useEffect(() => {
     api.puntosVenta.getAll()
       .then(data => {
         const activos = data.filter(l => l.activo)
@@ -22,7 +22,7 @@ function DeliveryModal({ onClose, onConfirm }) {
       })
       .catch(() => {})
       .finally(() => setLoadingPV(false))
-  })
+  }, [])
 
   const localSeleccionado = locales.find(l => String(l.id) === localId)
 
