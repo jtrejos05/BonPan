@@ -5,19 +5,9 @@ import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { api } from '../services/api'
 
-function Divider({ text }) {
-  return (
-    <div className="flex items-center gap-4 my-2">
-      <div className="flex-1 h-px bg-stone-300" />
-      <span className="text-stone-400 text-xs tracking-[0.3em] uppercase font-semibold">{text}</span>
-      <div className="flex-1 h-px bg-stone-300" />
-    </div>
-  )
-}
-
 export default function Home() {
   const { addToCart, products, loading, error } = useApp()
-  const featured = products.slice(0, 4)
+  const featured = products.slice(0, 3)
   const [promociones, setPromociones] = useState([])
 
   useEffect(() => {
@@ -29,241 +19,277 @@ export default function Home() {
   if (error) return <ServerError message={error} />
 
   return (
-    <div className="text-left bg-[#faf7f2]">
+    <div className="bg-white text-stone-900">
 
-      {/* ── Hero ── */}
-      <section className="relative bg-red-950 overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{backgroundImage:'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'}} />
+      {/* ── HERO ── */}
+      <section className="relative bg-stone-900 overflow-hidden min-h-[85vh] sm:min-h-screen flex items-end">
+        {/* Imagen de fondo — degradado sobre ella */}
+        <div className="absolute inset-0">
+          <div
+            className="w-full h-full bg-cover bg-center"
+            style={{
+              backgroundImage: `url("https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1600&q=80")`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/50 to-stone-900/10" />
+        </div>
 
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 py-16 sm:py-24 lg:py-36 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center relative z-10">
+        {/* Contenido */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 pb-16 sm:pb-24">
+          <p className="text-stone-400 text-xs tracking-[0.4em] uppercase font-semibold mb-4 sm:mb-6">
+            Panadería Artesanal · Ibagué
+          </p>
+          <h1 className="text-5xl sm:text-7xl lg:text-9xl text-white font-black leading-none mb-6 sm:mb-8 max-w-3xl"
+              style={{fontFamily:'Playfair Display, serif'}}>
+            Pan que hace feliz.
+          </h1>
+          <p className="text-stone-300 text-base sm:text-xl font-light mb-8 sm:mb-10 max-w-lg leading-relaxed">
+            Croissants, pasteles de pollo y carne. Todo hecho a mano desde las 6am, todos los días.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <Link to="/menu"
+              className="inline-flex items-center justify-center gap-2 bg-white text-stone-900
+                         font-bold text-xs tracking-[0.2em] uppercase px-8 py-4
+                         hover:bg-stone-100 transition-colors duration-200">
+              Ver Menú <ArrowRight size={15} />
+            </Link>
+            <Link to="/pedido"
+              className="inline-flex items-center justify-center gap-2 border border-white/40
+                         text-white font-semibold text-xs tracking-[0.2em] uppercase px-8 py-4
+                         hover:bg-white/10 transition-colors duration-200">
+              Ordenar Ahora
+            </Link>
+          </div>
+        </div>
+
+        {/* Scroll hint */}
+        <div className="absolute bottom-6 right-6 sm:right-10 flex flex-col items-center gap-2 z-10">
+          <div className="w-px h-10 sm:h-14 bg-white/30" />
+          <span className="text-white/40 text-[9px] tracking-[0.3em] uppercase rotate-90 origin-center mt-4">Scroll</span>
+        </div>
+      </section>
+
+
+      {/* ── MANIFIESTO ── */}
+      <section className="py-20 sm:py-32 px-5 sm:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
           <div>
-            <p className="text-red-300 text-xs tracking-[0.4em] uppercase font-semibold mb-4 sm:mb-6">
-              — Panadería Artesanal —
+            <p className="text-xs tracking-[0.4em] uppercase text-stone-400 font-semibold mb-5 sm:mb-6">Nuestra filosofía</p>
+            <h2 className="text-3xl sm:text-5xl text-stone-900 leading-tight mb-6 sm:mb-8"
+                style={{fontFamily:'Playfair Display, serif'}}>
+              Cada pieza es elaborada a mano, sin atajos.
+            </h2>
+            <p className="text-stone-500 text-base sm:text-lg leading-relaxed mb-4">
+              En Bon Pan creemos que el pan de verdad se hace con tiempo, dedicación y los mejores ingredientes.
+              Nada de aditivos, nada de prisa.
             </p>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-8xl text-white leading-none mb-5 sm:mb-6"
-                style={{fontFamily:'Playfair Display, serif', fontWeight:700}}>
-              Horneado<br/>
-              <em className="text-red-300 not-italic">con amor,</em><br/>
-              cada día.
-            </h1>
-
-            <p className="text-red-200/80 text-base sm:text-lg mb-8 sm:mb-10 leading-relaxed max-w-md font-light">
-              Croissants hojaldrados, pasteles de pollo y carne. Elaborados a mano desde las primeras horas de la mañana en Ibagué.
+            <p className="text-stone-500 text-base sm:text-lg leading-relaxed mb-8 sm:mb-10">
+              Cada croissant, cada pastel de pollo y cada hojaldrado sale del horno listo para hacerte el día mejor.
             </p>
-
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <Link to="/menu"
-                className="inline-flex items-center justify-center gap-2 bg-white text-red-950
-                           font-bold text-sm tracking-widest uppercase px-8 sm:px-10 py-4
-                           hover:bg-red-50 transition-all duration-300 shadow-xl">
-                Ver Menú <ArrowRight size={16} />
-              </Link>
-              <Link to="/pedido"
-                className="inline-flex items-center justify-center gap-2 border border-white/40
-                           text-white font-semibold text-sm tracking-widest uppercase px-8 sm:px-10 py-4
-                           hover:bg-white/10 transition-all duration-300">
-                Ordenar Ahora
-              </Link>
-            </div>
+            <Link to="/menu"
+              className="inline-flex items-center gap-3 text-xs font-bold tracking-[0.2em] uppercase
+                         text-stone-900 border-b-2 border-stone-900 pb-1
+                         hover:text-stone-500 hover:border-stone-500 transition-colors">
+              Conoce nuestro menú <ArrowRight size={14} />
+            </Link>
           </div>
 
-          {/* Logo ilustración — solo desktop */}
-          <div className="hidden lg:flex flex-col items-center justify-center gap-6">
-            <div className="relative">
-              <div className="absolute -inset-8 border border-white/10 rounded-full" />
-              <div className="absolute -inset-16 border border-white/5 rounded-full" />
-              <img src="/logo.png" alt="Bon Pan"
-                className="w-72 h-72 object-contain drop-shadow-2xl" />
-            </div>
-            <div className="flex gap-10 mt-4">
-              {[['15+','Años'],['20+','Productos'],['100%','Artesanal']].map(([v,l]) => (
-                <div key={l} className="text-center">
-                  <p className="text-3xl font-black text-white" style={{fontFamily:'Playfair Display,serif'}}>{v}</p>
-                  <p className="text-red-400 text-xs tracking-widest uppercase mt-1">{l}</p>
-                </div>
-              ))}
+          {/* Imagen lateral */}
+          <div className="relative h-72 sm:h-96 lg:h-[520px] overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=900&q=80"
+              alt="Panadería artesanal"
+              className="w-full h-full object-cover"
+            />
+            {/* Tag flotante */}
+            <div className="absolute bottom-5 left-5 bg-white px-5 py-3 shadow-lg">
+              <p className="text-xs font-bold tracking-widest uppercase text-stone-400 mb-1">Desde</p>
+              <p className="text-2xl font-black text-stone-900" style={{fontFamily:'Playfair Display,serif'}}>
+                Las 6<span className="text-sm font-semibold">am</span>
+              </p>
             </div>
           </div>
-
-          {/* Stats móvil */}
-          <div className="flex lg:hidden justify-around pt-2 border-t border-white/10">
-            {[['15+','Años'],['20+','Productos'],['100%','Artesanal']].map(([v,l]) => (
-              <div key={l} className="text-center">
-                <p className="text-2xl font-black text-white" style={{fontFamily:'Playfair Display,serif'}}>{v}</p>
-                <p className="text-red-400 text-xs tracking-widest uppercase mt-0.5">{l}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Wave bottom */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 80" className="w-full" preserveAspectRatio="none">
-            <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="#faf7f2" />
-          </svg>
         </div>
       </section>
 
 
-      {/* ── Quote banner ── */}
-      <section className="py-12 sm:py-16 px-5 sm:px-6 text-center bg-[#faf7f2]">
-        <Divider text="Nuestra promesa" />
-        <blockquote className="text-2xl sm:text-3xl lg:text-5xl text-red-950 max-w-3xl mx-auto mt-6 sm:mt-8 leading-tight"
-            style={{fontFamily:'Playfair Display, serif', fontStyle:'italic'}}>
-          "El buen pan no necesita presentación, solo un buen mordisco."
-        </blockquote>
-        <p className="text-stone-400 text-sm mt-4 tracking-widest uppercase font-semibold">— Bon Pan, Ibagué</p>
-      </section>
-
-      {/* ── Propuesta de valor ── */}
-      <section className="bg-white py-14 sm:py-20 px-5 sm:px-6">
+      {/* ── PILARES ── */}
+      <section className="bg-stone-50 py-16 sm:py-24 px-5 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200">
+          <p className="text-xs tracking-[0.4em] uppercase text-stone-400 font-semibold mb-10 sm:mb-14 text-center">
+            Por qué elegirnos
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-stone-200">
             {[
-              { num: '01', title: 'Ingredientes Frescos', desc: 'Solo usamos ingredientes naturales y de primera calidad, seleccionados cada mañana para garantizar el mejor sabor.' },
-              { num: '02', title: 'Recetas Artesanales', desc: 'Cada pieza es elaborada a mano siguiendo técnicas tradicionales que preservan el sabor auténtico del hojaldre.' },
-              { num: '03', title: 'Listo para Llevar', desc: 'Tu pedido listo en el menor tiempo posible. Empacado con cuidado para que llegue perfecto a tus manos.' },
+              { num: '01', title: 'Ingredientes Frescos', desc: 'Seleccionados cada mañana para garantizar el mejor sabor en cada bocado.' },
+              { num: '02', title: 'Recetas Artesanales', desc: 'Técnicas tradicionales que preservan el sabor auténtico del hojaldre.' },
+              { num: '03', title: 'Listo para Ti', desc: 'Empacado con cuidado para que llegue perfecto a tus manos.' },
             ].map(f => (
-              <div key={f.num} className="bg-white p-8 sm:p-10 group hover:bg-red-950 transition-all duration-500">
-                <p className="text-5xl sm:text-6xl font-black text-stone-100 group-hover:text-red-900 transition-colors mb-4"
+              <div key={f.num} className="px-6 sm:px-10 py-10 sm:py-8">
+                <p className="text-4xl sm:text-5xl font-black text-stone-200 mb-4"
                    style={{fontFamily:'Playfair Display, serif'}}>{f.num}</p>
-                <h3 className="text-lg sm:text-xl text-red-950 group-hover:text-white mb-3 transition-colors"
-                    style={{fontFamily:'Playfair Display, serif'}}>{f.title}</h3>
-                <p className="text-stone-400 group-hover:text-red-200 text-sm leading-relaxed transition-colors font-medium">{f.desc}</p>
+                <h3 className="text-base sm:text-lg font-bold text-stone-900 mb-3">{f.title}</h3>
+                <p className="text-stone-500 text-sm leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Featured Products ── */}
-      <section className="py-16 sm:py-24 px-5 sm:px-6 bg-[#faf7f2]">
+
+      {/* ── PRODUCTOS DESTACADOS ── */}
+      <section className="py-20 sm:py-32 px-5 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10 sm:mb-14">
-            <Divider text="Del horno para ti" />
-            <h2 className="text-3xl sm:text-5xl text-red-950 mt-5 sm:mt-6 mb-3 sm:mb-4"
-                style={{fontFamily:'Playfair Display, serif'}}>Destacados del Día</h2>
-            <p className="text-stone-400 font-medium max-w-md mx-auto text-sm sm:text-base">
-              Los productos que nuestros clientes no pueden dejar de pedir
-            </p>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12 sm:mb-16">
+            <div>
+              <p className="text-xs tracking-[0.4em] uppercase text-stone-400 font-semibold mb-3">Del horno para ti</p>
+              <h2 className="text-3xl sm:text-5xl text-stone-900 leading-tight"
+                  style={{fontFamily:'Playfair Display, serif'}}>Destacados del Día</h2>
+            </div>
+            <Link to="/menu"
+              className="text-xs font-bold tracking-[0.2em] uppercase text-stone-400
+                         border-b border-stone-300 pb-0.5 hover:text-stone-900 hover:border-stone-900 transition-colors shrink-0">
+              Ver todo →
+            </Link>
           </div>
 
           {loading.products ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {[1,2,3,4].map(i => <div key={i} className="bg-white h-64 sm:h-80 animate-pulse rounded" />)}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200">
+              {[1,2,3].map(i => <div key={i} className="bg-white h-80 animate-pulse" />)}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              {featured.map((p, i) => (
-                <div key={p.id}
-                  className="group bg-white overflow-hidden hover:shadow-2xl transition-all duration-500 cursor-pointer">
-                  <div className={`flex items-center justify-center py-8 sm:py-14 text-5xl sm:text-7xl relative overflow-hidden h-36 sm:h-48
-                    ${i % 2 === 0 ? 'bg-red-50' : 'bg-stone-50'}`}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200">
+              {featured.map(p => (
+                <div key={p.id} className="group bg-white overflow-hidden">
+                  {/* Imagen */}
+                  <div className="relative h-56 sm:h-72 overflow-hidden bg-stone-100">
                     {p.imagen
-                      ? <img src={p.imagen} alt={p.name} className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-500" />
-                      : <span className="group-hover:scale-110 transition-transform duration-500 inline-block">{p.emoji}</span>
+                      ? <img src={p.imagen} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                      : <div className="w-full h-full flex items-center justify-center text-6xl">{p.emoji}</div>
                     }
                   </div>
-
-                  <div className="p-4 sm:p-6 border-t border-stone-100">
-                    <p className="text-[9px] sm:text-[10px] text-red-600 font-bold tracking-[0.25em] uppercase mb-1 sm:mb-2">{p.category}</p>
-                    <h3 className="text-sm sm:text-lg text-red-950 mb-1 leading-tight"
-                        style={{fontFamily:'Playfair Display, serif'}}>{p.name}</h3>
-                    <p className="text-stone-400 text-xs mb-3 sm:mb-4 leading-relaxed font-medium line-clamp-2 hidden sm:block">{p.description}</p>
-
-                    <div className="flex items-center justify-between">
-                      <p className="text-red-800 font-black text-sm sm:text-lg">${p.price.toLocaleString()}</p>
-                      <button onClick={() => addToCart(p)}
-                        className="text-[10px] sm:text-xs font-bold tracking-widest uppercase text-red-800 border-b-2 border-red-800
-                                   hover:text-red-950 hover:border-red-950 transition-colors pb-0.5">
-                        Agregar
-                      </button>
+                  {/* Info */}
+                  <div className="p-5 sm:p-6 border-t border-stone-100">
+                    <p className="text-[10px] text-stone-400 font-bold tracking-[0.2em] uppercase mb-2">{p.category}</p>
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="text-base sm:text-lg font-bold text-stone-900 leading-tight"
+                          style={{fontFamily:'Playfair Display, serif'}}>{p.name}</h3>
+                      <p className="text-red-600 font-black text-base shrink-0">${p.price.toLocaleString()}</p>
                     </div>
+                    <p className="text-stone-400 text-xs mt-2 leading-relaxed line-clamp-2">{p.description}</p>
+                    <button onClick={() => addToCart(p)}
+                      className="mt-4 w-full border border-stone-200 py-2.5 text-xs font-bold tracking-[0.15em] uppercase
+                                 text-stone-600 hover:bg-stone-900 hover:text-white hover:border-stone-900 transition-all duration-200">
+                      Agregar al carrito
+                    </button>
                   </div>
                 </div>
               ))}
             </div>
           )}
+        </div>
+      </section>
 
-          <div className="text-center mt-10 sm:mt-14">
+
+      {/* ── PROMO BANNER ── (solo si hay promociones activas) */}
+      {promociones.length > 0 && (
+        <section className="bg-red-600 py-12 sm:py-16 px-5 sm:px-8">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div>
+              <p className="text-red-200 text-xs tracking-[0.3em] uppercase font-semibold mb-2">Promociones activas</p>
+              <h2 className="text-2xl sm:text-4xl text-white font-black" style={{fontFamily:'Playfair Display,serif'}}>
+                {promociones[0].nombre}
+              </h2>
+              {promociones[0].descripcion && (
+                <p className="text-red-100 mt-2 text-sm font-light">{promociones[0].descripcion}</p>
+              )}
+            </div>
             <Link to="/menu"
-              className="inline-flex items-center gap-3 text-sm font-bold tracking-widest uppercase
-                         text-red-900 border-b-2 border-red-900 pb-1
-                         hover:text-red-700 hover:border-red-700 transition-colors">
-              Ver Todo el Menú <ArrowRight size={16} />
+              className="shrink-0 inline-flex items-center gap-2 bg-white text-red-600 font-bold
+                         text-xs tracking-[0.2em] uppercase px-8 py-4
+                         hover:bg-red-50 transition-colors">
+              Ver en el Menú <ArrowRight size={14} />
+            </Link>
+          </div>
+        </section>
+      )}
+
+
+      {/* ── IMAGEN GRANDE ── */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 min-h-[50vh] sm:min-h-[60vh]">
+        <div className="relative h-64 sm:h-80 lg:h-auto overflow-hidden">
+          <img
+            src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=900&q=80"
+            alt="Croissants artesanales"
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div className="bg-stone-900 flex items-center justify-center px-8 sm:px-16 py-16 sm:py-20">
+          <div className="max-w-md">
+            <p className="text-stone-500 text-xs tracking-[0.4em] uppercase font-semibold mb-5">¿Listo para ordenar?</p>
+            <h2 className="text-3xl sm:text-5xl text-white leading-tight mb-6"
+                style={{fontFamily:'Playfair Display, serif'}}>
+              Haz tu pedido<br/>en línea.
+            </h2>
+            <p className="text-stone-400 text-base leading-relaxed mb-8 font-light">
+              Selecciona tus productos y los tenemos listos para ti — domicilio o retiro en tienda.
+            </p>
+            <Link to="/pedido"
+              className="inline-flex items-center gap-3 bg-white text-stone-900 font-bold
+                         text-xs tracking-[0.2em] uppercase px-10 py-4
+                         hover:bg-stone-100 transition-colors">
+              Ordenar Ahora <ArrowRight size={14} />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── Banner CTA ── */}
-      <section className="bg-red-950 py-16 sm:py-28 px-5 sm:px-6 relative overflow-hidden text-center">
-        <div className="absolute inset-0 opacity-5"
-          style={{backgroundImage:'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'}} />
-        <div className="relative z-10 max-w-2xl mx-auto">
-          <p className="text-red-400 text-xs tracking-[0.4em] uppercase font-semibold mb-3 sm:mb-4">¿Listo para ordenar?</p>
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl text-white mb-4 sm:mb-6 leading-tight"
-              style={{fontFamily:'Playfair Display, serif'}}>
-            Haz tu pedido<br/><em>en línea</em>
-          </h2>
-          <p className="text-red-200/70 mb-8 sm:mb-10 text-base sm:text-lg font-light max-w-md mx-auto">
-            Selecciona tus productos favoritos y los tenemos listos para ti
-          </p>
-          <Link to="/pedido"
-            className="inline-flex items-center gap-3 bg-white text-red-950 font-bold
-                       text-sm tracking-widest uppercase px-10 sm:px-12 py-4 sm:py-5
-                       hover:bg-red-50 transition-colors shadow-2xl">
-            Ordenar Ahora <ArrowRight size={16} />
-          </Link>
-        </div>
-      </section>
 
-      {/* ── Footer ── */}
-      <footer className="bg-red-950 border-t border-red-900/50 text-red-300">
-        <div className="max-w-7xl mx-auto px-5 sm:px-6 py-10 sm:py-12">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-10 mb-8 sm:mb-10">
+      {/* ── FOOTER ── */}
+      <footer className="bg-stone-900 text-stone-400">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
+
             {/* Marca */}
-            <div className="text-left">
+            <div className="col-span-2 sm:col-span-1">
               <div className="flex items-center gap-3 mb-4">
-                <img src="/logo.png" alt="Bon Pan" className="h-10 sm:h-12 w-10 sm:w-12 object-contain" />
+                <img src="/logo.png" alt="Bon Pan" className="h-10 w-10 object-contain" />
                 <div>
-                  <p className="font-black text-white" style={{fontFamily:'Playfair Display,serif'}}>Bon Pan</p>
-                  <p className="text-red-500 text-xs tracking-widest uppercase">Panadería Artesanal</p>
+                  <p className="font-black text-white text-lg" style={{fontFamily:'Playfair Display,serif'}}>Bon Pan</p>
+                  <p className="text-stone-600 text-xs tracking-widest uppercase">Panadería Artesanal</p>
                 </div>
               </div>
-              <p className="text-red-400/70 text-sm leading-relaxed">
-                Elaboramos cada producto con amor y los mejores ingredientes desde Ibagué, Tolima.
+              <p className="text-stone-500 text-sm leading-relaxed">
+                Elaboramos cada producto con amor desde Ibagué, Tolima.
               </p>
             </div>
 
-            {/* Links */}
-            <div className="text-left">
-              <p className="text-white text-xs tracking-[0.2em] uppercase font-bold mb-4">Navegación</p>
-              <div className="grid grid-cols-2 sm:grid-cols-1 gap-1 sm:space-y-2">
-                {[['/','/Inicio'],[ '/menu','Menú'],['/pedido','Pedido'],['/contacto','Contacto']].map(([to,l]) => (
+            {/* Nav */}
+            <div>
+              <p className="text-white text-xs tracking-[0.2em] uppercase font-bold mb-4">Páginas</p>
+              <div className="space-y-2.5">
+                {[['/', 'Inicio'],['/menu','Menú'],['/pedido','Pedido'],['/contacto','Contacto']].map(([to, l]) => (
                   <Link key={to} to={to}
-                    className="block text-red-400 hover:text-white text-sm font-medium transition-colors">{l}</Link>
+                    className="block text-stone-500 hover:text-white text-sm transition-colors">{l}</Link>
                 ))}
               </div>
             </div>
 
             {/* Contacto */}
-            <div className="text-left">
+            <div className="col-span-2 sm:col-span-2">
               <p className="text-white text-xs tracking-[0.2em] uppercase font-bold mb-4">Contacto</p>
-              <div className="space-y-2 text-sm text-red-400 font-medium">
+              <div className="space-y-2 text-sm text-stone-500">
                 <p>📍 Ibagué, Tolima</p>
                 <p>📞 +57 310 123 4567</p>
                 <p>✉️ hola@bonpan.co</p>
-                <p>🕐 Lun–Vie: 6am – 7pm</p>
+                <p>🕐 Lun–Vie: 6am – 7pm · Sáb–Dom: 7am – 5pm</p>
               </div>
             </div>
           </div>
 
-          <div className="border-t border-red-900/50 pt-5 sm:pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-3">
-            <p className="text-red-600 text-xs">© 2026 Bon Pan · Todos los derechos reservados</p>
-            <p className="text-red-600 text-xs">Hecho con ❤️ en Ibagué, Colombia</p>
+          <div className="border-t border-stone-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-stone-600 text-xs">© 2026 Bon Pan · Todos los derechos reservados</p>
+            <p className="text-stone-600 text-xs">Hecho con ❤️ en Ibagué, Colombia</p>
           </div>
         </div>
       </footer>
