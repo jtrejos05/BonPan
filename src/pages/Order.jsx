@@ -404,7 +404,7 @@ export default function Order() {
                       {delivery.tipo === 'retiro' ? 'Retiro en tienda' : `Domicilio · ${delivery.ciudad}`}
                     </p>
                     {delivery.tipo === 'retiro'
-                      ? <p className="text-xs text-stone-400">{TIENDA.tiempo}</p>
+                      ? <p className="text-xs text-stone-400">15–20 min</p>
                       : <p className="text-xs text-stone-400">{delivery.direccion}</p>
                     }
                   </div>
