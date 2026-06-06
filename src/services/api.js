@@ -53,6 +53,24 @@ export const api = {
     login: (password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
   },
 
+  upload: {
+    imagen: async (file) => {
+      const formData = new FormData()
+      formData.append('imagen', file)
+      const token = getToken()
+      const res = await fetch(`${BASE}/upload/imagen`, {
+        method: 'POST',
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Error al subir imagen' }))
+        throw new Error(err.error)
+      }
+      return res.json()
+    },
+  },
+
   usuarios: {
     register:    (data)       => request('/usuarios/register', { method: 'POST', body: JSON.stringify(data) }),
     login:       (data)       => request('/usuarios/login',    { method: 'POST', body: JSON.stringify(data) }),

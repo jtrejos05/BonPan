@@ -18,6 +18,7 @@ import AdminLayout     from './admin/AdminLayout'
 import AdminDashboard  from './admin/AdminDashboard'
 import AdminPedidos    from './admin/AdminPedidos'
 import AdminProductos  from './admin/AdminProductos'
+import AdminPromociones from './admin/AdminPromociones'
 import AdminClientes   from './admin/AdminClientes'
 import AdminActividad  from './admin/AdminActividad'
 
@@ -53,7 +54,8 @@ export default function App() {
                 <Route index             element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="dashboard"  element={<AdminDashboard />} />
                 <Route path="pedidos"    element={<AdminPedidos />} />
-                <Route path="productos"  element={<AdminProductos />} />
+                <Route path="productos"   element={<AdminProductos />} />
+                <Route path="promociones" element={<AdminPromociones />} />
                 <Route path="clientes"   element={<AdminClientes />} />
                 <Route path="actividad"  element={<AdminActividad />} />
               </Route>

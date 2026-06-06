@@ -1,13 +1,14 @@
 import { Link, useLocation, Navigate, Outlet } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { LayoutDashboard, Package, ClipboardList, Activity, LogOut, Users, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Package, ClipboardList, Activity, LogOut, Users, ChevronRight, Tag } from 'lucide-react'
 
 const navLinks = [
-  { to: '/admin/dashboard', label: 'Dashboard',  icon: <LayoutDashboard size={18} /> },
-  { to: '/admin/pedidos',   label: 'Pedidos',     icon: <ClipboardList size={18} /> },
-  { to: '/admin/productos', label: 'Productos',   icon: <Package size={18} /> },
-  { to: '/admin/clientes',  label: 'Clientes',    icon: <Users size={18} /> },
-  { to: '/admin/actividad', label: 'Actividad',   icon: <Activity size={18} /> },
+  { to: '/admin/dashboard',   label: 'Dashboard',   icon: <LayoutDashboard size={18} /> },
+  { to: '/admin/pedidos',     label: 'Pedidos',      icon: <ClipboardList size={18} /> },
+  { to: '/admin/productos',   label: 'Productos',    icon: <Package size={18} /> },
+  { to: '/admin/promociones', label: 'Promociones',  icon: <Tag size={18} /> },
+  { to: '/admin/clientes',    label: 'Clientes',     icon: <Users size={18} /> },
+  { to: '/admin/actividad',   label: 'Actividad',    icon: <Activity size={18} /> },
 ]
 
 export default function AdminLayout() {

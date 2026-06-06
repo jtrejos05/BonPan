@@ -143,12 +143,12 @@ export default function Home() {
                 <div key={p.id}
                   className="group bg-white overflow-hidden hover:shadow-2xl transition-all duration-500 cursor-pointer">
                   {/* Imagen/emoji */}
-                  <div className={`flex items-center justify-center py-14 text-7xl relative overflow-hidden
+                  <div className={`flex items-center justify-center py-14 text-7xl relative overflow-hidden h-48
                     ${i % 2 === 0 ? 'bg-red-50' : 'bg-stone-50'}`}>
-                    <div className="absolute inset-0 bg-red-950 opacity-0 group-hover:opacity-5 transition-opacity duration-500" />
-                    <span className="group-hover:scale-110 transition-transform duration-500 inline-block">
-                      {p.emoji}
-                    </span>
+                    {p.imagen
+                      ? <img src={p.imagen} alt={p.name} className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-500" />
+                      : <span className="group-hover:scale-110 transition-transform duration-500 inline-block">{p.emoji}</span>
+                    }
                   </div>
 
                   <div className="p-6 border-t border-stone-100">

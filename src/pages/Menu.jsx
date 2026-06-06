@@ -94,11 +94,15 @@ export default function Menu() {
             {filtered.map((p, i) => (
               <div key={p.id}
                 className="group bg-[#faf7f2] hover:bg-white transition-all duration-300 text-left">
-                {/* Emoji área */}
-                <div className={`flex items-center justify-center py-12 text-6xl relative overflow-hidden
+                {/* Imagen o Emoji */}
+                <div className={`flex items-center justify-center py-12 text-6xl relative overflow-hidden h-44
                   ${i % 3 === 0 ? 'bg-red-50' : i % 3 === 1 ? 'bg-stone-50' : 'bg-amber-50/50'}`}>
+                  {p.imagen
+                    ? <img src={p.imagen} alt={p.name} className="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-500" />
+                    : <span className="group-hover:scale-110 transition-transform duration-500 block">{p.emoji}</span>
+                  }
                   {p.stock === 0 && (
-                    <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                       <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Agotado</span>
                     </div>
                   )}
@@ -107,7 +111,6 @@ export default function Menu() {
                       ¡Últimos!
                     </span>
                   )}
-                  <span className="group-hover:scale-110 transition-transform duration-500 block">{p.emoji}</span>
                 </div>
 
                 {/* Info */}
