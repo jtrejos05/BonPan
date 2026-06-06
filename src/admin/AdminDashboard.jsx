@@ -1,11 +1,12 @@
 import { useApp } from '../context/AppContext'
+import { TrendingUp, ShoppingBag, Clock, AlertTriangle } from 'lucide-react'
 
 const STATUS_COLORS = {
-  'Pendiente':      'bg-yellow-100 text-yellow-700',
-  'En preparación': 'bg-blue-100 text-blue-700',
-  'Listo':          'bg-green-100 text-green-700',
-  'Entregado':      'bg-stone-100 text-stone-500',
-  'Cancelado':      'bg-red-100 text-red-600',
+  'Pendiente':      'bg-yellow-100 text-yellow-700 border-yellow-200',
+  'En preparación': 'bg-blue-100   text-blue-700   border-blue-200',
+  'Listo':          'bg-green-100  text-green-700  border-green-200',
+  'Entregado':      'bg-stone-100  text-stone-500  border-stone-200',
+  'Cancelado':      'bg-red-100    text-red-600    border-red-200',
 }
 
 export default function AdminDashboard() {
@@ -17,72 +18,94 @@ export default function AdminDashboard() {
   const delivered  = orders.filter(o => o.status === 'Entregado').length
   const lowStock   = products.filter(p => p.stock <= 5).length
 
-  // Top 5 productos más pedidos
   const productCounts = {}
-  orders.forEach(o => o.items.forEach(i => {
+  orders.forEach(o => o.items?.forEach(i => {
     productCounts[i.name] = (productCounts[i.name] || 0) + i.qty
   }))
-  const topProducts = Object.entries(productCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-
+  const topProducts  = Object.entries(productCounts).sort((a, b) => b[1] - a[1]).slice(0, 5)
   const recentOrders = orders.slice(0, 5)
+
+  const kpis = [
+    { label: 'Ingresos Totales', value: `$${revenue.toLocaleString()}`, icon: <TrendingUp size={22} />, color: 'bg-green-500',  light: 'bg-green-50 text-green-700'  },
+    { label: 'Total Pedidos',    value: orders.length,                   icon: <ShoppingBag size={22} />, color: 'bg-blue-500',   light: 'bg-blue-50 text-blue-700'    },
+    { label: 'Pendientes',       value: pending,                          icon: <Clock size={22} />,       color: 'bg-yellow-500', light: 'bg-yellow-50 text-yellow-700'},
+    { label: 'Stock Bajo',       value: lowStock,                         icon: <AlertTriangle size={22}/>, color: 'bg-red-500',    light: 'bg-red-50 text-red-700'      },
+  ]
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-black text-red-900" style={{fontFamily:'Montserrat,sans-serif'}}>Dashboard</h1>
-        <p className="text-stone-500 text-sm mt-1">Vista general del negocio en tiempo real</p>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Montserrat,sans-serif'}}>
+            Dashboard
+          </h1>
+          <p className="text-gray-400 text-sm mt-1 font-medium">Vista general del negocio en tiempo real</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs text-gray-400 font-medium">Hoy</p>
+          <p className="font-bold text-gray-700 text-sm">{new Date().toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'})}</p>
+        </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: 'Ingresos Totales',  value: `$${revenue.toLocaleString()}`, icon: '💰', color: 'bg-green-50  border-green-200',  text: 'text-green-800' },
-          { label: 'Total Pedidos',     value: orders.length,                  icon: '📋', color: 'bg-blue-50   border-blue-200',    text: 'text-blue-800'  },
-          { label: 'Pendientes',        value: pending,                         icon: '⏳', color: 'bg-yellow-50 border-yellow-200',  text: 'text-yellow-800'},
-          { label: 'Stock Bajo',        value: lowStock,                        icon: '⚠️', color: 'bg-red-50    border-red-200',     text: 'text-red-800'   },
-        ].map(k => (
-          <div key={k.label} className={`rounded-2xl border p-5 ${k.color}`}>
-            <div className="text-3xl mb-2">{k.icon}</div>
-            <div className={`text-2xl font-black ${k.text}`}>{k.value}</div>
-            <div className="text-stone-500 text-sm font-medium mt-0.5">{k.label}</div>
+        {kpis.map(k => (
+          <div key={k.label} className="bg-white rounded-2xl p-5 shadow-sm border border-stone-100 hover:shadow-md transition-shadow">
+            <div className={`w-11 h-11 rounded-xl ${k.color} flex items-center justify-center text-white mb-4 shadow-sm`}>
+              {k.icon}
+            </div>
+            <p className="text-2xl font-black text-gray-900">{k.value}</p>
+            <p className="text-gray-400 text-sm font-medium mt-1">{k.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Status summary */}
+      {/* Status pills */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
-          { label: 'Pendientes',      val: pending,    color: 'bg-yellow-100 text-yellow-800' },
-          { label: 'En preparación',  val: inProgress, color: 'bg-blue-100 text-blue-800'    },
-          { label: 'Entregados',      val: delivered,  color: 'bg-green-100 text-green-800'  },
-          { label: 'Cancelados',      val: orders.filter(o=>o.status==='Cancelado').length, color: 'bg-red-100 text-red-800' },
+          { label: 'Pendientes',     val: pending,    key: 'Pendiente'      },
+          { label: 'En preparación', val: inProgress, key: 'En preparación' },
+          { label: 'Entregados',     val: delivered,  key: 'Entregado'      },
+          { label: 'Cancelados',     val: orders.filter(o=>o.status==='Cancelado').length, key: 'Cancelado' },
         ].map(s => (
-          <div key={s.label} className={`rounded-xl px-4 py-3 flex items-center justify-between ${s.color}`}>
-            <span className="text-sm font-semibold">{s.label}</span>
-            <span className="text-xl font-black">{s.val}</span>
+          <div key={s.label} className={`rounded-2xl px-4 py-4 border ${STATUS_COLORS[s.key]} flex items-center justify-between`}>
+            <span className="text-sm font-bold">{s.label}</span>
+            <span className="text-2xl font-black">{s.val}</span>
           </div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent orders */}
-        <div className="bg-white rounded-2xl shadow-sm p-5">
-          <h2 className="font-black text-red-900 text-lg mb-4">Últimos Pedidos</h2>
+        {/* Últimos pedidos */}
+        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+          <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
+              style={{fontFamily:'Montserrat,sans-serif'}}>
+            <ShoppingBag size={20} className="text-red-500" /> Últimos Pedidos
+          </h2>
           {recentOrders.length === 0 ? (
-            <p className="text-stone-400 text-sm text-center py-6">Sin pedidos aún</p>
+            <div className="text-center py-8 text-gray-300">
+              <ShoppingBag size={40} className="mx-auto mb-2" />
+              <p className="text-sm font-medium">Sin pedidos aún</p>
+            </div>
           ) : (
             <div className="space-y-3">
               {recentOrders.map(o => (
-                <div key={o.id} className="flex items-center justify-between py-2 border-b border-stone-50 last:border-0">
-                  <div>
-                    <p className="font-semibold text-sm text-stone-800">{o.customer.name}</p>
-                    <p className="text-xs text-stone-400">{o.date}</p>
+                <div key={o.id} className="flex items-center justify-between py-3 border-b border-stone-50 last:border-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-red-50 text-red-700 font-black text-sm flex items-center justify-center">
+                      {o.customer?.name?.charAt(0)?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-gray-800">{o.customer?.name}</p>
+                      <p className="text-xs text-gray-400">{o.date || new Date(o.created_at).toLocaleString('es-CO')}</p>
+                    </div>
                   </div>
-                  <div className="text-right flex items-center gap-3">
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLORS[o.status]}`}>{o.status}</span>
-                    <span className="font-bold text-sm text-red-800">${o.total.toLocaleString()}</span>
+                  <div className="flex items-center gap-3">
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold border ${STATUS_COLORS[o.status]}`}>
+                      {o.status}
+                    </span>
+                    <span className="font-black text-sm text-red-700">${Number(o.total).toLocaleString()}</span>
                   </div>
                 </div>
               ))}
@@ -90,23 +113,32 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        {/* Top products */}
-        <div className="bg-white rounded-2xl shadow-sm p-5">
-          <h2 className="font-black text-red-900 text-lg mb-4">Productos Más Pedidos</h2>
+        {/* Top productos */}
+        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+          <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
+              style={{fontFamily:'Montserrat,sans-serif'}}>
+            <TrendingUp size={20} className="text-red-500" /> Más Vendidos
+          </h2>
           {topProducts.length === 0 ? (
-            <p className="text-stone-400 text-sm text-center py-6">Sin datos aún</p>
+            <div className="text-center py-8 text-gray-300">
+              <TrendingUp size={40} className="mx-auto mb-2" />
+              <p className="text-sm font-medium">Sin datos aún</p>
+            </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {topProducts.map(([name, qty], i) => (
                 <div key={name} className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-red-100 text-red-700 text-xs font-black flex items-center justify-center shrink-0">{i+1}</span>
-                  <div className="flex-1">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span className="font-semibold text-stone-700">{name}</span>
-                      <span className="text-stone-500 font-medium">{qty} uds</span>
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black text-white shrink-0
+                    ${i === 0 ? 'bg-yellow-400' : i === 1 ? 'bg-stone-400' : i === 2 ? 'bg-orange-400' : 'bg-red-100 text-red-600'}`}>
+                    {i + 1}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between text-sm mb-1.5">
+                      <span className="font-bold text-gray-700 truncate">{name}</span>
+                      <span className="text-gray-400 font-semibold shrink-0 ml-2">{qty} uds</span>
                     </div>
                     <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-red-500 rounded-full"
+                      <div className="h-full bg-gradient-to-r from-red-500 to-red-400 rounded-full transition-all"
                         style={{ width: `${(qty / (topProducts[0]?.[1] || 1)) * 100}%` }} />
                     </div>
                   </div>
@@ -117,21 +149,24 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Recent activity */}
-      <div className="bg-white rounded-2xl shadow-sm p-5">
-        <h2 className="font-black text-red-900 text-lg mb-4">Actividad Reciente</h2>
+      {/* Actividad reciente */}
+      <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+        <h2 className="font-black text-gray-900 text-lg mb-5"
+            style={{fontFamily:'Montserrat,sans-serif'}}>Actividad Reciente</h2>
         {activityLog.length === 0 ? (
-          <p className="text-stone-400 text-sm text-center py-6">Sin actividad registrada</p>
+          <p className="text-gray-300 text-sm text-center py-6 font-medium">Sin actividad registrada</p>
         ) : (
           <div className="space-y-2 max-h-56 overflow-y-auto">
             {activityLog.slice(0, 10).map(e => (
-              <div key={e.id} className="flex gap-3 items-start py-1.5 border-b border-stone-50 last:border-0">
-                <span className="text-lg shrink-0">
-                  {{ pedido: '🧾', estado: '🔄', producto: '📦', carrito: '🛒', sistema: '🔐' }[e.type] || '📌'}
+              <div key={e.id} className="flex gap-3 items-start py-2.5 border-b border-stone-50 last:border-0">
+                <span className="text-xl shrink-0">
+                  {{ pedido:'🧾', estado:'🔄', producto:'📦', carrito:'🛒', sistema:'🔐' }[e.type] || '📌'}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-stone-700">{e.description}</p>
-                  <p className="text-xs text-stone-400 mt-0.5">{e.timestamp}</p>
+                  <p className="text-sm font-semibold text-gray-700">{e.description}</p>
+                  <p className="text-xs text-gray-400 mt-0.5 font-medium">
+                    {e.timestamp || new Date(e.created_at).toLocaleString('es-CO')}
+                  </p>
                 </div>
               </div>
             ))}
