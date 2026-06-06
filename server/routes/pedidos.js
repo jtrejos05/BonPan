@@ -80,9 +80,9 @@ router.post('/', async (req, res) => {
 
     // Crear pedido
     const { rows: pRows } = await client.query(
-      `INSERT INTO pedidos (cliente_id, total, status, notes)
-       VALUES ($1,$2,'Pendiente',$3) RETURNING *`,
-      [clienteId, total, customer.notes || null]
+      `INSERT INTO pedidos (cliente_id, total, status, notes, punto_venta_id)
+       VALUES ($1,$2,'Pendiente',$3,$4) RETURNING *`,
+      [clienteId, total, customer.notes || null, customer.delivery?.puntoVentaId || null]
     )
     const pedidoId = pRows[0].id
 

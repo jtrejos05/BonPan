@@ -4,21 +4,39 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShoppingCart, X, MapPin, 
 import { useApp } from '../context/AppContext'
 import { api } from '../services/api'
 
-const TIENDA = {
-  nombre: 'Bon Pan — Centro',
-  direccion: 'Calle 15 #23-45, Centro, Pereira',
-  tiempo: '15–20 min',
-}
-
 // ── Modal de tipo de entrega ─────────────────────────────────
 function DeliveryModal({ onClose, onConfirm }) {
-  const [tipo,      setTipo]      = useState('retiro')
-  const [ciudad,    setCiudad]    = useState('')
-  const [direccion, setDireccion] = useState('')
+  const [tipo,       setTipo]       = useState('retiro')
+  const [ciudad,     setCiudad]     = useState('')
+  const [direccion,  setDireccion]  = useState('')
+  const [locales,    setLocales]    = useState([])
+  const [localId,    setLocalId]    = useState('')
+  const [loadingPV,  setLoadingPV]  = useState(true)
+
+  useState(() => {
+    api.puntosVenta.getAll()
+      .then(data => {
+        const activos = data.filter(l => l.activo)
+        setLocales(activos)
+        if (activos.length > 0) setLocalId(String(activos[0].id))
+      })
+      .catch(() => {})
+      .finally(() => setLoadingPV(false))
+  })
+
+  const localSeleccionado = locales.find(l => String(l.id) === localId)
 
   function confirm() {
     if (tipo === 'domicilio' && (!ciudad.trim() || !direccion.trim())) return
-    onConfirm({ tipo, ciudad, direccion })
+    if (tipo === 'retiro'   && !localId) return
+    onConfirm({
+      tipo,
+      ciudad,
+      direccion,
+      puntoVentaId:     tipo === 'retiro' ? Number(localId) : null,
+      puntoVentaNombre: tipo === 'retiro' ? localSeleccionado?.nombre : null,
+      puntoVentaDireccion: tipo === 'retiro' ? localSeleccionado?.direccion : null,
+    })
     onClose()
   }
 
@@ -62,15 +80,33 @@ function DeliveryModal({ onClose, onConfirm }) {
 
           {/* Contenido según tipo */}
           {tipo === 'retiro' ? (
-            <div className="bg-red-50 border-2 border-red-800 p-4">
-              <div className="flex items-start gap-3">
-                <Store size={20} className="text-red-800 mt-0.5 shrink-0" />
-                <div>
-                  <p className="font-black text-red-950 text-sm">{TIENDA.nombre}</p>
-                  <p className="text-stone-500 text-xs mt-0.5">{TIENDA.direccion}</p>
-                  <p className="text-red-600 text-xs font-semibold mt-1">⏱ Listo en {TIENDA.tiempo}</p>
+            <div className="space-y-3">
+              {loadingPV ? (
+                <div className="bg-stone-50 p-4 animate-pulse rounded text-center text-stone-400 text-sm">
+                  Cargando locales...
                 </div>
-              </div>
+              ) : locales.length === 0 ? (
+                <p className="text-stone-400 text-sm text-center py-4">No hay locales disponibles</p>
+              ) : (
+                locales.map(l => (
+                  <button key={l.id} type="button" onClick={() => setLocalId(String(l.id))}
+                    className={`w-full text-left p-4 border-2 transition-all rounded
+                      ${String(l.id) === localId
+                        ? 'border-red-800 bg-red-50'
+                        : 'border-stone-200 hover:border-red-300'}`}>
+                    <div className="flex items-start gap-3">
+                      <Store size={18} className={`mt-0.5 shrink-0 ${String(l.id) === localId ? 'text-red-800' : 'text-stone-400'}`} />
+                      <div>
+                        <p className={`font-black text-sm ${String(l.id) === localId ? 'text-red-950' : 'text-stone-700'}`}>
+                          {l.nombre}
+                        </p>
+                        {l.direccion && <p className="text-stone-500 text-xs mt-0.5">{l.direccion}</p>}
+                        <p className="text-red-600 text-xs font-semibold mt-1">⏱ Listo en 15–20 min</p>
+                      </div>
+                    </div>
+                  </button>
+                ))
+              )}
             </div>
           ) : (
             <div className="space-y-4">
@@ -193,7 +229,7 @@ export default function Order() {
         {confirmed.customer?.delivery && (
           <div className="bg-stone-50 border border-stone-200 rounded px-4 py-3 mb-6 text-sm text-left">
             {confirmed.customer.delivery.tipo === 'retiro' ? (
-              <p className="text-stone-600 font-medium">🏪 <strong>Retiro en tienda</strong> — {TIENDA.direccion}</p>
+              <p className="text-stone-600 font-medium">🏪 <strong>Retiro en tienda</strong> — {confirmed.customer.delivery.puntoVentaNombre} · {confirmed.customer.delivery.puntoVentaDireccion}</p>
             ) : (
               <p className="text-stone-600 font-medium">🛵 <strong>Domicilio</strong> — {confirmed.customer.delivery.direccion}, {confirmed.customer.delivery.ciudad}</p>
             )}
@@ -293,7 +329,7 @@ export default function Order() {
                   ) : delivery.tipo === 'retiro' ? (
                     <>
                       <p className="font-bold text-red-950 text-sm">Retiro en tienda</p>
-                      <p className="text-stone-500 text-xs">{TIENDA.nombre} · {TIENDA.tiempo}</p>
+                      <p className="text-stone-500 text-xs">{delivery.puntoVentaNombre} · 15–20 min</p>
                     </>
                   ) : (
                     <>
