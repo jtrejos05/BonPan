@@ -53,6 +53,15 @@ export const api = {
     login: (password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
   },
 
+  puntosVenta: {
+    getAll:    ()          => request('/puntos-venta'),
+    create:    (data)      => request('/puntos-venta',          { method: 'POST',   body: JSON.stringify(data) }),
+    update:    (id, data)  => request(`/puntos-venta/${id}`,    { method: 'PUT',    body: JSON.stringify(data) }),
+    remove:    (id)        => request(`/puntos-venta/${id}`,    { method: 'DELETE' }),
+    login:     (id, pin)   => request('/puntos-venta/login',    { method: 'POST',   body: JSON.stringify({ id, pin }) }),
+    getPedidos:(id)        => request(`/puntos-venta/${id}/pedidos`),
+  },
+
   promociones: {
     getAll:       ()       => request('/promociones/admin'),
     getActivas:   ()       => request('/promociones'),

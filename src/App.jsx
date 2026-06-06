@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { GoogleOAuthProvider } from '@react-oauth/google'
-import { AppProvider } from './context/AppContext'
+import { AppProvider }  from './context/AppContext'
 import { AuthProvider } from './context/AuthContext'
 
-// Client layout & pages
+// Client pages
 import Navbar    from './components/Navbar'
 import Home      from './pages/Home'
 import Menu      from './pages/Menu'
@@ -13,17 +13,21 @@ import Login     from './pages/Login'
 import Register  from './pages/Register'
 
 // Admin module
-import AdminLogin      from './admin/AdminLogin'
-import AdminLayout     from './admin/AdminLayout'
-import AdminDashboard  from './admin/AdminDashboard'
-import AdminPedidos    from './admin/AdminPedidos'
-import AdminProductos  from './admin/AdminProductos'
+import AdminLogin       from './admin/AdminLogin'
+import AdminLayout      from './admin/AdminLayout'
+import AdminDashboard   from './admin/AdminDashboard'
+import AdminPedidos     from './admin/AdminPedidos'
+import AdminProductos   from './admin/AdminProductos'
 import AdminPromociones from './admin/AdminPromociones'
-import AdminClientes   from './admin/AdminClientes'
-import AdminActividad  from './admin/AdminActividad'
+import AdminPuntosVenta from './admin/AdminPuntosVenta'
+import AdminClientes    from './admin/AdminClientes'
+import AdminActividad   from './admin/AdminActividad'
 
-// Google Client ID — configura el tuyo en .env
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || import.meta.env.GOOGLE_CLIENT_ID || ''
+// Punto de venta module
+import PVLogin     from './punto-venta/PVLogin'
+import PVDashboard from './punto-venta/PVDashboard'
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
 function ClientLayout() {
   return (
@@ -51,14 +55,19 @@ export default function App() {
               {/* Admin module */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin"       element={<AdminLayout />}>
-                <Route index             element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard"  element={<AdminDashboard />} />
-                <Route path="pedidos"    element={<AdminPedidos />} />
-                <Route path="productos"   element={<AdminProductos />} />
-                <Route path="promociones" element={<AdminPromociones />} />
-                <Route path="clientes"   element={<AdminClientes />} />
-                <Route path="actividad"  element={<AdminActividad />} />
+                <Route index                  element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="dashboard"       element={<AdminDashboard />} />
+                <Route path="pedidos"         element={<AdminPedidos />} />
+                <Route path="productos"       element={<AdminProductos />} />
+                <Route path="promociones"     element={<AdminPromociones />} />
+                <Route path="puntos-venta"    element={<AdminPuntosVenta />} />
+                <Route path="clientes"        element={<AdminClientes />} />
+                <Route path="actividad"       element={<AdminActividad />} />
               </Route>
+
+              {/* Punto de venta module */}
+              <Route path="/punto-venta"           element={<PVLogin />} />
+              <Route path="/punto-venta/dashboard" element={<PVDashboard />} />
 
               {/* Client module */}
               <Route path="/*" element={<ClientLayout />} />
