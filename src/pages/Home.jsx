@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import ServerError from '../components/ServerError'
-import { ArrowRight, Tag } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { api } from '../services/api'
 
@@ -99,85 +99,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Sección Promociones ── */}
-      {promociones.length > 0 && (
-        <section className="py-20 px-6 bg-white" id="promociones">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-12">
-              <Divider text="Ofertas especiales" />
-              <h2 className="text-5xl text-red-950 mt-6 mb-4"
-                  style={{fontFamily:'Playfair Display, serif'}}>Promociones</h2>
-              <p className="text-stone-400 font-medium max-w-md mx-auto">
-                Aprovecha nuestras ofertas exclusivas — válidas por tiempo limitado
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {promociones.map(p => (
-                <div key={p.id}
-                  className="relative border-2 border-red-100 bg-gradient-to-br from-red-50 to-orange-50
-                             p-7 hover:border-red-300 hover:shadow-lg transition-all duration-300 group">
-                  {/* Badge descuento */}
-                  <div className="absolute -top-4 -right-4 w-16 h-16 bg-red-950 rounded-full flex flex-col items-center justify-center shadow-lg">
-                    <span className="text-white font-black text-lg leading-none">
-                      {p.tipo === 'porcentaje' ? `${p.valor}%` : `$${Number(p.valor) >= 1000 ? Math.round(p.valor/1000)+'K' : p.valor}`}
-                    </span>
-                    <span className="text-red-300 text-[9px] font-bold uppercase tracking-wide">off</span>
-                  </div>
-
-                  <div className="mb-4">
-                    <span className="text-[10px] text-red-600 font-bold tracking-[0.25em] uppercase">
-                      {p.tipo === 'porcentaje' ? 'Descuento' : 'Valor fijo'}
-                    </span>
-                    <h3 className="text-2xl text-red-950 mt-1 leading-tight"
-                        style={{fontFamily:'Playfair Display, serif'}}>{p.nombre}</h3>
-                  </div>
-
-                  {p.descripcion && (
-                    <p className="text-stone-500 text-sm mb-4 leading-relaxed">{p.descripcion}</p>
-                  )}
-
-                  {/* Código */}
-                  {p.codigo && (
-                    <div className="mb-4">
-                      <p className="text-xs text-stone-400 font-semibold mb-1">Usa el código:</p>
-                      <div className="inline-flex items-center gap-2 bg-white border-2 border-dashed border-red-300 px-4 py-2">
-                        <Tag size={14} className="text-red-500" />
-                        <span className="font-mono font-black text-red-900 text-lg tracking-widest">{p.codigo}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Categorías */}
-                  {p.categorias?.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mb-4">
-                      {p.categorias.map(c => (
-                        <span key={c} className="text-[10px] font-bold bg-red-100 text-red-700 px-2 py-0.5 rounded-full uppercase tracking-wide">
-                          {c}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Fecha vigencia */}
-                  {p.fecha_fin && (
-                    <p className="text-xs text-stone-400 font-medium mt-3">
-                      ⏰ Válido hasta {new Date(p.fecha_fin).toLocaleDateString('es-CO', { day:'numeric', month:'long', year:'numeric' })}
-                    </p>
-                  )}
-
-                  <Link to="/pedido"
-                    className="mt-5 w-full flex items-center justify-center gap-2 bg-red-950 text-white
-                               font-bold text-xs tracking-widest uppercase py-3
-                               hover:bg-red-800 transition-colors">
-                    Aprovechar oferta <ArrowRight size={14} />
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* ── Quote banner ── */}
       <section className="py-16 px-6 text-center bg-[#faf7f2]">
