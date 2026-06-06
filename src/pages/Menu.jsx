@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
-import { ShoppingCart, Check } from 'lucide-react'
+import { ShoppingCart, Check, Tag, ChevronLeft, ChevronRight } from 'lucide-react'
+import { api } from '../services/api'
 
 const ALL = 'Todos'
 
@@ -9,6 +10,15 @@ export default function Menu() {
   const [activeCategory, setActiveCategory] = useState(ALL)
   const [added, setAdded]   = useState(null)
   const [search, setSearch] = useState('')
+
+  const [promociones,  setPromociones]  = useState([])
+  const [promoIndex,   setPromoIndex]   = useState(0)
+
+  useEffect(() => {
+    api.promociones.getActivas()
+      .then(data => setPromociones(data))
+      .catch(() => {})
+  }, [])
 
   const categories = [ALL, ...new Set(products.map(p => p.category))]
   const filtered   = products.filter(p => {
@@ -52,6 +62,55 @@ export default function Menu() {
           <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#faf7f2" />
         </svg>
       </div>
+
+      {/* Banner de promociones */}
+      {promociones.length > 0 && (
+        <div className="bg-red-800 text-white">
+          <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+            <button onClick={() => setPromoIndex(i => i === 0 ? promociones.length - 1 : i - 1)}
+              className="text-red-200 hover:text-white transition-colors shrink-0"
+              style={{visibility: promociones.length > 1 ? 'visible' : 'hidden'}}>
+              <ChevronLeft size={18} />
+            </button>
+
+            <div className="flex-1 text-center">
+              {(() => {
+                const p = promociones[promoIndex]
+                return (
+                  <div className="flex items-center justify-center gap-2 flex-wrap">
+                    <Tag size={14} className="text-red-300 shrink-0" />
+                    <span className="font-black text-sm">{p.nombre}</span>
+                    {p.descripcion && (
+                      <span className="text-red-200 text-sm">— {p.descripcion}</span>
+                    )}
+                    {p.codigo && (
+                      <span className="bg-white text-red-800 font-black text-xs px-2 py-0.5 rounded font-mono tracking-widest">
+                        {p.codigo}
+                      </span>
+                    )}
+                  </div>
+                )
+              })()}
+            </div>
+
+            <button onClick={() => setPromoIndex(i => i === promociones.length - 1 ? 0 : i + 1)}
+              className="text-red-200 hover:text-white transition-colors shrink-0"
+              style={{visibility: promociones.length > 1 ? 'visible' : 'hidden'}}>
+              <ChevronRight size={18} />
+            </button>
+          </div>
+
+          {/* Dots si hay varias */}
+          {promociones.length > 1 && (
+            <div className="flex justify-center gap-1.5 pb-2">
+              {promociones.map((_, i) => (
+                <button key={i} onClick={() => setPromoIndex(i)}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${i === promoIndex ? 'bg-white' : 'bg-red-600'}`} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Search */}

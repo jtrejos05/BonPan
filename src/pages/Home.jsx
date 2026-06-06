@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import ServerError from '../components/ServerError'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Tag } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { api } from '../services/api'
 
 function Divider({ text }) {
   return (
@@ -16,6 +18,13 @@ function Divider({ text }) {
 export default function Home() {
   const { addToCart, products, loading, error } = useApp()
   const featured = products.slice(0, 4)
+  const [promociones, setPromociones] = useState([])
+
+  useEffect(() => {
+    api.promociones.getActivas()
+      .then(data => setPromociones(data))
+      .catch(() => {})
+  }, [])
 
   if (error) return <ServerError message={error} />
 
@@ -89,6 +98,33 @@ export default function Home() {
           </svg>
         </div>
       </section>
+
+      {/* ── Promociones banner ── */}
+      {promociones.length > 0 && (
+        <section className="bg-red-800 py-4 px-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-center gap-3 flex-wrap text-center">
+              <Tag size={16} className="text-red-300 shrink-0" />
+              <p className="text-white font-bold text-sm">🎉 Promociones disponibles:</p>
+              <div className="flex gap-3 flex-wrap justify-center">
+                {promociones.map(p => (
+                  <div key={p.id} className="flex items-center gap-2 bg-red-900/50 px-3 py-1.5 rounded-full">
+                    <span className="text-white text-sm font-semibold">{p.nombre}</span>
+                    {p.codigo && (
+                      <span className="bg-white text-red-800 font-black text-xs px-2 py-0.5 rounded font-mono tracking-widest">
+                        {p.codigo}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <Link to="/menu" className="text-red-200 text-xs font-bold hover:text-white transition-colors underline">
+                Ver menú →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Quote banner ── */}
       <section className="py-16 px-6 text-center bg-[#faf7f2]">
