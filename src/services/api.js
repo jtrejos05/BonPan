@@ -2,9 +2,17 @@
 const BASE = import.meta.env.VITE_API_URL
   || (import.meta.env.DEV ? 'http://localhost:4000/api' : 'https://bonpan-production.up.railway.app/api')
 
+function getToken() {
+  return localStorage.getItem('bonpan_token')
+}
+
 async function request(path, options = {}) {
+  const token = getToken()
   const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     ...options,
   })
   if (!res.ok) {
@@ -43,5 +51,12 @@ export const api = {
 
   auth: {
     login: (password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
+  },
+
+  usuarios: {
+    register:    (data)       => request('/usuarios/register', { method: 'POST', body: JSON.stringify(data) }),
+    login:       (data)       => request('/usuarios/login',    { method: 'POST', body: JSON.stringify(data) }),
+    googleLogin: (credential) => request('/usuarios/google',   { method: 'POST', body: JSON.stringify({ credential }) }),
+    me:          ()           => request('/usuarios/me'),
   },
 }

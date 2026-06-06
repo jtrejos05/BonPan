@@ -1,13 +1,26 @@
 import { Link, useLocation } from 'react-router-dom'
-import { ShoppingCart, Menu, X } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { ShoppingCart, Menu, X, User, LogOut } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
 
 export default function Navbar() {
   const { cartCount } = useApp()
-  const [open, setOpen]       = useState(false)
-  const [scrolled, setScrolled] = useState(false)
+  const { user, logout } = useAuth()
+  const [open,        setOpen]        = useState(false)
+  const [scrolled,    setScrolled]    = useState(false)
+  const [userMenu,    setUserMenu]    = useState(false)
+  const userMenuRef = useRef(null)
   const { pathname } = useLocation()
+
+  // Cerrar menú usuario al click afuera
+  useEffect(() => {
+    function handleClick(e) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setUserMenu(false)
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
 
   useEffect(() => {
     const fn = () => setScrolled(window.scrollY > 10)
@@ -64,7 +77,7 @@ export default function Navbar() {
                 {l.label}
               </Link>
             ))}
-            <Link to="/pedido" className="relative ml-2">
+            <Link to="/pedido" className="relative">
               <ShoppingCart size={20} className="text-stone-600 hover:text-red-800 transition-colors" />
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-800 text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
@@ -72,6 +85,40 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
+
+            {/* Usuario */}
+            {user ? (
+              <div className="relative" ref={userMenuRef}>
+                <button onClick={() => setUserMenu(!userMenu)}
+                  className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                  {user.avatar
+                    ? <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
+                    : <div className="w-8 h-8 rounded-full bg-red-950 text-white text-sm font-black flex items-center justify-center">
+                        {user.name?.charAt(0).toUpperCase()}
+                      </div>}
+                </button>
+                {userMenu && (
+                  <div className="absolute right-0 top-12 bg-white border border-stone-200 shadow-xl w-52 z-50 py-2">
+                    <div className="px-4 py-3 border-b border-stone-100">
+                      <p className="font-bold text-stone-800 text-sm truncate">{user.name}</p>
+                      <p className="text-stone-400 text-xs truncate">{user.email}</p>
+                    </div>
+                    <button onClick={() => { logout(); setUserMenu(false) }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-sm text-stone-600
+                                 hover:bg-red-50 hover:text-red-800 transition-colors font-medium">
+                      <LogOut size={14} /> Cerrar Sesión
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link to="/login"
+                className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase
+                           border border-stone-300 px-4 py-2 text-stone-600
+                           hover:bg-red-950 hover:text-white hover:border-red-950 transition-all duration-200">
+                <User size={14} /> Ingresar
+              </Link>
+            )}
           </div>
 
           {/* Mobile */}
