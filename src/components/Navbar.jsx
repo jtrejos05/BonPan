@@ -29,10 +29,11 @@ export default function Navbar() {
   }, [])
 
   const links = [
-    { to: '/',         label: 'Inicio'   },
-    { to: '/menu',     label: 'Menú'     },
-    { to: '/pedido',   label: 'Pedido'   },
-    { to: '/contacto', label: 'Contacto' },
+    { to: '/',              label: 'Inicio'      },
+    { to: '/menu',          label: 'Menú'        },
+    { to: '/#promociones',  label: 'Promociones' },
+    { to: '/pedido',        label: 'Pedido'      },
+    { to: '/contacto',      label: 'Contacto'    },
   ]
 
   return (
