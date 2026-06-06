@@ -5,14 +5,14 @@ import { useApp } from '../context/AppContext'
 
 export default function Navbar() {
   const { cartCount } = useApp()
-  const [open, setOpen] = useState(false)
+  const [open, setOpen]       = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
+    const fn = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', fn)
+    return () => window.removeEventListener('scroll', fn)
   }, [])
 
   const links = [
@@ -23,65 +23,89 @@ export default function Navbar() {
   ]
 
   return (
-    <nav className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white shadow-lg' : 'bg-white/95 backdrop-blur-sm shadow-sm'}`}>
-      <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-18 py-3">
-
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
-          <img src="/logo.png" alt="Bon Pan"
-            className="h-12 w-12 rounded-xl object-contain shadow-sm group-hover:scale-105 transition-transform duration-200" />
-          <div className="text-left">
-            <p className="font-black text-lg text-red-900 leading-tight tracking-tight"
-               style={{fontFamily:'Montserrat,sans-serif'}}>Bon Pan</p>
-            <p className="text-xs text-red-400 font-semibold tracking-widest uppercase leading-tight">Panadería</p>
-          </div>
-        </Link>
-
-        {/* Desktop links */}
-        <ul className="hidden md:flex items-center gap-1">
-          {links.map(l => (
-            <li key={l.to}>
-              <Link to={l.to}
-                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200
-                  ${pathname === l.to
-                    ? 'bg-red-700 text-white shadow-sm'
-                    : 'text-stone-600 hover:text-red-700 hover:bg-red-50'}`}>
-                {l.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        {/* Cart + hamburger */}
-        <div className="flex items-center gap-3">
-          <Link to="/pedido"
-            className="relative flex items-center justify-center w-10 h-10 rounded-full bg-red-50 hover:bg-red-100 transition-colors">
-            <ShoppingCart size={20} className="text-red-700" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-black shadow-sm">
-                {cartCount}
-              </span>
-            )}
-          </Link>
-          <button className="md:hidden w-10 h-10 flex items-center justify-center rounded-full bg-stone-100 hover:bg-stone-200 transition-colors"
-            onClick={() => setOpen(!open)}>
-            {open ? <X size={20} className="text-stone-700" /> : <Menu size={20} className="text-stone-700" />}
-          </button>
-        </div>
+    <>
+      {/* Top bar — estilo Magnolia */}
+      <div className="bg-red-900 text-red-100 text-center py-2 text-xs font-semibold tracking-widest uppercase">
+        🥐 Horneamos todos los días desde las 6am · Pereira, Risaralda
       </div>
 
-      {/* Mobile menu */}
-      {open && (
-        <div className="md:hidden bg-white border-t border-stone-100 px-5 py-4 flex flex-col gap-2">
-          {links.map(l => (
-            <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
-              className={`px-4 py-3 rounded-xl text-sm font-semibold transition-colors
-                ${pathname === l.to ? 'bg-red-700 text-white' : 'text-stone-700 hover:bg-red-50'}`}>
-              {l.label}
+      <nav className={`sticky top-0 z-50 bg-[#faf7f2] transition-shadow duration-300 ${scrolled ? 'shadow-md' : ''}`}>
+        {/* Línea decorativa top */}
+        <div className="h-0.5 bg-gradient-to-r from-transparent via-red-800 to-transparent" />
+
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between py-4">
+          {/* Logo centrado en desktop */}
+          <div className="hidden md:flex items-center gap-8 flex-1">
+            {links.slice(0, 2).map(l => (
+              <Link key={l.to} to={l.to}
+                className={`text-sm font-semibold tracking-widest uppercase transition-colors duration-200
+                  ${pathname === l.to ? 'text-red-800 border-b-2 border-red-800 pb-0.5' : 'text-stone-500 hover:text-red-800'}`}>
+                {l.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Logo centrado */}
+          <Link to="/" className="flex flex-col items-center gap-1 group mx-auto md:mx-0">
+            <img src="/logo.png" alt="Bon Pan"
+              className="h-14 w-14 object-contain group-hover:scale-105 transition-transform duration-300" />
+            <div className="text-center leading-tight">
+              <p className="font-black text-red-900 text-lg tracking-tight"
+                 style={{fontFamily:'Playfair Display, serif'}}>Bon Pan</p>
+              <p className="text-red-400 text-[10px] font-semibold tracking-[0.2em] uppercase">Panadería Artesanal</p>
+            </div>
+          </Link>
+
+          <div className="hidden md:flex items-center gap-8 flex-1 justify-end">
+            {links.slice(2).map(l => (
+              <Link key={l.to} to={l.to}
+                className={`text-sm font-semibold tracking-widest uppercase transition-colors duration-200
+                  ${pathname === l.to ? 'text-red-800 border-b-2 border-red-800 pb-0.5' : 'text-stone-500 hover:text-red-800'}`}>
+                {l.label}
+              </Link>
+            ))}
+            <Link to="/pedido" className="relative ml-2">
+              <ShoppingCart size={20} className="text-stone-600 hover:text-red-800 transition-colors" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-800 text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </Link>
-          ))}
+          </div>
+
+          {/* Mobile */}
+          <div className="flex md:hidden items-center gap-3">
+            <Link to="/pedido" className="relative">
+              <ShoppingCart size={20} className="text-stone-600" />
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-800 text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            <button onClick={() => setOpen(!open)} className="text-stone-700">
+              {open ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
         </div>
-      )}
-    </nav>
+
+        {/* Línea bottom decorativa */}
+        <div className="h-px bg-stone-200" />
+
+        {/* Mobile menu */}
+        {open && (
+          <div className="md:hidden bg-[#faf7f2] border-t border-stone-100 px-6 py-4 space-y-1">
+            {links.map(l => (
+              <Link key={l.to} to={l.to} onClick={() => setOpen(false)}
+                className={`block py-3 text-sm font-semibold tracking-widest uppercase border-b border-stone-100
+                  ${pathname === l.to ? 'text-red-800' : 'text-stone-500'}`}>
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        )}
+      </nav>
+    </>
   )
 }
