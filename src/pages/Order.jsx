@@ -118,9 +118,10 @@ function DeliveryModal({ onClose, onConfirm }) {
                   className="w-full border border-stone-200 px-4 py-3 text-sm text-stone-700 font-medium
                              focus:outline-none focus:border-red-800 bg-white appearance-none">
                   <option value="">Selecciona una ciudad</option>
-                  <option>Pereira</option>
-                  <option>Dosquebradas</option>
-                  <option>Santa Rosa de Cabal</option>
+                  <option>Ibagué</option>
+                  <option>El Espinal</option>
+                  <option>Melgar</option>
+                  <option>Armenia</option>
                 </select>
               </div>
               <div>

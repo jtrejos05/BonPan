@@ -52,7 +52,7 @@ export default function Home() {
             </h1>
 
             <p className="text-red-200/80 text-lg mb-10 leading-relaxed max-w-md font-light">
-              Croissants hojaldrados, pasteles de pollo y carne. Elaborados a mano desde las primeras horas de la mañana en Pereira.
+              Croissants hojaldrados, pasteles de pollo y carne. Elaborados a mano desde las primeras horas de la mañana en Ibagué.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
@@ -107,7 +107,7 @@ export default function Home() {
             style={{fontFamily:'Playfair Display, serif', fontStyle:'italic'}}>
           "El buen pan no necesita presentación, solo un buen mordisco."
         </blockquote>
-        <p className="text-stone-400 text-sm mt-4 tracking-widest uppercase font-semibold">— Bon Pan, Pereira</p>
+        <p className="text-stone-400 text-sm mt-4 tracking-widest uppercase font-semibold">— Bon Pan, Ibagué</p>
       </section>
 
       {/* ── Propuesta de valor ── */}
@@ -228,7 +228,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-red-400/70 text-sm leading-relaxed">
-                Elaboramos cada producto con amor y los mejores ingredientes desde Pereira, Risaralda.
+                Elaboramos cada producto con amor y los mejores ingredientes desde Ibagué, Tolima.
               </p>
             </div>
 
@@ -247,7 +247,7 @@ export default function Home() {
             <div className="text-left">
               <p className="text-white text-xs tracking-[0.2em] uppercase font-bold mb-4">Contacto</p>
               <div className="space-y-2 text-sm text-red-400 font-medium">
-                <p>📍 Calle 15 #23-45, Pereira</p>
+                <p>📍 Ibagué, Tolima</p>
                 <p>📞 +57 310 123 4567</p>
                 <p>✉️ hola@bonpan.co</p>
                 <p>🕐 Lun–Vie: 6am – 7pm</p>
@@ -257,7 +257,7 @@ export default function Home() {
 
           <div className="border-t border-red-900/50 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
             <p className="text-red-600 text-xs">© 2026 Bon Pan · Todos los derechos reservados</p>
-            <p className="text-red-600 text-xs">Hecho con ❤️ en Pereira, Colombia</p>
+            <p className="text-red-600 text-xs">Hecho con ❤️ en Ibagué, Colombia</p>
           </div>
         </div>
       </footer>

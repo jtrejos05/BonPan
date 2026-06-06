@@ -39,7 +39,7 @@ export default function Navbar() {
     <>
       {/* Top bar — estilo Magnolia */}
       <div className="bg-red-900 text-red-100 text-center py-2 text-xs font-semibold tracking-widest uppercase">
-        🥐 Horneamos todos los días desde las 6am · Pereira, Risaralda
+        🥐 Horneamos todos los días desde las 6am · Ibagué, Tolima
       </div>
 
       <nav className={`sticky top-0 z-50 bg-[#faf7f2] transition-shadow duration-300 ${scrolled ? 'shadow-md' : ''}`}>

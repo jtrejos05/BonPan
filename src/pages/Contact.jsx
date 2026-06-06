@@ -17,7 +17,7 @@ function FbIcon() {
 }
 
 const INFO = [
-  { icon: <MapPin size={18} />, title: 'Dirección', lines: ['Calle 15 #23-45, Centro', 'Pereira, Risaralda'] },
+  { icon: <MapPin size={18} />, title: 'Dirección', lines: ['Calle 15 #23-45, Centro', 'Ibagué, Tolima'] },
   { icon: <Phone size={18} />, title: 'Teléfono', lines: ['+57 310 123 4567', '+57 6 335 6789'] },
   { icon: <Mail size={18} />, title: 'Correo', lines: ['hola@bonpan.co'] },
   { icon: <Clock size={18} />, title: 'Horario', lines: ['Lunes – Viernes: 6:00am – 7:00pm', 'Sábado – Domingo: 7:00am – 5:00pm'] },
@@ -87,7 +87,7 @@ export default function Contact() {
             <div className="overflow-hidden h-52 border border-stone-200">
               <iframe title="Ubicación Bon Pan" width="100%" height="100%" style={{border:0}}
                 loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade"
-                src="https://www.google.com/maps?q=Calle+15+%2323-45,+Centro,+Pereira,+Risaralda,+Colombia&output=embed" />
+                src="https://www.google.com/maps?q=Ibagu%C3%A9,+Tolima,+Colombia&output=embed" />
             </div>
 
             <div className="bg-white border border-stone-200 p-8 text-left">
