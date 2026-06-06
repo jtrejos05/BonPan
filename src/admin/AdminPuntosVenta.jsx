@@ -224,7 +224,7 @@ export default function AdminPuntosVenta() {
               {/* Link de acceso */}
               <div className="bg-stone-50 rounded-xl px-4 py-3 mb-4">
                 <p className="text-xs text-stone-400 font-semibold mb-1">Acceso empleados:</p>
-                <p className="text-xs font-mono text-red-800 font-bold">bonpan.co/punto-venta</p>
+                <p className="text-xs font-mono text-red-800 font-bold">{window.location.origin}/punto-venta</p>
                 <p className="text-xs text-stone-500 mt-0.5">Local ID: <strong>{l.id}</strong> · PIN: protegido</p>
               </div>
 
