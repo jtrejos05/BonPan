@@ -27,53 +27,53 @@ export default function Contact() {
   return (
     <div className="bg-[#faf7f2]">
       {/* Header */}
-      <div className="bg-red-950 pt-20 pb-0 text-center relative overflow-hidden">
+      <div className="bg-red-950 pt-16 sm:pt-20 pb-0 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-5"
           style={{backgroundImage:'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'}} />
-        <div className="relative z-10 pb-16">
-          <p className="text-red-400 text-xs tracking-[0.4em] uppercase font-semibold mb-4">Visítanos</p>
-          <h1 className="text-6xl text-white mb-4" style={{fontFamily:'Playfair Display, serif'}}>Contáctanos</h1>
-          <p className="text-red-200/70 font-light text-lg">Estamos aquí para atenderte con gusto</p>
+        <div className="relative z-10 pb-12 sm:pb-16 px-4">
+          <p className="text-red-400 text-xs tracking-[0.4em] uppercase font-semibold mb-3 sm:mb-4">Visítanos</p>
+          <h1 className="text-4xl sm:text-6xl text-white mb-3 sm:mb-4" style={{fontFamily:'Playfair Display, serif'}}>Contáctanos</h1>
+          <p className="text-red-200/70 font-light text-base sm:text-lg">Estamos aquí para atenderte con gusto</p>
         </div>
         <svg viewBox="0 0 1440 60" className="w-full block" preserveAspectRatio="none">
           <path d="M0,30 C360,60 1080,0 1440,30 L1440,60 L0,60 Z" fill="#faf7f2" />
         </svg>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
 
           {/* Info */}
           <div className="space-y-0">
             {INFO.map((item, i) => (
               <div key={item.title}
-                className={`flex gap-5 py-6 ${i < INFO.length - 1 ? 'border-b border-stone-200' : ''}`}>
-                <div className="w-10 h-10 bg-red-950 text-white flex items-center justify-center shrink-0 mt-0.5">
+                className={`flex gap-4 sm:gap-5 py-5 sm:py-6 ${i < INFO.length - 1 ? 'border-b border-stone-200' : ''}`}>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-red-950 text-white flex items-center justify-center shrink-0 mt-0.5">
                   {item.icon}
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold tracking-[0.2em] uppercase text-stone-400 mb-1">{item.title}</p>
                   {item.lines.map(l => (
-                    <p key={l} className="text-stone-700 font-medium">{l}</p>
+                    <p key={l} className="text-stone-700 font-medium text-sm sm:text-base">{l}</p>
                   ))}
                 </div>
               </div>
             ))}
 
             {/* Redes */}
-            <div className="pt-6 text-left">
+            <div className="pt-5 sm:pt-6 text-left">
               <p className="text-xs font-bold tracking-[0.2em] uppercase text-stone-400 mb-4">Redes Sociales</p>
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
                 <a href="https://www.instagram.com/panaderia.bonpan/?hl=es"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 border border-stone-300 text-stone-700 px-5 py-2.5
+                  className="flex items-center gap-2 border border-stone-300 text-stone-700 px-4 sm:px-5 py-2.5
                              text-xs font-bold tracking-widest uppercase hover:bg-stone-900 hover:text-white
                              hover:border-stone-900 transition-all duration-300">
                   <IgIcon /> Instagram
                 </a>
                 <a href="https://www.facebook.com/panaderia.bonpan?locale=es_LA"
                   target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 border border-stone-300 text-stone-700 px-5 py-2.5
+                  className="flex items-center gap-2 border border-stone-300 text-stone-700 px-4 sm:px-5 py-2.5
                              text-xs font-bold tracking-widest uppercase hover:bg-blue-700 hover:text-white
                              hover:border-blue-700 transition-all duration-300">
                   <FbIcon /> Facebook
@@ -83,18 +83,18 @@ export default function Contact() {
           </div>
 
           {/* Mapa + Formulario */}
-          <div className="space-y-6">
-            <div className="overflow-hidden h-52 border border-stone-200">
+          <div className="space-y-5 sm:space-y-6">
+            <div className="overflow-hidden h-48 sm:h-52 border border-stone-200">
               <iframe title="Ubicación Bon Pan" width="100%" height="100%" style={{border:0}}
                 loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade"
                 src="https://www.google.com/maps?q=Ibagu%C3%A9,+Tolima,+Colombia&output=embed" />
             </div>
 
-            <div className="bg-white border border-stone-200 p-8 text-left">
-              <h2 className="text-2xl text-red-950 mb-6" style={{fontFamily:'Playfair Display, serif'}}>
+            <div className="bg-white border border-stone-200 p-6 sm:p-8 text-left">
+              <h2 className="text-xl sm:text-2xl text-red-950 mb-5 sm:mb-6" style={{fontFamily:'Playfair Display, serif'}}>
                 Envíanos un Mensaje
               </h2>
-              <form className="space-y-5"
+              <form className="space-y-4 sm:space-y-5"
                 onSubmit={e => { e.preventDefault(); alert('¡Mensaje enviado! Te respondemos pronto.') }}>
                 {[
                   {type:'text', placeholder:'Tu nombre completo'},
@@ -102,18 +102,18 @@ export default function Contact() {
                 ].map(f => (
                   <div key={f.placeholder} className="border-b border-stone-200 pb-1">
                     <input {...f} required
-                      className="w-full bg-transparent py-2 text-stone-700 font-medium
+                      className="w-full bg-transparent py-2.5 text-stone-700 font-medium
                                  focus:outline-none placeholder:text-stone-300 text-sm" />
                   </div>
                 ))}
                 <div className="border-b border-stone-200 pb-1">
                   <textarea placeholder="Tu mensaje..." rows={4} required
-                    className="w-full bg-transparent py-2 text-stone-700 font-medium
+                    className="w-full bg-transparent py-2.5 text-stone-700 font-medium
                                focus:outline-none placeholder:text-stone-300 resize-none text-sm" />
                 </div>
                 <button type="submit"
                   className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase
-                             py-4 hover:bg-red-900 transition-colors">
+                             py-4 hover:bg-red-900 active:bg-red-800 transition-colors touch-manipulation">
                   Enviar Mensaje
                 </button>
               </form>

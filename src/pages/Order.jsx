@@ -33,31 +33,36 @@ function DeliveryModal({ onClose, onConfirm }) {
       tipo,
       ciudad,
       direccion,
-      puntoVentaId:     tipo === 'retiro' ? Number(localId) : null,
-      puntoVentaNombre: tipo === 'retiro' ? localSeleccionado?.nombre : null,
+      puntoVentaId:        tipo === 'retiro' ? Number(localId) : null,
+      puntoVentaNombre:    tipo === 'retiro' ? localSeleccionado?.nombre : null,
       puntoVentaDireccion: tipo === 'retiro' ? localSeleccionado?.direccion : null,
     })
     onClose()
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal */}
-      <div className="relative bg-white w-full max-w-md shadow-2xl z-10">
+      {/* Modal — full bottom sheet en móvil, centrado en desktop */}
+      <div className="relative bg-white w-full sm:max-w-md shadow-2xl z-10 rounded-t-2xl sm:rounded-none">
+        {/* Handle móvil */}
+        <div className="flex justify-center pt-3 sm:hidden">
+          <div className="w-10 h-1 bg-stone-300 rounded-full" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-stone-100">
-          <h2 className="text-2xl text-red-950" style={{fontFamily:'Playfair Display, serif'}}>
+        <div className="flex items-start justify-between p-5 sm:p-6 border-b border-stone-100">
+          <h2 className="text-xl sm:text-2xl text-red-950" style={{fontFamily:'Playfair Display, serif'}}>
             ¿Cómo quieres tu pedido?
           </h2>
-          <button onClick={onClose} className="text-stone-400 hover:text-stone-600 transition-colors mt-1">
+          <button onClick={onClose} className="text-stone-400 hover:text-stone-600 transition-colors mt-1 p-1">
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-6 space-y-5">
+        <div className="p-5 sm:p-6 space-y-4 sm:space-y-5">
           {/* Toggle Domicilio / Retiro */}
           <div className="grid grid-cols-2 border border-stone-200 overflow-hidden">
             <button
@@ -142,7 +147,7 @@ function DeliveryModal({ onClose, onConfirm }) {
           <button type="button" onClick={confirm}
             disabled={tipo === 'domicilio' && (!ciudad || !direccion)}
             className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase py-4
-                       hover:bg-red-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+                       hover:bg-red-900 active:bg-red-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation">
             Confirmar
           </button>
         </div>
@@ -188,7 +193,7 @@ export default function Order() {
   }
 
   const descuento  = calcDescuento()
-  const totalFinal = cartTotal - descuento // { tipo, ciudad, direccion }
+  const totalFinal = cartTotal - descuento
 
   function validate() {
     const e = {}
@@ -218,31 +223,37 @@ export default function Order() {
 
   // ── Confirmación ──
   if (confirmed) return (
-    <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center px-4 py-20">
-      <div className="bg-white border border-stone-200 p-10 max-w-md w-full text-center shadow-xl">
-        <div className="text-5xl mb-6">🎉</div>
-        <h2 className="text-3xl text-red-950 mb-2" style={{fontFamily:'Playfair Display, serif'}}>
+    <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center px-4 py-16">
+      <div className="bg-white border border-stone-200 p-6 sm:p-10 max-w-md w-full text-center shadow-xl">
+        <div className="text-4xl sm:text-5xl mb-5 sm:mb-6">🎉</div>
+        <h2 className="text-2xl sm:text-3xl text-red-950 mb-2" style={{fontFamily:'Playfair Display, serif'}}>
           ¡Pedido Confirmado!
         </h2>
-        <p className="text-stone-400 mb-1 font-medium">Gracias, <strong className="text-stone-700">{confirmed.customer?.name}</strong></p>
-        <p className="text-stone-400 text-sm mb-2">Tu pedido está siendo preparado 🥐</p>
+        <p className="text-stone-400 mb-1 font-medium text-sm sm:text-base">
+          Gracias, <strong className="text-stone-700">{confirmed.customer?.name}</strong>
+        </p>
+        <p className="text-stone-400 text-sm mb-3">Tu pedido está siendo preparado 🥐</p>
 
         {confirmed.customer?.delivery && (
-          <div className="bg-stone-50 border border-stone-200 rounded px-4 py-3 mb-6 text-sm text-left">
+          <div className="bg-stone-50 border border-stone-200 rounded px-4 py-3 mb-5 sm:mb-6 text-sm text-left">
             {confirmed.customer.delivery.tipo === 'retiro' ? (
-              <p className="text-stone-600 font-medium">🏪 <strong>Retiro en tienda</strong> — {confirmed.customer.delivery.puntoVentaNombre} · {confirmed.customer.delivery.puntoVentaDireccion}</p>
+              <p className="text-stone-600 font-medium text-xs sm:text-sm">
+                🏪 <strong>Retiro en tienda</strong> — {confirmed.customer.delivery.puntoVentaNombre} · {confirmed.customer.delivery.puntoVentaDireccion}
+              </p>
             ) : (
-              <p className="text-stone-600 font-medium">🛵 <strong>Domicilio</strong> — {confirmed.customer.delivery.direccion}, {confirmed.customer.delivery.ciudad}</p>
+              <p className="text-stone-600 font-medium text-xs sm:text-sm">
+                🛵 <strong>Domicilio</strong> — {confirmed.customer.delivery.direccion}, {confirmed.customer.delivery.ciudad}
+              </p>
             )}
           </div>
         )}
 
-        <div className="bg-stone-50 border border-stone-100 p-5 text-left mb-8">
+        <div className="bg-stone-50 border border-stone-100 p-4 sm:p-5 text-left mb-6 sm:mb-8">
           <p className="text-xs font-bold tracking-widest uppercase text-stone-400 mb-3">Resumen</p>
           {confirmed.items?.map(i => (
             <div key={i.id} className="flex justify-between py-1.5 text-stone-600 text-sm">
-              <span>{i.emoji} {i.name} ×{i.qty}</span>
-              <span className="font-semibold">${(i.price * i.qty).toLocaleString()}</span>
+              <span className="truncate mr-2">{i.emoji} {i.name} ×{i.qty}</span>
+              <span className="font-semibold shrink-0">${(i.price * i.qty).toLocaleString()}</span>
             </div>
           ))}
           <div className="border-t border-stone-200 mt-3 pt-3 flex justify-between font-black text-red-950">
@@ -253,7 +264,7 @@ export default function Order() {
 
         <button onClick={() => setConfirmed(null)}
           className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase py-4
-                     hover:bg-red-900 transition-colors">
+                     hover:bg-red-900 transition-colors touch-manipulation">
           Hacer Otro Pedido
         </button>
         <Link to="/menu" className="block mt-3 text-sm text-stone-400 hover:text-red-800 transition-colors font-medium">
@@ -267,16 +278,16 @@ export default function Order() {
   if (cart.length === 0) return (
     <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center px-4">
       <div className="text-center">
-        <div className="w-20 h-20 border-2 border-stone-200 flex items-center justify-center mx-auto mb-6">
-          <ShoppingCart size={32} className="text-stone-300" />
+        <div className="w-16 sm:w-20 h-16 sm:h-20 border-2 border-stone-200 flex items-center justify-center mx-auto mb-5 sm:mb-6">
+          <ShoppingCart size={28} className="text-stone-300" />
         </div>
-        <h2 className="text-3xl text-red-950 mb-2" style={{fontFamily:'Playfair Display, serif'}}>
+        <h2 className="text-2xl sm:text-3xl text-red-950 mb-2" style={{fontFamily:'Playfair Display, serif'}}>
           Tu carrito está vacío
         </h2>
-        <p className="text-stone-400 mb-8 font-medium">Agrega productos desde el menú para continuar</p>
+        <p className="text-stone-400 mb-6 sm:mb-8 font-medium text-sm sm:text-base">Agrega productos desde el menú para continuar</p>
         <Link to="/menu"
           className="inline-flex items-center gap-2 bg-red-950 text-white font-bold
-                     text-xs tracking-widest uppercase px-10 py-4 hover:bg-red-900 transition-colors">
+                     text-xs tracking-widest uppercase px-8 sm:px-10 py-4 hover:bg-red-900 transition-colors">
           Ver Menú <ArrowRight size={16} />
         </Link>
       </div>
@@ -294,31 +305,31 @@ export default function Order() {
       )}
 
       {/* Header */}
-      <div className="bg-red-950 pt-16 pb-0 text-center relative overflow-hidden">
-        <div className="relative z-10 pb-12">
-          <p className="text-red-400 text-xs tracking-[0.4em] uppercase font-semibold mb-3">Mi Carrito</p>
-          <h1 className="text-5xl text-white" style={{fontFamily:'Playfair Display, serif'}}>Tu Pedido</h1>
+      <div className="bg-red-950 pt-14 sm:pt-16 pb-0 text-center relative overflow-hidden">
+        <div className="relative z-10 pb-10 sm:pb-12 px-4">
+          <p className="text-red-400 text-xs tracking-[0.4em] uppercase font-semibold mb-2 sm:mb-3">Mi Carrito</p>
+          <h1 className="text-3xl sm:text-5xl text-white" style={{fontFamily:'Playfair Display, serif'}}>Tu Pedido</h1>
         </div>
         <svg viewBox="0 0 1440 50" className="w-full block" preserveAspectRatio="none">
           <path d="M0,25 C360,50 1080,0 1440,25 L1440,50 L0,50 Z" fill="#faf7f2" />
         </svg>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 sm:gap-8">
 
           {/* ── Items ── */}
           <div className="lg:col-span-3 space-y-3">
-            <p className="text-xs font-bold tracking-widest uppercase text-stone-400 mb-5">
+            <p className="text-xs font-bold tracking-widest uppercase text-stone-400 mb-4">
               {cart.length} producto{cart.length !== 1 ? 's' : ''} en tu carrito
             </p>
 
             {/* Selector de entrega */}
             <button onClick={() => setShowModal(true)}
-              className={`w-full flex items-center justify-between p-4 border-2 transition-all duration-200 mb-6
+              className={`w-full flex items-center justify-between p-3 sm:p-4 border-2 transition-all duration-200 mb-4 sm:mb-6
                 ${errors.delivery ? 'border-red-400 bg-red-50' : delivery ? 'border-red-950 bg-white' : 'border-dashed border-stone-300 bg-white hover:border-red-800'}`}>
               <div className="flex items-center gap-3 text-left">
-                <div className="w-9 h-9 bg-red-950 text-white flex items-center justify-center shrink-0 text-lg">
+                <div className="w-8 sm:w-9 h-8 sm:h-9 bg-red-950 text-white flex items-center justify-center shrink-0 text-base sm:text-lg">
                   {!delivery ? '📦' : delivery.tipo === 'retiro' ? '🏪' : '🛵'}
                 </div>
                 <div>
@@ -342,49 +353,51 @@ export default function Order() {
               </div>
               <ChevronDown size={16} className="text-stone-400 shrink-0" />
             </button>
-            {errors.delivery && <p className="text-red-500 text-xs font-semibold -mt-4 mb-2">{errors.delivery}</p>}
+            {errors.delivery && <p className="text-red-500 text-xs font-semibold -mt-3 mb-2">{errors.delivery}</p>}
 
             {/* Productos */}
             {cart.map(item => (
               <div key={item.id}
-                className="bg-white border border-stone-100 p-5 flex gap-4 items-center hover:border-stone-200 transition-colors">
-                <div className="w-14 h-14 bg-stone-50 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
+                className="bg-white border border-stone-100 p-3 sm:p-5 flex gap-3 sm:gap-4 items-center hover:border-stone-200 transition-colors">
+                <div className="w-12 sm:w-14 h-12 sm:h-14 bg-stone-50 flex items-center justify-center text-2xl sm:text-3xl shrink-0 overflow-hidden">
                   {item.imagen
                     ? <img src={item.imagen} alt={item.name} className="w-full h-full object-cover" />
                     : item.emoji}
                 </div>
                 <div className="flex-1 min-w-0 text-left">
-                  <h3 className="font-bold text-red-950 text-sm truncate" style={{fontFamily:'Playfair Display,serif'}}>
+                  <h3 className="font-bold text-red-950 text-xs sm:text-sm truncate" style={{fontFamily:'Playfair Display,serif'}}>
                     {item.name}
                   </h3>
                   <p className="text-stone-400 text-xs mt-0.5">${item.price.toLocaleString()} c/u</p>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                {/* Controles cantidad */}
+                <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                   <button onClick={() => updateQty(item.id, item.qty - 1)}
                     className="w-7 h-7 border border-stone-200 text-stone-500 flex items-center justify-center
-                               hover:border-red-800 hover:text-red-800 transition-colors">
-                    <Minus size={12} />
+                               hover:border-red-800 hover:text-red-800 transition-colors active:bg-red-50">
+                    <Minus size={11} />
                   </button>
-                  <span className="w-6 text-center font-black text-stone-800 text-sm">{item.qty}</span>
+                  <span className="w-5 text-center font-black text-stone-800 text-sm">{item.qty}</span>
                   <button onClick={() => updateQty(item.id, item.qty + 1)}
                     className="w-7 h-7 border border-stone-200 text-stone-500 flex items-center justify-center
-                               hover:border-red-800 hover:text-red-800 transition-colors">
-                    <Plus size={12} />
+                               hover:border-red-800 hover:text-red-800 transition-colors active:bg-red-50">
+                    <Plus size={11} />
                   </button>
                 </div>
-                <p className="font-black text-red-800 text-sm shrink-0 min-w-[70px] text-right">
+                {/* Precio */}
+                <p className="font-black text-red-800 text-sm shrink-0 min-w-[60px] sm:min-w-[70px] text-right">
                   ${(item.price * item.qty).toLocaleString()}
                 </p>
                 <button onClick={() => removeFromCart(item.id)}
-                  className="text-stone-300 hover:text-red-500 transition-colors shrink-0">
-                  <Trash2 size={16} />
+                  className="text-stone-300 hover:text-red-500 transition-colors shrink-0 p-1">
+                  <Trash2 size={15} />
                 </button>
               </div>
             ))}
 
             <Link to="/menu"
               className="inline-flex items-center gap-2 text-red-800 font-semibold text-xs
-                         tracking-widest uppercase border-b border-red-800 pb-0.5 mt-4
+                         tracking-widest uppercase border-b border-red-800 pb-0.5 mt-3 sm:mt-4
                          hover:text-red-950 transition-colors">
               + Agregar más productos
             </Link>
@@ -392,23 +405,23 @@ export default function Order() {
 
           {/* ── Checkout ── */}
           <div className="lg:col-span-2">
-            <div className="bg-white border border-stone-200 p-6 sticky top-24">
-              <h2 className="text-xl text-red-950 mb-5 flex items-center gap-2"
+            <div className="bg-white border border-stone-200 p-5 sm:p-6 lg:sticky lg:top-24">
+              <h2 className="text-lg sm:text-xl text-red-950 mb-4 sm:mb-5 flex items-center gap-2"
                   style={{fontFamily:'Playfair Display, serif'}}>
-                <ShoppingBag size={20} className="text-red-800" /> Resumen
+                <ShoppingBag size={18} className="text-red-800" /> Resumen
               </h2>
 
               {/* Entrega seleccionada */}
               {delivery && (
-                <div className="bg-stone-50 border border-stone-100 px-4 py-3 mb-4 flex items-center gap-2">
-                  <span className="text-lg">{delivery.tipo === 'retiro' ? '🏪' : '🛵'}</span>
-                  <div className="text-left flex-1">
-                    <p className="text-xs font-bold text-stone-700">
+                <div className="bg-stone-50 border border-stone-100 px-3 sm:px-4 py-3 mb-4 flex items-center gap-2">
+                  <span className="text-base sm:text-lg">{delivery.tipo === 'retiro' ? '🏪' : '🛵'}</span>
+                  <div className="text-left flex-1 min-w-0">
+                    <p className="text-xs font-bold text-stone-700 truncate">
                       {delivery.tipo === 'retiro' ? 'Retiro en tienda' : `Domicilio · ${delivery.ciudad}`}
                     </p>
                     {delivery.tipo === 'retiro'
                       ? <p className="text-xs text-stone-400">15–20 min</p>
-                      : <p className="text-xs text-stone-400">{delivery.direccion}</p>
+                      : <p className="text-xs text-stone-400 truncate">{delivery.direccion}</p>
                     }
                   </div>
                   <button onClick={() => setShowModal(true)}
@@ -439,7 +452,7 @@ export default function Order() {
                     placeholder="Ej: BONPAN20"
                     className="flex-1 border-b-2 border-stone-200 bg-transparent py-2 text-stone-700
                                font-mono font-bold text-sm focus:outline-none focus:border-red-800
-                               tracking-widest placeholder:font-normal placeholder:tracking-normal transition-colors" />
+                               tracking-widest placeholder:font-normal placeholder:tracking-normal transition-colors min-w-0" />
                   <button type="button" onClick={aplicarCodigo} disabled={promoLoading || !codigoInput}
                     className="text-xs font-bold text-red-800 border-b-2 border-red-800 pb-1
                                hover:text-red-950 disabled:opacity-40 transition-colors shrink-0">
@@ -469,15 +482,15 @@ export default function Order() {
                 </div>
                 {descuento > 0 && (
                   <div className="flex justify-between text-sm text-green-600 font-bold">
-                    <span>Descuento ({promo.nombre})</span>
-                    <span>-${descuento.toLocaleString()}</span>
+                    <span className="truncate mr-2">Descuento ({promo.nombre})</span>
+                    <span className="shrink-0">-${descuento.toLocaleString()}</span>
                   </div>
                 )}
               </div>
 
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-5 sm:mb-6">
                 <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Total</span>
-                <span className="font-black text-2xl text-red-950">${totalFinal.toLocaleString()}</span>
+                <span className="font-black text-xl sm:text-2xl text-red-950">${totalFinal.toLocaleString()}</span>
               </div>
 
               {/* Formulario */}
@@ -494,7 +507,7 @@ export default function Order() {
                       value={form[f.key]}
                       onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
                       placeholder={f.placeholder}
-                      className={`w-full border-b-2 bg-transparent py-2 text-stone-700 font-medium text-sm
+                      className={`w-full border-b-2 bg-transparent py-2.5 text-stone-700 font-medium text-sm
                         focus:outline-none transition-colors
                         ${errors[f.key] ? 'border-red-400' : 'border-stone-200 focus:border-red-800'}`} />
                     {errors[f.key] && <p className="text-red-500 text-xs mt-1 font-medium">{errors[f.key]}</p>}
@@ -521,7 +534,7 @@ export default function Order() {
 
                 <button type="submit" disabled={submitting}
                   className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase
-                             py-4 hover:bg-red-900 transition-colors disabled:opacity-50 mt-2">
+                             py-4 hover:bg-red-900 active:bg-red-800 transition-colors disabled:opacity-50 mt-2 touch-manipulation">
                   {submitting ? '⏳ Enviando...' : 'Confirmar Pedido'}
                 </button>
               </form>
