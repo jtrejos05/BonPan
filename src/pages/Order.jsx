@@ -347,8 +347,10 @@ export default function Order() {
             {cart.map(item => (
               <div key={item.id}
                 className="bg-white border border-stone-100 p-5 flex gap-4 items-center hover:border-stone-200 transition-colors">
-                <div className="w-14 h-14 bg-stone-50 flex items-center justify-center text-3xl shrink-0">
-                  {item.emoji}
+                <div className="w-14 h-14 bg-stone-50 flex items-center justify-center text-3xl shrink-0 overflow-hidden">
+                  {item.imagen
+                    ? <img src={item.imagen} alt={item.name} className="w-full h-full object-cover" />
+                    : item.emoji}
                 </div>
                 <div className="flex-1 min-w-0 text-left">
                   <h3 className="font-bold text-red-950 text-sm truncate" style={{fontFamily:'Playfair Display,serif'}}>
