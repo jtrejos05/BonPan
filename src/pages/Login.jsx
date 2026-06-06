@@ -54,25 +54,6 @@ export default function Login() {
         </div>
 
         <div className="bg-white border border-stone-200 p-8">
-          {/* Google */}
-          <div className="mb-6">
-            <GoogleLogin
-              onSuccess={handleGoogle}
-              onError={() => setError('Error al iniciar sesión con Google')}
-              text="signin_with"
-              shape="rectangular"
-              width="100%"
-              locale="es"
-            />
-          </div>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-stone-200" />
-            <span className="text-stone-400 text-xs tracking-widest uppercase font-semibold">o con correo</span>
-            <div className="flex-1 h-px bg-stone-200" />
-          </div>
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -119,6 +100,25 @@ export default function Login() {
               {loading ? '⏳ Ingresando...' : <> Iniciar Sesión <ArrowRight size={14} /></>}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-6">
+            <div className="flex-1 h-px bg-stone-200" />
+            <span className="text-stone-400 text-xs tracking-widest uppercase font-semibold">o continúa con</span>
+            <div className="flex-1 h-px bg-stone-200" />
+          </div>
+
+          {/* Google */}
+          <div>
+            <GoogleLogin
+              onSuccess={handleGoogle}
+              onError={() => setError('Error al iniciar sesión con Google')}
+              text="signin_with"
+              shape="rectangular"
+              width="100%"
+              locale="es"
+            />
+          </div>
 
           <p className="text-center text-sm text-stone-400 mt-6 font-medium">
             ¿No tienes cuenta?{' '}
