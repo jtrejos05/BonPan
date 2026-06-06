@@ -138,7 +138,7 @@ function DeliveryModal({ onClose, onConfirm }) {
             </div>
           )}
 
-          <button onClick={confirm}
+          <button type="button" onClick={confirm}
             disabled={tipo === 'domicilio' && (!ciudad || !direccion)}
             className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase py-4
                        hover:bg-red-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
