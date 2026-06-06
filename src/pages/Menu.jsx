@@ -95,21 +95,46 @@ export default function Menu() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {promociones.map(p => (
                 <div key={p.id}
-                  className="flex items-center gap-4 bg-red-950 text-white px-5 py-4 relative overflow-hidden">
-                  {/* Fondo decorativo */}
-                  <div className="absolute right-0 top-0 bottom-0 w-20 bg-red-900/40" />
-                  <div className="w-12 h-12 bg-red-800 rounded flex items-center justify-center shrink-0 text-xl font-black"
-                       style={{fontFamily:'Playfair Display,serif'}}>
-                    {p.tipo === 'porcentaje' ? `${p.valor}%` : `-$${Number(p.valor) >= 1000 ? Math.round(p.valor/1000)+'K' : p.valor}`}
-                  </div>
-                  <div className="flex-1 min-w-0 relative z-10">
-                    <p className="font-black text-sm leading-tight truncate">{p.nombre}</p>
-                    {p.descripcion && <p className="text-red-200 text-xs mt-0.5 truncate">{p.descripcion}</p>}
-                    {p.codigo && (
-                      <span className="inline-block mt-1 bg-white text-red-950 font-black text-xs px-2 py-0.5 font-mono tracking-widest">
-                        {p.codigo}
-                      </span>
+                  className="bg-white border border-stone-200 overflow-hidden hover:shadow-md transition-all group">
+                  {/* Imagen si tiene */}
+                  {p.imagen && (
+                    <div className="h-36 overflow-hidden relative">
+                      <img src={p.imagen} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                      <div className="absolute top-2 right-2 bg-red-950 text-white text-xs font-black px-2.5 py-1">
+                        {p.tipo === 'porcentaje' ? `${p.valor}% OFF` : `-$${Number(p.valor).toLocaleString()}`}
+                      </div>
+                      {p.precio && (
+                        <div className="absolute bottom-2 left-2 bg-white text-red-950 font-black text-sm px-3 py-1 shadow">
+                          ${Number(p.precio).toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className={`${p.imagen ? 'p-4' : 'flex items-center gap-4 p-4 bg-red-950'}`}>
+                    {!p.imagen && (
+                      <div className="w-12 h-12 bg-red-800 rounded flex items-center justify-center shrink-0 font-black text-white text-sm">
+                        {p.tipo === 'porcentaje' ? `${p.valor}%` : `-$${Number(p.valor) >= 1000 ? Math.round(p.valor/1000)+'K' : p.valor}`}
+                      </div>
                     )}
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-black text-sm leading-tight ${p.imagen ? 'text-red-950' : 'text-white'}`}>{p.nombre}</p>
+                      {p.descripcion && <p className={`text-xs mt-0.5 line-clamp-1 ${p.imagen ? 'text-stone-500' : 'text-red-200'}`}>{p.descripcion}</p>}
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        {p.precio && !p.imagen && (
+                          <span className="bg-white text-red-950 font-black text-xs px-2 py-0.5">${Number(p.precio).toLocaleString()}</span>
+                        )}
+                        {p.codigo && (
+                          <span className={`font-black text-xs px-2 py-0.5 font-mono tracking-widest ${p.imagen ? 'bg-red-50 text-red-800' : 'bg-white text-red-950'}`}>
+                            {p.codigo}
+                          </span>
+                        )}
+                        {p.fecha_fin && (
+                          <span className={`text-xs ${p.imagen ? 'text-stone-400' : 'text-red-300'}`}>
+                            Hasta {new Date(p.fecha_fin).toLocaleDateString('es-CO')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

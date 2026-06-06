@@ -50,12 +50,12 @@ router.get('/codigo/:codigo', async (req, res) => {
 
 // POST /api/promociones — crear promoción
 router.post('/', async (req, res) => {
-  const { nombre, descripcion, tipo, valor, codigo, categorias, activa, fecha_inicio, fecha_fin } = req.body
+  const { nombre, descripcion, tipo, valor, codigo, categorias, activa, fecha_inicio, fecha_fin, imagen, precio } = req.body
   if (!nombre || !valor) return res.status(400).json({ error: 'Nombre y valor son requeridos' })
   try {
     const { rows } = await db.query(
-      `INSERT INTO promociones (nombre, descripcion, tipo, valor, codigo, categorias, activa, fecha_inicio, fecha_fin)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      `INSERT INTO promociones (nombre, descripcion, tipo, valor, codigo, categorias, activa, fecha_inicio, fecha_fin, imagen, precio)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
       [
         nombre, descripcion || null, tipo || 'porcentaje', valor,
         codigo ? codigo.toUpperCase() : null,
@@ -63,6 +63,8 @@ router.post('/', async (req, res) => {
         activa !== false,
         fecha_inicio || null,
         fecha_fin    || null,
+        imagen       || null,
+        precio       || null,
       ]
     )
     await db.query(
@@ -78,13 +80,14 @@ router.post('/', async (req, res) => {
 
 // PUT /api/promociones/:id — editar
 router.put('/:id', async (req, res) => {
-  const { nombre, descripcion, tipo, valor, codigo, categorias, activa, fecha_inicio, fecha_fin } = req.body
+  const { nombre, descripcion, tipo, valor, codigo, categorias, activa, fecha_inicio, fecha_fin, imagen, precio } = req.body
   try {
     const { rows } = await db.query(
       `UPDATE promociones SET
          nombre=$1, descripcion=$2, tipo=$3, valor=$4, codigo=$5,
-         categorias=$6, activa=$7, fecha_inicio=$8, fecha_fin=$9
-       WHERE id=$10 RETURNING *`,
+         categorias=$6, activa=$7, fecha_inicio=$8, fecha_fin=$9,
+         imagen=$10, precio=$11
+       WHERE id=$12 RETURNING *`,
       [
         nombre, descripcion || null, tipo, valor,
         codigo ? codigo.toUpperCase() : null,
@@ -92,6 +95,8 @@ router.put('/:id', async (req, res) => {
         activa !== false,
         fecha_inicio || null,
         fecha_fin    || null,
+        imagen       || null,
+        precio       || null,
         req.params.id,
       ]
     )

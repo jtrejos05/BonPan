@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { api } from '../services/api'
-import { Plus, X, Check, Tag, ToggleLeft, ToggleRight, Trash2, Calendar, Percent, DollarSign, Pencil, RefreshCw } from 'lucide-react'
+import { Plus, X, Check, Tag, ToggleLeft, ToggleRight, Trash2, Calendar, Percent, DollarSign, Pencil, RefreshCw, Image, Upload } from 'lucide-react'
 
 const CATEGORIAS = ['Todos los productos', 'Croissants', 'Pasteles Salados', 'Hojaldre Dulce', 'Bebidas']
 
@@ -16,13 +16,37 @@ function PromoModal({ initial, onSave, onClose }) {
     activa:      initial.activa !== false,
     fecha_inicio: initial.fecha_inicio ? initial.fecha_inicio.slice(0,10) : '',
     fecha_fin:    initial.fecha_fin   ? initial.fecha_fin.slice(0,10)   : '',
+    imagen:      initial.imagen      || '',
+    precio:      initial.precio      || '',
   } : {
     nombre: '', descripcion: '', tipo: 'porcentaje', valor: '',
     codigo: '', categorias: [], activa: true, fecha_inicio: '', fecha_fin: '',
+    imagen: '', precio: '',
   })
-  const [saving, setSaving] = useState(false)
-  const [error,  setError]  = useState('')
+  const [saving,      setSaving]      = useState(false)
+  const [error,       setError]       = useState('')
+  const [uploading,   setUploading]   = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const [preview,     setPreview]     = useState(initial?.imagen || '')
+  const fileInputRef = useRef(null)
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  async function handleImageChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadError('')
+    setPreview(URL.createObjectURL(file))
+    setUploading(true)
+    try {
+      const { url } = await api.upload.imagen(file)
+      set('imagen', url)
+    } catch {
+      setUploadError('Error al subir la imagen. Intenta de nuevo.')
+      setPreview(initial?.imagen || '')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   function toggleCat(c) {
     setForm(f => ({
@@ -62,6 +86,42 @@ function PromoModal({ initial, onSave, onClose }) {
         </div>
 
         <form onSubmit={submit} className="p-6 space-y-5">
+          {/* Imagen */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              Imagen de la promoción
+            </label>
+            <div onClick={() => fileInputRef.current?.click()}
+              className={`relative border-2 border-dashed rounded-2xl overflow-hidden cursor-pointer
+                transition-all duration-200 group
+                ${uploading ? 'border-red-300 bg-red-50' : 'border-stone-200 hover:border-red-400 hover:bg-red-50'}`}>
+              {preview ? (
+                <div className="relative h-40">
+                  <img src={preview} alt="Preview" className="w-full h-full object-cover"/>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity
+                                  flex items-center justify-center">
+                    <p className="text-white font-bold text-sm flex items-center gap-2">
+                      <Upload size={16}/> Cambiar foto
+                    </p>
+                  </div>
+                  {uploading && (
+                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                      <p className="text-red-700 font-bold text-sm animate-pulse">⏳ Subiendo imagen...</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="h-40 flex flex-col items-center justify-center gap-2 text-stone-400">
+                  <Image size={28}/>
+                  <p className="font-bold text-sm text-stone-500">Haz clic para subir una foto</p>
+                  <p className="text-xs">JPG, PNG · Máx 5MB</p>
+                </div>
+              )}
+            </div>
+            {uploadError && <p className="text-red-500 text-xs mt-1 font-medium">{uploadError}</p>}
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange}/>
+          </div>
+
           {/* Nombre */}
           <div>
             <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">Nombre *</label>
@@ -115,6 +175,20 @@ function PromoModal({ initial, onSave, onClose }) {
                 placeholder={form.tipo === 'porcentaje' ? '20' : '5000'}
                 className="flex-1 bg-transparent py-2.5 text-stone-700 font-medium focus:outline-none" />
             </div>
+          </div>
+
+          {/* Precio especial */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              Precio especial (opcional)
+            </label>
+            <div className="flex items-center border-b-2 border-stone-200 focus-within:border-red-800 transition-colors">
+              <span className="text-stone-400 font-bold mr-2">$</span>
+              <input type="number" value={form.precio} onChange={e => set('precio', e.target.value)}
+                min="0" placeholder="Ej: 8000"
+                className="flex-1 bg-transparent py-2.5 text-stone-700 font-medium focus:outline-none"/>
+            </div>
+            <p className="text-stone-400 text-xs mt-1">Si la promoción tiene un precio fijo de venta, agrégalo aquí.</p>
           </div>
 
           {/* Código */}
@@ -176,10 +250,10 @@ function PromoModal({ initial, onSave, onClose }) {
               className="flex-1 border-2 border-stone-200 text-stone-600 font-bold py-3 rounded-xl text-sm">
               Cancelar
             </button>
-            <button type="submit" disabled={saving}
+            <button type="submit" disabled={saving || uploading}
               className="flex-1 bg-red-950 text-white font-bold py-3 rounded-xl text-sm
                          hover:bg-red-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-              {saving ? '⏳ Guardando...' : <><Check size={16} /> {initial ? 'Guardar cambios' : 'Crear promoción'}</>}
+              {uploading ? '⏳ Subiendo imagen...' : saving ? '⏳ Guardando...' : <><Check size={16}/> {initial ? 'Guardar cambios' : 'Crear promoción'}</>}
             </button>
           </div>
         </form>
@@ -194,14 +268,36 @@ function PromoCard({ p, onToggle, onEdit, onDelete }) {
   const isActive  = p.activa && !isExpired
 
   return (
-    <div className={`bg-white rounded-2xl border-2 p-5 transition-all
+    <div className={`bg-white rounded-2xl border-2 overflow-hidden transition-all
       ${isActive ? 'border-stone-100 hover:border-red-200 hover:shadow-md' : 'border-stone-100 opacity-60'}`}>
+
+      {/* Imagen */}
+      {p.imagen && (
+        <div className="h-44 overflow-hidden relative">
+          <img src={p.imagen} alt={p.nombre} className="w-full h-full object-cover"/>
+          <div className="absolute top-3 right-3">
+            <span className={`px-2.5 py-1 rounded-full text-xs font-bold border
+              ${isExpired ? 'bg-stone-100/90 text-stone-500 border-stone-200'
+                : isActive  ? 'bg-green-100/90 text-green-700 border-green-200'
+                : 'bg-yellow-100/90 text-yellow-700 border-yellow-200'}`}>
+              {isExpired ? 'Expirada' : isActive ? '● Activa' : '⏸ Pausada'}
+            </span>
+          </div>
+          {p.precio && (
+            <div className="absolute bottom-3 left-3 bg-red-950 text-white px-3 py-1 font-black text-sm">
+              ${Number(p.precio).toLocaleString()}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className={p.imagen ? 'p-5' : 'p-5'}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0
+          {!p.imagen && <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0
             ${isActive ? 'bg-red-50' : 'bg-stone-100'}`}>
             🎉
-          </div>
+          </div>}
           <div>
             <h3 className="font-black text-red-950 text-base leading-tight"
                 style={{fontFamily:'Playfair Display,serif'}}>{p.nombre}</h3>
@@ -261,6 +357,7 @@ function PromoCard({ p, onToggle, onEdit, onDelete }) {
                      text-stone-400 hover:border-red-300 hover:text-red-500 transition-colors">
           <Trash2 size={14} />
         </button>
+      </div>
       </div>
     </div>
   )
