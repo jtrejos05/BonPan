@@ -16,13 +16,25 @@ export default function Order() {
     return e
   }
 
-  function handleSubmit(ev) {
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+
+  async function handleSubmit(ev) {
     ev.preventDefault()
     const e = validate()
     if (Object.keys(e).length) return setErrors(e)
-    const order = placeOrder(form)
-    setConfirmed(order)
-    setForm({ name: '', phone: '', notes: '' })
+    setSubmitting(true)
+    setSubmitError('')
+    try {
+      const order = await placeOrder(form)
+      setConfirmed(order)
+      setForm({ name: '', phone: '', notes: '' })
+    } catch (err) {
+      setSubmitError('Hubo un error al enviar el pedido. Intenta de nuevo.')
+      console.error(err)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (confirmed) {
@@ -150,9 +162,12 @@ export default function Order() {
                   className="w-full border border-stone-200 rounded-xl px-4 py-2.5 text-stone-700 focus:outline-none focus:border-red-400 resize-none"
                 />
               </div>
-              <button type="submit"
-                className="w-full bg-red-700 text-white font-bold py-3 rounded-full hover:bg-red-800 transition-colors shadow-sm">
-                Confirmar Pedido 🎉
+              {submitError && (
+                <p className="text-red-500 text-sm text-center font-medium">{submitError}</p>
+              )}
+              <button type="submit" disabled={submitting}
+                className="w-full bg-red-700 text-white font-bold py-3 rounded-full hover:bg-red-800 transition-colors shadow-sm disabled:opacity-60 disabled:cursor-not-allowed">
+                {submitting ? 'Enviando pedido...' : 'Confirmar Pedido 🎉'}
               </button>
             </form>
           </div>
