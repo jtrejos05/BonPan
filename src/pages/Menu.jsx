@@ -86,16 +86,37 @@ function ProductCard({ p, index, onAdd, added }) {
 }
 
 /* ─── Tarjeta de promoción ───────────────────── */
-function PromoCard({ p, index }) {
+function PromoCard({ p, index, onAdd }) {
   const ref    = useRef(null)
   const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
+  const [added, setAdded] = useState(false)
+
+  // Solo se puede agregar al carrito si tiene precio
+  const tieneP = p.precio && Number(p.precio) > 0
+
+  function handleAdd() {
+    if (!tieneP) return
+    onAdd({
+      id:          `promo-${p.id}`,
+      name:        p.nombre,
+      price:       Number(p.precio),
+      emoji:       '🎉',
+      imagen:      p.imagen || null,
+      category:    'Promoción',
+      description: p.descripcion || '',
+      stock:       99,
+    })
+    setAdded(true)
+    setTimeout(() => setAdded(false), 1400)
+  }
+
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, delay: index * 0.1 }}
-      className="group bg-white overflow-hidden">
+      className="group bg-white overflow-hidden flex flex-col">
       {p.imagen && (
         <div className="h-36 sm:h-44 overflow-hidden relative">
           <img src={p.imagen} alt={p.nombre}
@@ -103,23 +124,30 @@ function PromoCard({ p, index }) {
           <div className="absolute top-3 right-3 bg-stone-900 text-white text-xs font-black px-2.5 py-1">
             {p.tipo === 'porcentaje' ? `${p.valor}% OFF` : `-$${Number(p.valor).toLocaleString()}`}
           </div>
-          {p.precio && (
+          {tieneP && (
             <div className="absolute bottom-3 left-3 bg-amber-400 text-stone-900 font-black text-sm px-3 py-1">
               ${Number(p.precio).toLocaleString()}
             </div>
           )}
         </div>
       )}
-      <div className={`p-4 ${!p.imagen ? 'flex items-center gap-4 bg-stone-900' : ''}`}>
+      <div className={`p-4 flex-1 flex flex-col ${!p.imagen ? 'bg-stone-900' : ''}`}>
         {!p.imagen && (
-          <div className="w-12 h-12 bg-amber-400 flex items-center justify-center shrink-0 font-black text-stone-900 text-sm">
-            {p.tipo === 'porcentaje' ? `${p.valor}%` : 'OFF'}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-amber-400 flex items-center justify-center shrink-0 font-black text-stone-900 text-sm">
+              {p.tipo === 'porcentaje' ? `${p.valor}%` : 'OFF'}
+            </div>
+            {tieneP && (
+              <span className="bg-white text-stone-900 font-black text-sm px-3 py-1">
+                ${Number(p.precio).toLocaleString()}
+              </span>
+            )}
           </div>
         )}
-        <div>
+        <div className="flex-1">
           <p className={`font-bold text-sm ${p.imagen ? 'text-stone-900' : 'text-white'}`}>{p.nombre}</p>
           {p.descripcion && (
-            <p className={`text-xs mt-0.5 line-clamp-1 ${p.imagen ? 'text-stone-400' : 'text-stone-400'}`}>
+            <p className={`text-xs mt-0.5 line-clamp-2 ${p.imagen ? 'text-stone-400' : 'text-stone-400'}`}>
               {p.descripcion}
             </p>
           )}
@@ -136,6 +164,25 @@ function PromoCard({ p, index }) {
             )}
           </div>
         </div>
+
+        {/* Botón agregar — solo si tiene precio */}
+        {tieneP ? (
+          <button
+            onClick={handleAdd}
+            className={`mt-4 w-full flex items-center justify-center gap-1.5 text-xs font-bold
+                        tracking-widest uppercase py-2.5 border transition-all duration-300 touch-manipulation
+                        ${added
+                          ? 'bg-amber-400 text-stone-900 border-amber-400'
+                          : p.imagen
+                            ? 'border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white'
+                            : 'border-white text-white hover:bg-white hover:text-stone-900'}`}>
+            {added ? <><Check size={11} /> Agregado</> : <><ShoppingCart size={11} /> Agregar</>}
+          </button>
+        ) : (
+          <p className={`mt-3 text-xs text-center italic ${p.imagen ? 'text-stone-400' : 'text-stone-500'}`}>
+            Usa el código al pagar
+          </p>
+        )}
       </div>
     </motion.div>
   )
@@ -187,6 +234,7 @@ function BottomBanner() {
 ═══════════════════════════════════════════════ */
 export default function Menu() {
   const { products, addToCart, loading } = useApp()
+
   const [activeCategory, setActiveCategory] = useState(ALL)
   const [added,          setAdded]          = useState(null)
   const [search,         setSearch]         = useState('')
@@ -329,7 +377,7 @@ export default function Menu() {
             </motion.div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-stone-200">
               {promociones.map((p, i) => (
-                <PromoCard key={p.id} p={p} index={i} />
+                <PromoCard key={p.id} p={p} index={i} onAdd={addToCart} />
               ))}
             </div>
           </div>
