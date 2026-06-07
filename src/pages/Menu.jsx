@@ -337,17 +337,13 @@ export default function Menu() {
 
 
         {/* ══ CONTADOR ══ */}
-        <motion.div
-          key={activeCategory + search}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center gap-4 mb-8 sm:mb-10">
+        <div className="flex items-center gap-4 mb-8 sm:mb-10">
           <div className="h-px flex-1 bg-stone-100" />
           <p className="text-stone-400 text-xs tracking-widest uppercase font-semibold shrink-0">
             {filtered.length} producto{filtered.length !== 1 ? 's' : ''}
           </p>
           <div className="h-px flex-1 bg-stone-100" />
-        </motion.div>
+        </div>
 
 
         {/* ══ GRID DE PRODUCTOS ══ */}
@@ -360,12 +356,7 @@ export default function Menu() {
             <p className="text-stone-300 text-sm mt-1">Prueba con otra búsqueda o categoría</p>
           </motion.div>
         ) : (
-          <motion.div
-            key={activeCategory + search}
-            initial="hidden"
-            animate="show"
-            variants={stagger}
-            className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-stone-200">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-stone-200">
             {filtered.map((p, i) => (
               <ProductCard
                 key={p.id}
@@ -375,7 +366,7 @@ export default function Menu() {
                 added={added}
               />
             ))}
-          </motion.div>
+          </div>
         )}
 
 
