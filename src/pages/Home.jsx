@@ -1,256 +1,479 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import ServerError from '../components/ServerError'
-import { ArrowRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { ArrowRight, ArrowDown } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
 import { api } from '../services/api'
+import { motion, useInView, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 
+/* ─── Variantes ─────────────────────────────── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 48 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.9, ease: [0.25, 0.1, 0.25, 1] } },
+}
+const fadeIn = {
+  hidden: { opacity: 0 },
+  show:   { opacity: 1, transition: { duration: 1.2, ease: 'easeOut' } },
+}
+const stagger = {
+  hidden: {},
+  show:   { transition: { staggerChildren: 0.15 } },
+}
+
+/* ─── Wrapper con reveal al scroll ─────────── */
+function Reveal({ children, className = '', delay = 0, y = 48 }) {
+  const ref   = useRef(null)
+  const inView = useInView(ref, { once: true, amount: 0.15 })
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      initial={{ opacity: 0, y }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.9, delay, ease: [0.25, 0.1, 0.25, 1] }}>
+      {children}
+    </motion.div>
+  )
+}
+
+function RevealSection({ children, className = '' }) {
+  const ref   = useRef(null)
+  const inView = useInView(ref, { once: true, amount: 0.1 })
+  return (
+    <motion.div
+      ref={ref}
+      className={className}
+      initial="hidden"
+      animate={inView ? 'show' : 'hidden'}
+      variants={stagger}>
+      {children}
+    </motion.div>
+  )
+}
+
+/* ─── Sección de producto hero ─────────────── */
+function ProductHero({ img, tag, title, sub, price, reverse, onAdd, p }) {
+  const ref   = useRef(null)
+  const inView = useInView(ref, { once: true, amount: 0.15 })
+
+  return (
+    <div ref={ref} className={`grid grid-cols-1 lg:grid-cols-2 min-h-[80vh]`}>
+      {/* Imagen */}
+      <motion.div
+        initial={{ opacity: 0, scale: 1.05 }}
+        animate={inView ? { opacity: 1, scale: 1 } : {}}
+        transition={{ duration: 1.1, ease: 'easeOut' }}
+        className={`relative overflow-hidden bg-stone-100 h-72 sm:h-96 lg:h-auto ${reverse ? 'lg:order-2' : ''}`}>
+        <img src={img} alt={title} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+      </motion.div>
+
+      {/* Texto */}
+      <div className={`flex items-center px-8 sm:px-12 lg:px-16 py-14 lg:py-0 bg-white ${reverse ? 'lg:order-1' : ''}`}>
+        <div className="max-w-md">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.1, duration: 0.7 }}
+            className="text-xs tracking-[0.4em] uppercase text-stone-400 font-semibold mb-4">
+            {tag}
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.2, duration: 0.9 }}
+            className="text-4xl sm:text-5xl lg:text-6xl font-black text-stone-900 leading-none mb-6"
+            style={{fontFamily:'Playfair Display, serif'}}>
+            {title}
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.35, duration: 0.8 }}
+            className="text-stone-500 text-base sm:text-lg leading-relaxed mb-8 font-light">
+            {sub}
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="flex items-center gap-6 flex-wrap">
+            <span className="text-3xl font-black text-stone-900">${price}</span>
+            {p && (
+              <button onClick={() => onAdd(p)}
+                className="flex items-center gap-2 bg-stone-900 text-white text-xs font-bold
+                           tracking-[0.2em] uppercase px-7 py-3.5
+                           hover:bg-stone-700 active:bg-stone-900 transition-colors duration-200 touch-manipulation">
+                Agregar al carrito <ArrowRight size={14} />
+              </button>
+            )}
+          </motion.div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Galería ───────────────────────────────── */
+function Gallery() {
+  const ref   = useRef(null)
+  const inView = useInView(ref, { once: true, amount: 0.1 })
+  const imgs = [
+    { src: 'https://images.unsplash.com/photo-1504093898956-c318a39e9eee?w=800&q=80', alt: 'Pan artesanal' },
+    { src: 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=800&q=80', alt: 'Croissants frescos' },
+    { src: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80', alt: 'Pan recién horneado' },
+  ]
+  return (
+    <motion.section
+      ref={ref}
+      initial="hidden" animate={inView ? 'show' : 'hidden'} variants={stagger}
+      className="grid grid-cols-3 gap-px bg-stone-200">
+      {imgs.map((img, i) => (
+        <motion.div key={i} variants={fadeIn}
+          className="relative overflow-hidden h-40 sm:h-64 lg:h-96 bg-stone-100 group">
+          <img src={img.src} alt={img.alt}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+        </motion.div>
+      ))}
+    </motion.section>
+  )
+}
+
+/* ─── Sección "Cuando tú duermes…" ─────────── */
+function CraftSection() {
+  const ref   = useRef(null)
+  const inView = useInView(ref, { once: true, amount: 0.15 })
+  return (
+    <section ref={ref} className="grid grid-cols-1 lg:grid-cols-2 min-h-[60vh]">
+      <motion.div
+        initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}}
+        transition={{ duration: 1.2 }}
+        className="relative overflow-hidden h-72 sm:h-96 lg:h-auto">
+        <img
+          src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=1000&q=90"
+          alt="Panadero artesanal"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/20" />
+      </motion.div>
+      <div className="bg-amber-300 flex items-center px-8 sm:px-14 lg:px-16 py-16">
+        <div className="max-w-md">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="text-amber-800 text-xs tracking-[0.4em] uppercase font-bold mb-5">
+            El proceso
+          </motion.p>
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.5, duration: 0.9 }}
+            className="text-4xl sm:text-5xl font-black text-stone-900 leading-tight mb-6"
+            style={{fontFamily:'Playfair Display, serif'}}>
+            Cuando tú duermes,<br/>nosotros horneamos.
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.7, duration: 0.8 }}
+            className="text-stone-700 text-base sm:text-lg leading-relaxed mb-8 font-light">
+            Cada día desde las 6am nuestro equipo prepara todo a mano. Sin fábricas, sin congelados. Solo ingredientes reales y recetas de toda la vida.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.9, duration: 0.8 }}>
+            <Link to="/contacto"
+              className="inline-flex items-center gap-2 bg-stone-900 text-white font-bold
+                         text-xs tracking-[0.2em] uppercase px-8 py-4
+                         hover:bg-stone-700 transition-colors">
+              Dónde encontrarnos <ArrowRight size={14} />
+            </Link>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── CTA Final ─────────────────────────────── */
+function FinalCTA() {
+  const ref   = useRef(null)
+  const inView = useInView(ref, { once: true, amount: 0.2 })
+  return (
+    <section ref={ref} className="relative min-h-[70vh] sm:min-h-screen flex items-center justify-center overflow-hidden">
+      <motion.div
+        initial={{ scale: 1.1 }} animate={inView ? { scale: 1 } : {}}
+        transition={{ duration: 1.5, ease: 'easeOut' }}
+        className="absolute inset-0">
+        <img
+          src="https://images.unsplash.com/photo-1530610476181-d83430b64dcd?w=1800&q=90"
+          alt="Pan Bon Pan"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-stone-950/75" />
+      </motion.div>
+      <div className="relative z-10 text-center px-5 sm:px-8 max-w-4xl mx-auto">
+        <motion.p
+          initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="text-stone-400 text-xs tracking-[0.5em] uppercase font-semibold mb-6">
+          ¿Tienes hambre?
+        </motion.p>
+        <motion.h2
+          initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.5, duration: 1, ease: [0.25,0.1,0.25,1] }}
+          className="text-5xl sm:text-7xl lg:text-9xl text-white font-black leading-none mb-8"
+          style={{fontFamily:'Playfair Display, serif'}}>
+          Haz tu pedido<br/>
+          <span className="text-amber-300">ahora.</span>
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}}
+          transition={{ delay: 0.9, duration: 0.9 }}
+          className="text-stone-400 text-lg sm:text-xl font-light mb-10 leading-relaxed">
+          Domicilio o retiro en tienda. Listo en 15–20 minutos.
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 1.1, duration: 0.8 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link to="/pedido"
+            className="inline-flex items-center justify-center gap-2 bg-amber-300 text-stone-900
+                       font-black text-sm tracking-[0.2em] uppercase px-12 py-5
+                       hover:bg-amber-200 transition-colors duration-200">
+            Ordenar Ahora <ArrowRight size={16} />
+          </Link>
+          <Link to="/menu"
+            className="inline-flex items-center justify-center gap-2 border border-white/30
+                       text-white font-semibold text-xs tracking-[0.2em] uppercase px-12 py-5
+                       hover:bg-white/10 transition-colors">
+            Ver el Menú
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Stats ─────────────────────────────────── */
+function Stats() {
+  const ref   = useRef(null)
+  const inView = useInView(ref, { once: true, amount: 0.2 })
+  return (
+    <section ref={ref} className="bg-stone-900 py-14 sm:py-20 px-5 sm:px-8">
+      <motion.div
+        initial="hidden" animate={inView ? 'show' : 'hidden'} variants={stagger}
+        className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-0 sm:divide-x divide-stone-800">
+        {[
+          { n: '6am',  label: 'Abrimos cada día'     },
+          { n: '15+',  label: 'Años horneando'        },
+          { n: '100%', label: 'Ingredientes naturales' },
+          { n: '0',    label: 'Conservantes'          },
+        ].map(s => (
+          <motion.div key={s.n} variants={fadeUp} className="text-center sm:px-8">
+            <p className="text-4xl sm:text-6xl font-black text-amber-300 mb-2"
+               style={{fontFamily:'Playfair Display,serif'}}>{s.n}</p>
+            <p className="text-stone-500 text-xs tracking-[0.2em] uppercase font-semibold">{s.label}</p>
+          </motion.div>
+        ))}
+      </motion.div>
+    </section>
+  )
+}
+
+/* ═══════════════════════════════════════════════
+   COMPONENTE PRINCIPAL
+═══════════════════════════════════════════════ */
 export default function Home() {
   const { addToCart, products, loading, error } = useApp()
-  const featured = products.slice(0, 3)
   const [promociones, setPromociones] = useState([])
+  const heroRef = useRef(null)
+
+  // Parallax hero
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
+  const heroImgY    = useTransform(scrollYProgress, [0, 1], ['0%', '20%'])
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0])
+  const heroTextY   = useTransform(scrollYProgress, [0, 1], ['0%', '35%'])
 
   useEffect(() => {
-    api.promociones.getActivas()
-      .then(data => setPromociones(data))
-      .catch(() => {})
+    api.promociones.getActivas().then(setPromociones).catch(() => {})
   }, [])
 
   if (error) return <ServerError message={error} />
 
+  const [p1, p2, p3] = products
+
   return (
-    <div className="bg-white text-stone-900">
+    <div className="bg-white text-stone-900 overflow-x-hidden">
 
       {/* ── HERO ── */}
-      <section className="relative bg-stone-900 overflow-hidden min-h-[85vh] sm:min-h-screen flex items-end">
-        {/* Imagen de fondo — degradado sobre ella */}
-        <div className="absolute inset-0">
-          <div
-            className="w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage: `url("https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1600&q=80")`,
-            }}
+      <section ref={heroRef} className="relative h-screen min-h-[600px] flex items-end overflow-hidden">
+        <motion.div style={{ y: heroImgY }} className="absolute inset-0 scale-110">
+          <img
+            src="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=1800&q=90"
+            alt="Croissants artesanales Bon Pan"
+            className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-stone-900 via-stone-900/50 to-stone-900/10" />
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-900/60 to-transparent" />
+        </motion.div>
 
-        {/* Contenido */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 pb-16 sm:pb-24">
-          <p className="text-stone-400 text-xs tracking-[0.4em] uppercase font-semibold mb-4 sm:mb-6">
-            Panadería Artesanal · Ibagué
-          </p>
-          <h1 className="text-5xl sm:text-7xl lg:text-9xl text-white font-black leading-none mb-6 sm:mb-8 max-w-3xl"
-              style={{fontFamily:'Playfair Display, serif'}}>
-            Pan que hace feliz.
-          </h1>
-          <p className="text-stone-300 text-base sm:text-xl font-light mb-8 sm:mb-10 max-w-lg leading-relaxed">
-            Croissants, pasteles de pollo y carne. Todo hecho a mano desde las 6am, todos los días.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <motion.div
+          style={{ y: heroTextY, opacity: heroOpacity }}
+          className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 pb-16 sm:pb-24">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="text-stone-400 text-xs tracking-[0.5em] uppercase font-semibold mb-5">
+            — Panadería Artesanal · Ibagué, Colombia
+          </motion.p>
+          <motion.h1
+            initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 1.1, ease: [0.25, 0.1, 0.25, 1] }}
+            className="text-6xl sm:text-8xl lg:text-[120px] text-white font-black leading-none mb-8"
+            style={{fontFamily:'Playfair Display, serif'}}>
+            Hecho a mano.<br/>
+            <span className="text-amber-300">Con amor.</span>
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.9 }}
+            className="text-stone-300 text-lg sm:text-xl font-light max-w-xl leading-relaxed mb-10">
+            Croissants dorados, pasteles de pollo y carne. Recién salidos del horno cada mañana.
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.1, duration: 0.8 }}
+            className="flex flex-col sm:flex-row gap-4">
             <Link to="/menu"
               className="inline-flex items-center justify-center gap-2 bg-white text-stone-900
-                         font-bold text-xs tracking-[0.2em] uppercase px-8 py-4
-                         hover:bg-stone-100 transition-colors duration-200">
+                         font-bold text-xs tracking-[0.2em] uppercase px-10 py-4
+                         hover:bg-amber-300 transition-colors duration-300">
               Ver Menú <ArrowRight size={15} />
             </Link>
             <Link to="/pedido"
-              className="inline-flex items-center justify-center gap-2 border border-white/40
-                         text-white font-semibold text-xs tracking-[0.2em] uppercase px-8 py-4
-                         hover:bg-white/10 transition-colors duration-200">
+              className="inline-flex items-center justify-center gap-2 border border-white/30
+                         text-white font-semibold text-xs tracking-[0.2em] uppercase px-10 py-4
+                         hover:bg-white/10 transition-colors duration-300">
               Ordenar Ahora
             </Link>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Scroll hint */}
-        <div className="absolute bottom-6 right-6 sm:right-10 flex flex-col items-center gap-2 z-10">
-          <div className="w-px h-10 sm:h-14 bg-white/30" />
-          <span className="text-white/40 text-[9px] tracking-[0.3em] uppercase rotate-90 origin-center mt-4">Scroll</span>
-        </div>
+        <motion.div
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.8 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+          <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 1.8 }}>
+            <ArrowDown size={20} className="text-white/40" />
+          </motion.div>
+        </motion.div>
       </section>
 
 
-      {/* ── MANIFIESTO ── */}
-      <section className="py-20 sm:py-32 px-5 sm:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center">
-          <div>
-            <p className="text-xs tracking-[0.4em] uppercase text-stone-400 font-semibold mb-5 sm:mb-6">Nuestra filosofía</p>
-            <h2 className="text-3xl sm:text-5xl text-stone-900 leading-tight mb-6 sm:mb-8"
+      {/* ── FRASE ── */}
+      <section className="py-20 sm:py-32 px-5 sm:px-8 bg-white">
+        <div className="max-w-6xl mx-auto text-center">
+          <Reveal delay={0.1}>
+            <p className="text-xs tracking-[0.5em] uppercase text-stone-400 font-semibold mb-6">Nuestra promesa</p>
+          </Reveal>
+          <Reveal delay={0.2} y={60}>
+            <h2 className="text-4xl sm:text-6xl lg:text-8xl text-stone-900 font-black leading-tight"
                 style={{fontFamily:'Playfair Display, serif'}}>
-              Cada pieza es elaborada a mano, sin atajos.
+              "El mejor pan<br/>
+              <em className="text-amber-500 not-italic">que vas a probar</em><br/>
+              en Ibagué."
             </h2>
-            <p className="text-stone-500 text-base sm:text-lg leading-relaxed mb-4">
-              En Bon Pan creemos que el pan de verdad se hace con tiempo, dedicación y los mejores ingredientes.
-              Nada de aditivos, nada de prisa.
-            </p>
-            <p className="text-stone-500 text-base sm:text-lg leading-relaxed mb-8 sm:mb-10">
-              Cada croissant, cada pastel de pollo y cada hojaldrado sale del horno listo para hacerte el día mejor.
-            </p>
-            <Link to="/menu"
-              className="inline-flex items-center gap-3 text-xs font-bold tracking-[0.2em] uppercase
-                         text-stone-900 border-b-2 border-stone-900 pb-1
-                         hover:text-stone-500 hover:border-stone-500 transition-colors">
-              Conoce nuestro menú <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          {/* Imagen lateral */}
-          <div className="relative h-72 sm:h-96 lg:h-[520px] overflow-hidden">
-            <img
-              src="https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=900&q=80"
-              alt="Panadería artesanal"
-              className="w-full h-full object-cover"
-            />
-            {/* Tag flotante */}
-            <div className="absolute bottom-5 left-5 bg-white px-5 py-3 shadow-lg">
-              <p className="text-xs font-bold tracking-widest uppercase text-stone-400 mb-1">Desde</p>
-              <p className="text-2xl font-black text-stone-900" style={{fontFamily:'Playfair Display,serif'}}>
-                Las 6<span className="text-sm font-semibold">am</span>
-              </p>
-            </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
 
-      {/* ── PILARES ── */}
-      <section className="bg-stone-50 py-16 sm:py-24 px-5 sm:px-8">
-        <div className="max-w-7xl mx-auto">
-          <p className="text-xs tracking-[0.4em] uppercase text-stone-400 font-semibold mb-10 sm:mb-14 text-center">
-            Por qué elegirnos
+      {/* ── IMAGEN CINEMÁTICA ── */}
+      <Reveal y={0} className="relative h-[55vh] sm:h-[75vh] overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=1800&q=90"
+          alt="Croissant de chocolate Bon Pan"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/25" />
+        <Reveal delay={0.3} className="absolute bottom-8 sm:bottom-14 left-5 sm:left-14 bg-white/95 backdrop-blur px-6 sm:px-8 py-5 sm:py-6 max-w-xs sm:max-w-sm shadow-2xl">
+          <p className="text-xs tracking-[0.3em] uppercase text-stone-400 font-semibold mb-2">Recién salido del horno</p>
+          <p className="text-xl sm:text-2xl font-black text-stone-900" style={{fontFamily:'Playfair Display,serif'}}>
+            Hojaldrado y dorado,<br/>cada mañana.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-stone-200">
-            {[
-              { num: '01', title: 'Ingredientes Frescos', desc: 'Seleccionados cada mañana para garantizar el mejor sabor en cada bocado.' },
-              { num: '02', title: 'Recetas Artesanales', desc: 'Técnicas tradicionales que preservan el sabor auténtico del hojaldre.' },
-              { num: '03', title: 'Listo para Ti', desc: 'Empacado con cuidado para que llegue perfecto a tus manos.' },
-            ].map(f => (
-              <div key={f.num} className="px-6 sm:px-10 py-10 sm:py-8">
-                <p className="text-4xl sm:text-5xl font-black text-stone-200 mb-4"
-                   style={{fontFamily:'Playfair Display, serif'}}>{f.num}</p>
-                <h3 className="text-base sm:text-lg font-bold text-stone-900 mb-3">{f.title}</h3>
-                <p className="text-stone-500 text-sm leading-relaxed">{f.desc}</p>
+        </Reveal>
+      </Reveal>
+
+
+      {/* ── STATS ── */}
+      <Stats />
+
+
+      {/* ── PRODUCTOS HERO ── */}
+      <section>
+        <ProductHero
+          img="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=1200&q=90"
+          tag="Nuestra especialidad"
+          title="Croissant Clásico."
+          sub="Capas perfectas de masa hojaldrada, mantequilla real y un dorado que te va a enloquecer. Crujiente por fuera, suave por dentro."
+          price={p1 ? p1.price.toLocaleString() : '4.500'}
+          p={p1} onAdd={addToCart} reverse={false}
+        />
+        <div className="h-px bg-stone-100" />
+        <ProductHero
+          img="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=1200&q=90"
+          tag="El favorito de todos"
+          title="Pastel de Pollo."
+          sub="Relleno generoso de pollo, con masa que se deshace en la boca. El que más piden, el que nunca falta."
+          price={p2 ? p2.price.toLocaleString() : '5.000'}
+          p={p2} onAdd={addToCart} reverse={true}
+        />
+        <div className="h-px bg-stone-100" />
+        <ProductHero
+          img="https://images.unsplash.com/photo-1586444248879-bc604cbd555a?w=1200&q=90"
+          tag="Sabor intenso"
+          title="Pastel de Carne."
+          sub="Masa hojaldrada con relleno de carne sazonada al estilo Bon Pan. Un bocado y ya no puedes parar."
+          price={p3 ? p3.price.toLocaleString() : '5.000'}
+          p={p3} onAdd={addToCart} reverse={false}
+        />
+      </section>
+
+
+      {/* ── CRAFT ── */}
+      <CraftSection />
+
+
+      {/* ── GALERÍA ── */}
+      <Gallery />
+
+
+      {/* ── PROMO (si hay) ── */}
+      <AnimatePresence>
+        {promociones.length > 0 && (
+          <Reveal className="bg-red-600 py-14 sm:py-20 px-5 sm:px-8">
+            <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
+              <div>
+                <p className="text-red-200 text-xs tracking-[0.3em] uppercase font-semibold mb-2">🔥 Oferta especial</p>
+                <h2 className="text-3xl sm:text-5xl text-white font-black" style={{fontFamily:'Playfair Display,serif'}}>
+                  {promociones[0].nombre}
+                </h2>
+                {promociones[0].descripcion && (
+                  <p className="text-red-100 mt-2 text-base font-light">{promociones[0].descripcion}</p>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-      {/* ── PRODUCTOS DESTACADOS ── */}
-      <section className="py-20 sm:py-32 px-5 sm:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-12 sm:mb-16">
-            <div>
-              <p className="text-xs tracking-[0.4em] uppercase text-stone-400 font-semibold mb-3">Del horno para ti</p>
-              <h2 className="text-3xl sm:text-5xl text-stone-900 leading-tight"
-                  style={{fontFamily:'Playfair Display, serif'}}>Destacados del Día</h2>
+              <Link to="/menu"
+                className="shrink-0 inline-flex items-center gap-2 bg-white text-red-600 font-bold
+                           text-xs tracking-[0.2em] uppercase px-10 py-4 hover:bg-red-50 transition-colors">
+                Ver en el Menú <ArrowRight size={14} />
+              </Link>
             </div>
-            <Link to="/menu"
-              className="text-xs font-bold tracking-[0.2em] uppercase text-stone-400
-                         border-b border-stone-300 pb-0.5 hover:text-stone-900 hover:border-stone-900 transition-colors shrink-0">
-              Ver todo →
-            </Link>
-          </div>
-
-          {loading.products ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200">
-              {[1,2,3].map(i => <div key={i} className="bg-white h-80 animate-pulse" />)}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-stone-200">
-              {featured.map(p => (
-                <div key={p.id} className="group bg-white overflow-hidden">
-                  {/* Imagen */}
-                  <div className="relative h-56 sm:h-72 overflow-hidden bg-stone-100">
-                    {p.imagen
-                      ? <img src={p.imagen} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                      : <div className="w-full h-full flex items-center justify-center text-6xl">{p.emoji}</div>
-                    }
-                  </div>
-                  {/* Info */}
-                  <div className="p-5 sm:p-6 border-t border-stone-100">
-                    <p className="text-[10px] text-stone-400 font-bold tracking-[0.2em] uppercase mb-2">{p.category}</p>
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-base sm:text-lg font-bold text-stone-900 leading-tight"
-                          style={{fontFamily:'Playfair Display, serif'}}>{p.name}</h3>
-                      <p className="text-red-600 font-black text-base shrink-0">${p.price.toLocaleString()}</p>
-                    </div>
-                    <p className="text-stone-400 text-xs mt-2 leading-relaxed line-clamp-2">{p.description}</p>
-                    <button onClick={() => addToCart(p)}
-                      className="mt-4 w-full border border-stone-200 py-2.5 text-xs font-bold tracking-[0.15em] uppercase
-                                 text-stone-600 hover:bg-stone-900 hover:text-white hover:border-stone-900 transition-all duration-200">
-                      Agregar al carrito
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+          </Reveal>
+        )}
+      </AnimatePresence>
 
 
-      {/* ── PROMO BANNER ── (solo si hay promociones activas) */}
-      {promociones.length > 0 && (
-        <section className="bg-red-600 py-12 sm:py-16 px-5 sm:px-8">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div>
-              <p className="text-red-200 text-xs tracking-[0.3em] uppercase font-semibold mb-2">Promociones activas</p>
-              <h2 className="text-2xl sm:text-4xl text-white font-black" style={{fontFamily:'Playfair Display,serif'}}>
-                {promociones[0].nombre}
-              </h2>
-              {promociones[0].descripcion && (
-                <p className="text-red-100 mt-2 text-sm font-light">{promociones[0].descripcion}</p>
-              )}
-            </div>
-            <Link to="/menu"
-              className="shrink-0 inline-flex items-center gap-2 bg-white text-red-600 font-bold
-                         text-xs tracking-[0.2em] uppercase px-8 py-4
-                         hover:bg-red-50 transition-colors">
-              Ver en el Menú <ArrowRight size={14} />
-            </Link>
-          </div>
-        </section>
-      )}
-
-
-      {/* ── IMAGEN GRANDE ── */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 min-h-[50vh] sm:min-h-[60vh]">
-        <div className="relative h-64 sm:h-80 lg:h-auto overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=900&q=80"
-            alt="Croissants artesanales"
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div className="bg-stone-900 flex items-center justify-center px-8 sm:px-16 py-16 sm:py-20">
-          <div className="max-w-md">
-            <p className="text-stone-500 text-xs tracking-[0.4em] uppercase font-semibold mb-5">¿Listo para ordenar?</p>
-            <h2 className="text-3xl sm:text-5xl text-white leading-tight mb-6"
-                style={{fontFamily:'Playfair Display, serif'}}>
-              Haz tu pedido<br/>en línea.
-            </h2>
-            <p className="text-stone-400 text-base leading-relaxed mb-8 font-light">
-              Selecciona tus productos y los tenemos listos para ti — domicilio o retiro en tienda.
-            </p>
-            <Link to="/pedido"
-              className="inline-flex items-center gap-3 bg-white text-stone-900 font-bold
-                         text-xs tracking-[0.2em] uppercase px-10 py-4
-                         hover:bg-stone-100 transition-colors">
-              Ordenar Ahora <ArrowRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* ── CTA FINAL ── */}
+      <FinalCTA />
 
 
       {/* ── FOOTER ── */}
-      <footer className="bg-stone-900 text-stone-400">
+      <footer className="bg-stone-950 text-stone-500">
         <div className="max-w-7xl mx-auto px-5 sm:px-8 py-12 sm:py-16">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
-
-            {/* Marca */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-10 mb-10">
             <div className="col-span-2 sm:col-span-1">
               <div className="flex items-center gap-3 mb-4">
                 <img src="/logo.png" alt="Bon Pan" className="h-10 w-10 object-contain" />
@@ -259,26 +482,22 @@ export default function Home() {
                   <p className="text-stone-600 text-xs tracking-widest uppercase">Panadería Artesanal</p>
                 </div>
               </div>
-              <p className="text-stone-500 text-sm leading-relaxed">
+              <p className="text-stone-600 text-sm leading-relaxed">
                 Elaboramos cada producto con amor desde Ibagué, Tolima.
               </p>
             </div>
-
-            {/* Nav */}
             <div>
               <p className="text-white text-xs tracking-[0.2em] uppercase font-bold mb-4">Páginas</p>
               <div className="space-y-2.5">
                 {[['/', 'Inicio'],['/menu','Menú'],['/pedido','Pedido'],['/contacto','Contacto']].map(([to, l]) => (
                   <Link key={to} to={to}
-                    className="block text-stone-500 hover:text-white text-sm transition-colors">{l}</Link>
+                    className="block text-stone-600 hover:text-white text-sm transition-colors">{l}</Link>
                 ))}
               </div>
             </div>
-
-            {/* Contacto */}
             <div className="col-span-2 sm:col-span-2">
               <p className="text-white text-xs tracking-[0.2em] uppercase font-bold mb-4">Contacto</p>
-              <div className="space-y-2 text-sm text-stone-500">
+              <div className="space-y-2 text-sm text-stone-600">
                 <p>📍 Ibagué, Tolima</p>
                 <p>📞 +57 310 123 4567</p>
                 <p>✉️ hola@bonpan.co</p>
@@ -286,10 +505,9 @@ export default function Home() {
               </div>
             </div>
           </div>
-
-          <div className="border-t border-stone-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p className="text-stone-600 text-xs">© 2026 Bon Pan · Todos los derechos reservados</p>
-            <p className="text-stone-600 text-xs">Hecho con ❤️ en Ibagué, Colombia</p>
+          <div className="border-t border-stone-900 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-stone-700 text-xs">© 2026 Bon Pan · Todos los derechos reservados</p>
+            <p className="text-stone-700 text-xs">Hecho con ❤️ en Ibagué, Colombia</p>
           </div>
         </div>
       </footer>
