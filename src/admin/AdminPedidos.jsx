@@ -1,6 +1,17 @@
 import { useState } from 'react'
 import { useApp } from '../context/AppContext'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Clock, Copy } from 'lucide-react'
+
+/** Formatea timestamp ISO/Postgres a español con hora */
+function fmtDate(raw) {
+  if (!raw) return '—'
+  const d = new Date(raw)
+  if (isNaN(d)) return String(raw)
+  return d.toLocaleString('es-CO', {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true,
+  })
+}
 
 const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Entregado', 'Cancelado']
 const STATUS_COLORS  = {
@@ -75,8 +86,19 @@ export default function AdminPedidos() {
                 onClick={() => setExpanded(expanded === order.id ? null : order.id)}>
                 <div className="flex items-center gap-4">
                   <div>
-                    <p className="font-bold text-red-900">#{order.id}</p>
-                    <p className="text-xs text-stone-400">{order.date}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-bold text-red-900">#{order.id}</p>
+                      <button
+                        onClick={e => { e.stopPropagation(); navigator.clipboard.writeText(String(order.id)) }}
+                        title="Copiar código"
+                        className="text-stone-300 hover:text-stone-600 transition-colors">
+                        <Copy size={12} />
+                      </button>
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-stone-400">
+                      <Clock size={11} />
+                      <span>{fmtDate(order.created_at)}</span>
+                    </div>
                   </div>
                   <div>
                     <p className="font-semibold text-stone-800">{order.customer.name}</p>
@@ -110,6 +132,14 @@ export default function AdminPedidos() {
                         <span>${order.total.toLocaleString()}</span>
                       </div>
                     </div>
+                    {/* Entrega */}
+                    {order.tipo_entrega && (
+                      <div className="mt-3 bg-stone-50 rounded-xl p-3 text-sm text-stone-600">
+                        🚚 <span className="font-medium">Entrega:</span>{' '}
+                        {order.tipo_entrega === 'domicilio' ? 'Domicilio' : 'Recogida en punto'}
+                        {order.direccion_entrega && ` — ${order.direccion_entrega}`}
+                      </div>
+                    )}
                     {order.customer.notes && (
                       <div className="mt-3 bg-amber-50 rounded-xl p-3 text-sm text-stone-600">
                         📝 <span className="font-medium">Nota:</span> {order.customer.notes}
@@ -121,7 +151,10 @@ export default function AdminPedidos() {
                   <div>
                     <h3 className="font-bold text-stone-700 text-sm mb-3">Historial de Estado</h3>
                     <div className="space-y-2 mb-4">
-                      {(order.statusHistory || [{ status: order.status, timestamp: order.date }]).map((h, i) => (
+                      {(order.statusHistory?.length
+                        ? order.statusHistory
+                        : [{ status: order.status, timestamp: order.created_at }]
+                      ).map((h, i) => (
                         <div key={i} className="flex items-start gap-3">
                           <div className="flex flex-col items-center">
                             <div className="w-3 h-3 rounded-full bg-red-500 shrink-0 mt-0.5" />
@@ -131,7 +164,7 @@ export default function AdminPedidos() {
                           </div>
                           <div>
                             <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLORS[h.status]}`}>{h.status}</span>
-                            <p className="text-xs text-stone-400 mt-0.5">{h.timestamp}</p>
+                            <p className="text-xs text-stone-400 mt-0.5">{fmtDate(h.timestamp)}</p>
                           </div>
                         </div>
                       ))}
