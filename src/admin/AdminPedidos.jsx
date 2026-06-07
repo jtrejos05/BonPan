@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useApp } from '../context/AppContext'
-import { ChevronDown, ChevronUp, Clock, Copy } from 'lucide-react'
+import { ChevronDown, ChevronUp, Clock, Copy, CalendarDays, X } from 'lucide-react'
 
 /** Formatea timestamp ISO/Postgres a español con hora */
 function fmtDate(raw) {
@@ -13,6 +13,19 @@ function fmtDate(raw) {
   })
 }
 
+/** Obtiene año, mes (1-12) y día de un timestamp */
+function parseParts(raw) {
+  if (!raw) return null
+  const d = new Date(raw)
+  if (isNaN(d)) return null
+  return { y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() }
+}
+
+const MONTHS = [
+  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
+  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
+]
+
 const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Entregado', 'Cancelado']
 const STATUS_COLORS  = {
   'Pendiente':      'bg-yellow-100 text-yellow-700',
@@ -24,15 +37,56 @@ const STATUS_COLORS  = {
 
 export default function AdminPedidos() {
   const { orders, updateOrderStatus, loading } = useApp()
-  const [filter, setFilter]   = useState('Todos')
+  const [filter,   setFilter]   = useState('Todos')
   const [expanded, setExpanded] = useState(null)
-  const [search, setSearch]   = useState('')
+  const [search,   setSearch]   = useState('')
+
+  // Filtros de fecha
+  const [selYear,  setSelYear]  = useState('')
+  const [selMonth, setSelMonth] = useState('')
+  const [selDay,   setSelDay]   = useState('')
+
+  // Años disponibles según pedidos
+  const availableYears = useMemo(() => {
+    const years = [...new Set(orders.map(o => parseParts(o.created_at)?.y).filter(Boolean))]
+    return years.sort((a, b) => b - a)
+  }, [orders])
+
+  // Días disponibles según año+mes seleccionados
+  const availableDays = useMemo(() => {
+    if (!selYear || !selMonth) return []
+    const days = [...new Set(
+      orders
+        .map(o => parseParts(o.created_at))
+        .filter(p => p && p.y === Number(selYear) && p.m === Number(selMonth))
+        .map(p => p.d)
+    )]
+    return days.sort((a, b) => a - b)
+  }, [orders, selYear, selMonth])
+
+  const hasDateFilter = selYear || selMonth || selDay
+
+  function clearDate() {
+    setSelYear(''); setSelMonth(''); setSelDay('')
+  }
+
+  // Cuando cambia el año, resetear mes y día
+  function handleYear(v) {
+    setSelYear(v); setSelMonth(''); setSelDay('')
+  }
+  function handleMonth(v) {
+    setSelMonth(v); setSelDay('')
+  }
 
   const filtered = orders.filter(o => {
     const matchStatus = filter === 'Todos' || o.status === filter
     const matchSearch = o.customer.name.toLowerCase().includes(search.toLowerCase()) ||
                         String(o.id).includes(search)
-    return matchStatus && matchSearch
+    const parts = parseParts(o.created_at)
+    const matchYear  = !selYear  || (parts && parts.y === Number(selYear))
+    const matchMonth = !selMonth || (parts && parts.m === Number(selMonth))
+    const matchDay   = !selDay   || (parts && parts.d === Number(selDay))
+    return matchStatus && matchSearch && matchYear && matchMonth && matchDay
   })
 
   if (loading.orders) return (
@@ -51,22 +105,81 @@ export default function AdminPedidos() {
         <p className="text-stone-500 text-sm mt-1">Trazabilidad completa de cada pedido</p>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="🔍 Buscar por cliente o ID..."
-          className="border border-stone-200 rounded-full px-4 py-2 text-sm text-stone-700 focus:outline-none focus:border-red-400 bg-white"
-        />
-        <div className="flex gap-2 flex-wrap">
-          {['Todos', ...STATUS_OPTIONS].map(s => (
-            <button key={s} onClick={() => setFilter(s)}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors
-                ${filter === s ? 'bg-red-700 text-white' : 'bg-white border border-stone-200 text-stone-600 hover:border-red-400'}`}>
-              {s}
+      {/* Filtros */}
+      <div className="space-y-3">
+        {/* Búsqueda + estados */}
+        <div className="flex flex-wrap gap-3 items-center">
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="🔍 Buscar por cliente o ID..."
+            className="border border-stone-200 rounded-full px-4 py-2 text-sm text-stone-700 focus:outline-none focus:border-red-400 bg-white"
+          />
+          <div className="flex gap-2 flex-wrap">
+            {['Todos', ...STATUS_OPTIONS].map(s => (
+              <button key={s} onClick={() => setFilter(s)}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-colors
+                  ${filter === s ? 'bg-red-700 text-white' : 'bg-white border border-stone-200 text-stone-600 hover:border-red-400'}`}>
+                {s}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Filtro por fecha */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex items-center gap-1.5 text-stone-400">
+            <CalendarDays size={15} />
+            <span className="text-xs font-semibold uppercase tracking-wider">Fecha:</span>
+          </div>
+
+          {/* Año */}
+          <select
+            value={selYear}
+            onChange={e => handleYear(e.target.value)}
+            className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700 focus:outline-none focus:border-red-400 bg-white">
+            <option value="">Año</option>
+            {availableYears.map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+
+          {/* Mes — solo si hay año */}
+          <select
+            value={selMonth}
+            onChange={e => handleMonth(e.target.value)}
+            disabled={!selYear}
+            className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700 focus:outline-none focus:border-red-400 bg-white disabled:opacity-40">
+            <option value="">Mes</option>
+            {MONTHS.map((m, i) => (
+              <option key={i+1} value={i+1}>{m}</option>
+            ))}
+          </select>
+
+          {/* Día — solo si hay año + mes */}
+          <select
+            value={selDay}
+            onChange={e => setSelDay(e.target.value)}
+            disabled={!selYear || !selMonth}
+            className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700 focus:outline-none focus:border-red-400 bg-white disabled:opacity-40">
+            <option value="">Día</option>
+            {availableDays.map(d => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+          </select>
+
+          {/* Limpiar filtro fecha */}
+          {hasDateFilter && (
+            <button onClick={clearDate}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-600 text-xs font-semibold hover:bg-red-100 transition-colors">
+              <X size={11} /> Limpiar fecha
             </button>
-          ))}
+          )}
+
+          {/* Contador */}
+          <span className="text-xs text-stone-400 ml-1">
+            {filtered.length} pedido{filtered.length !== 1 ? 's' : ''}
+          </span>
         </div>
       </div>
 
