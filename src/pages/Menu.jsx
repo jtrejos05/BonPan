@@ -19,7 +19,7 @@ const stagger = {
 /* ─── Tarjeta de producto ────────────────────── */
 function ProductCard({ p, index, onAdd, added }) {
   const ref    = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.15 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
 
   return (
     <motion.div
@@ -88,7 +88,7 @@ function ProductCard({ p, index, onAdd, added }) {
 /* ─── Tarjeta de promoción ───────────────────── */
 function PromoCard({ p, index }) {
   const ref    = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.2 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
   return (
     <motion.div
       ref={ref}
@@ -144,7 +144,7 @@ function PromoCard({ p, index }) {
 /* ─── Banner inferior ───────────────────────── */
 function BottomBanner() {
   const ref    = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.3 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
   return (
     <motion.div
       ref={ref}

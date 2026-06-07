@@ -23,7 +23,7 @@ const stagger = {
 /* ─── Wrapper con reveal al scroll ─────────── */
 function Reveal({ children, className = '', delay = 0, y = 48 }) {
   const ref   = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.15 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
   return (
     <motion.div
       ref={ref}
@@ -38,7 +38,7 @@ function Reveal({ children, className = '', delay = 0, y = 48 }) {
 
 function RevealSection({ children, className = '' }) {
   const ref   = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.1 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
   return (
     <motion.div
       ref={ref}
@@ -54,7 +54,7 @@ function RevealSection({ children, className = '' }) {
 /* ─── Sección de producto hero ─────────────── */
 function ProductHero({ img, tag, title, sub, price, reverse, onAdd, p }) {
   const ref   = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.15 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
 
   return (
     <div ref={ref} className={`grid grid-cols-1 lg:grid-cols-2 min-h-[80vh]`}>
@@ -112,7 +112,7 @@ function ProductHero({ img, tag, title, sub, price, reverse, onAdd, p }) {
 /* ─── Galería ───────────────────────────────── */
 function Gallery() {
   const ref   = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.1 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
   const imgs = [
     { src: 'https://images.unsplash.com/photo-1504093898956-c318a39e9eee?w=800&q=80', alt: 'Pan artesanal' },
     { src: 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=800&q=80', alt: 'Croissants frescos' },
@@ -137,7 +137,7 @@ function Gallery() {
 /* ─── Sección "Cuando tú duermes…" ─────────── */
 function CraftSection() {
   const ref   = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.15 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
   return (
     <section ref={ref} className="grid grid-cols-1 lg:grid-cols-2 min-h-[60vh]">
       <motion.div
@@ -191,7 +191,7 @@ function CraftSection() {
 /* ─── CTA Final ─────────────────────────────── */
 function FinalCTA() {
   const ref   = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.2 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
   return (
     <section ref={ref} className="relative min-h-[70vh] sm:min-h-screen flex items-center justify-center overflow-hidden">
       <motion.div
@@ -251,7 +251,7 @@ function FinalCTA() {
 /* ─── Stats ─────────────────────────────────── */
 function Stats() {
   const ref   = useRef(null)
-  const inView = useInView(ref, { once: true, amount: 0.2 })
+  const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
   return (
     <section ref={ref} className="bg-stone-900 py-14 sm:py-20 px-5 sm:px-8">
       <motion.div
