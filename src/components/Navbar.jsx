@@ -47,11 +47,8 @@ export default function Navbar() {
 
             {/* Logo — izquierda */}
             <Link to="/" className="flex items-center gap-3 group shrink-0">
-              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center overflow-hidden shrink-0">
-                <img src="/logo.png" alt="Bon Pan"
-                  className="w-14 h-14 object-contain group-hover:opacity-80 transition-opacity duration-300"
-                  style={{ transform: 'rotate(40deg)' }} />
-              </div>
+              <img src="/logo.png" alt="Bon Pan"
+                className="h-10 w-10 sm:h-11 sm:w-11 object-contain group-hover:opacity-80 transition-opacity duration-300" />
               <div className="leading-none">
                 <p className="font-black text-stone-900 text-lg tracking-tight"
                    style={{fontFamily:'Playfair Display, serif'}}>Bon Pan</p>
