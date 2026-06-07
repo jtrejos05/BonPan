@@ -52,17 +52,12 @@ export default function AdminPedidos() {
     return years.sort((a, b) => b - a)
   }, [orders])
 
-  // Días disponibles según año+mes seleccionados
+  // Días disponibles: todos los días del mes seleccionado
   const availableDays = useMemo(() => {
     if (!selYear || !selMonth) return []
-    const days = [...new Set(
-      orders
-        .map(o => parseParts(o.created_at))
-        .filter(p => p && p.y === Number(selYear) && p.m === Number(selMonth))
-        .map(p => p.d)
-    )]
-    return days.sort((a, b) => a - b)
-  }, [orders, selYear, selMonth])
+    const daysInMonth = new Date(Number(selYear), Number(selMonth), 0).getDate()
+    return Array.from({ length: daysInMonth }, (_, i) => i + 1)
+  }, [selYear, selMonth])
 
   const hasDateFilter = selYear || selMonth || selDay
 
