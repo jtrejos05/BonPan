@@ -45,9 +45,30 @@ export default function Navbar() {
         <div className="border-b border-stone-100">
           <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center justify-between h-16 sm:h-20">
 
-            {/* Links izquierda — desktop */}
-            <div className="hidden md:flex items-center gap-8 flex-1">
+            {/* Logo — izquierda */}
+            <Link to="/" className="flex items-center gap-3 group shrink-0">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center overflow-hidden shrink-0">
+                <img src="/logo.png" alt="Bon Pan"
+                  className="w-14 h-14 object-contain group-hover:opacity-80 transition-opacity duration-300"
+                  style={{ transform: 'rotate(40deg)' }} />
+              </div>
+              <div className="leading-none">
+                <p className="font-black text-stone-900 text-lg tracking-tight"
+                   style={{fontFamily:'Playfair Display, serif'}}>Bon Pan</p>
+                <p className="text-stone-400 text-[9px] font-semibold tracking-[0.2em] uppercase">Panadería · Ibagué</p>
+              </div>
+            </Link>
+
+            {/* Links — centro/derecha desktop */}
+            <div className="hidden md:flex items-center gap-8 flex-1 justify-center">
               {links.slice(0, 2).map(l => (
+                <Link key={l.to} to={l.to}
+                  className={`text-xs font-semibold tracking-[0.15em] uppercase transition-colors duration-200
+                    ${pathname === l.to ? 'text-stone-900' : 'text-stone-400 hover:text-stone-900'}`}>
+                  {l.label}
+                </Link>
+              ))}
+              {links.slice(2).map(l => (
                 <Link key={l.to} to={l.to}
                   className={`text-xs font-semibold tracking-[0.15em] uppercase transition-colors duration-200
                     ${pathname === l.to ? 'text-stone-900' : 'text-stone-400 hover:text-stone-900'}`}>
@@ -56,27 +77,8 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* Logo centrado */}
-            <Link to="/" className="flex flex-col items-center gap-0.5 group mx-auto md:mx-0 shrink-0">
-              <img src="/logo.png" alt="Bon Pan"
-                className="h-10 sm:h-12 w-10 sm:w-12 object-contain group-hover:opacity-80 transition-opacity duration-300" />
-              <div className="text-center leading-none">
-                <p className="font-black text-stone-900 text-base sm:text-lg tracking-tight"
-                   style={{fontFamily:'Playfair Display, serif'}}>Bon Pan</p>
-                <p className="text-stone-400 text-[9px] font-semibold tracking-[0.2em] uppercase">Panadería · Ibagué</p>
-              </div>
-            </Link>
-
-            {/* Links derecha — desktop */}
-            <div className="hidden md:flex items-center gap-8 flex-1 justify-end">
-              {links.slice(2).map(l => (
-                <Link key={l.to} to={l.to}
-                  className={`text-xs font-semibold tracking-[0.15em] uppercase transition-colors duration-200
-                    ${pathname === l.to ? 'text-stone-900' : 'text-stone-400 hover:text-stone-900'}`}>
-                  {l.label}
-                </Link>
-              ))}
-
+            {/* Acciones — derecha desktop */}
+            <div className="hidden md:flex items-center gap-6 shrink-0">
               <Link to="/pedido" className="relative">
                 <ShoppingCart size={19} className="text-stone-500 hover:text-stone-900 transition-colors" />
                 {cartCount > 0 && (
