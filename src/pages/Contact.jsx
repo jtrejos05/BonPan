@@ -40,7 +40,7 @@ export default function Contact() {
     <div className="bg-white">
 
       {/* Header */}
-      <div className="bg-stone-900 pt-16 sm:pt-20 pb-14 sm:pb-20 px-5 sm:px-8">
+      <div className="pt-16 sm:pt-20 pb-14 sm:pb-20 px-5 sm:px-8" style={{backgroundColor:'#5c0a0a'}}>
         <div className="max-w-7xl mx-auto">
           <p className="text-stone-500 text-xs tracking-[0.4em] uppercase font-semibold mb-3 sm:mb-4">Visítanos</p>
           <h1 className="text-5xl sm:text-7xl text-white font-black leading-none"
