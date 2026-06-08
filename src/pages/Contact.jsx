@@ -44,7 +44,7 @@ export default function Contact() {
         <div className="max-w-7xl mx-auto">
           <p className="text-stone-500 text-xs tracking-[0.4em] uppercase font-semibold mb-3 sm:mb-4">Visítanos</p>
           <h1 className="text-5xl sm:text-7xl text-white font-black leading-none"
-              style={{fontFamily:'Playfair Display, serif'}}>
+              style={{fontFamily:'Elms Sans, sans-serif'}}>
             Contáctanos.
           </h1>
         </div>
@@ -102,7 +102,7 @@ export default function Contact() {
 
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-stone-900 mb-6"
-                  style={{fontFamily:'Playfair Display, serif'}}>
+                  style={{fontFamily:'Elms Sans, sans-serif'}}>
                 Envíanos un Mensaje
               </h2>
               <form ref={formRef} className="space-y-5" onSubmit={async (e) => {
