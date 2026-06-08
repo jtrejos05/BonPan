@@ -258,7 +258,7 @@ function Stats() {
         initial="hidden" animate={inView ? 'show' : 'hidden'} variants={stagger}
         className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-0 sm:divide-x divide-stone-800">
         {[
-          { n: '6am',  label: 'Abrimos cada día'     },
+          { n: '7am',  label: 'Abrimos cada día'     },
           { n: '15+',  label: 'Años horneando'        },
           { n: '100%', label: 'Ingredientes naturales' },
           { n: '0',    label: 'Conservantes'          },
