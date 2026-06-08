@@ -1,4 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { AppProvider }  from './context/AppContext'
 import { AuthProvider } from './context/AuthContext'
@@ -51,6 +58,7 @@ export default function App() {
       <AppProvider>
         <AuthProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               {/* Admin module */}
               <Route path="/admin/login" element={<AdminLogin />} />
