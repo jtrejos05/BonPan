@@ -51,7 +51,7 @@ export default function Navbar() {
                 className="h-10 w-10 sm:h-11 sm:w-11 object-contain group-hover:opacity-80 transition-opacity duration-300" />
               <div className="leading-none">
                 <p className="font-black text-stone-900 text-xl tracking-tight"
-                   style={{fontFamily:'Elms Sans, sans-serif'}}>Bon Pan</p>
+                   style={{fontFamily:'Elms Sans, sans-serif'}}>BonPan</p>
                 <p className="text-stone-400 text-[9px] font-semibold tracking-[0.2em] uppercase">Panadería</p>
               </div>
             </Link>
