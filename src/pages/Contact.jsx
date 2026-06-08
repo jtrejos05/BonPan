@@ -93,7 +93,7 @@ export default function Contact() {
             <div className="overflow-hidden h-52 sm:h-64 border border-stone-100">
               <iframe title="Ubicación Bon Pan" width="100%" height="100%" style={{border:0}}
                 loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade"
-                src="https://www.google.com/maps?q=Carrera+6+Sur+%2366-40+Santaf%C3%A9+de+Varsovia+Ibagu%C3%A9+Tolima+Colombia&output=embed" />
+                src="https://www.google.com/maps?q=4.430097,-75.197022&output=embed" />
             </div>
 
             <div>
