@@ -59,7 +59,8 @@ function PromoModal({ initial, onSave, onClose }) {
 
   async function submit(e) {
     e.preventDefault()
-    if (!form.nombre || !form.valor) return setError('Nombre y valor son requeridos')
+    if (!form.nombre) return setError('El nombre es requerido')
+    if (!form.valor && !form.precio) return setError('Debes ingresar un porcentaje/valor de descuento o un precio especial')
     setSaving(true)
     setError('')
     try {
@@ -166,12 +167,13 @@ function PromoModal({ initial, onSave, onClose }) {
           {/* Valor */}
           <div>
             <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-              {form.tipo === 'porcentaje' ? 'Porcentaje de descuento *' : 'Valor a descontar (COP) *'}
+              {form.tipo === 'porcentaje' ? 'Porcentaje de descuento' : 'Valor a descontar (COP)'}
+              <span className="normal-case font-normal text-stone-300 ml-1">(opcional si hay precio especial)</span>
             </label>
             <div className="flex items-center border-b-2 border-stone-200 focus-within:border-red-800 transition-colors">
               <span className="text-stone-400 font-bold mr-2">{form.tipo === 'porcentaje' ? '%' : '$'}</span>
               <input type="number" value={form.valor} onChange={e => set('valor', e.target.value)}
-                required min="1" max={form.tipo === 'porcentaje' ? 100 : undefined}
+                min="1" max={form.tipo === 'porcentaje' ? 100 : undefined}
                 placeholder={form.tipo === 'porcentaje' ? '20' : '5000'}
                 className="flex-1 bg-transparent py-2.5 text-stone-700 font-medium focus:outline-none" />
             </div>
@@ -317,10 +319,16 @@ function PromoCard({ p, onToggle, onEdit, onDelete }) {
       {p.descripcion && <p className="text-stone-500 text-sm mb-3">{p.descripcion}</p>}
 
       <div className="flex items-center gap-3 flex-wrap text-xs text-stone-400 font-medium mb-4">
-        <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
-          {p.tipo === 'porcentaje' ? <Percent size={12} /> : <DollarSign size={12} />}
-          {p.tipo === 'porcentaje' ? `${p.valor}% de descuento` : `$${Number(p.valor).toLocaleString()} menos`}
-        </span>
+        {p.valor ? (
+          <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
+            {p.tipo === 'porcentaje' ? <Percent size={12} /> : <DollarSign size={12} />}
+            {p.tipo === 'porcentaje' ? `${p.valor}% de descuento` : `$${Number(p.valor).toLocaleString()} menos`}
+          </span>
+        ) : (
+          <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
+            <DollarSign size={12} /> Solo precio especial
+          </span>
+        )}
         {p.fecha_fin && (
           <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
             <Calendar size={12} /> Hasta {new Date(p.fecha_fin).toLocaleDateString('es-CO')}
