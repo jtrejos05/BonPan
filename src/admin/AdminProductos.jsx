@@ -16,11 +16,6 @@ function ProductCard({ p, onEdit, onDelete, onToggle }) {
         {p.imagen
           ? <img src={p.imagen} alt={p.name} className="w-full h-40 object-cover absolute inset-0" />
           : p.emoji}
-        {/* Badge stock */}
-        <span className={`absolute top-3 right-3 text-xs font-bold px-2 py-1 rounded-full
-          ${p.stock === 0 ? 'bg-red-100 text-red-600' : p.stock <= 5 ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-700'}`}>
-          {p.stock === 0 ? 'Agotado' : `${p.stock} uds`}
-        </span>
       </div>
 
       <div className="p-4">
@@ -62,7 +57,7 @@ function ProductCard({ p, onEdit, onDelete, onToggle }) {
 function ProductModal({ initial, onSave, onClose }) {
   const [form, setForm] = useState(initial || {
     name: '', category: 'Croissants', price: '',
-    description: '', emoji: '🥐', stock: '', imagen: ''
+    description: '', emoji: '🥐', stock: 99, imagen: ''
   })
   const [saving,       setSaving]       = useState(false)
   const [uploading,    setUploading]    = useState(false)
@@ -92,9 +87,9 @@ function ProductModal({ initial, onSave, onClose }) {
 
   async function submit(e) {
     e.preventDefault()
-    if (!form.name || !form.price || !form.stock) return
+    if (!form.name || !form.price) return
     setSaving(true)
-    await onSave({ ...form, price: Number(form.price), stock: Number(form.stock) })
+    await onSave({ ...form, price: Number(form.price), stock: 99 })
     setSaving(false)
     onClose()
   }
@@ -207,27 +202,16 @@ function ProductModal({ initial, onSave, onClose }) {
             </div>
           </div>
 
-          {/* Precio y Stock */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-                Precio (COP) *
-              </label>
-              <div className="flex items-center border-b-2 border-stone-200 focus-within:border-red-800 transition-colors">
-                <span className="text-stone-400 font-bold mr-1">$</span>
-                <input type="number" value={form.price} onChange={e => set('price', e.target.value)} required min="0"
-                  placeholder="4500"
-                  className="flex-1 bg-transparent py-2.5 text-stone-700 font-medium focus:outline-none" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-                Cantidad disponible *
-              </label>
-              <input type="number" value={form.stock} onChange={e => set('stock', e.target.value)} required min="0"
-                placeholder="20"
-                className="w-full border-b-2 border-stone-200 bg-transparent py-2.5 text-stone-700
-                           font-medium focus:outline-none focus:border-red-800 transition-colors" />
+          {/* Precio */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              Precio (COP) *
+            </label>
+            <div className="flex items-center border-b-2 border-stone-200 focus-within:border-red-800 transition-colors">
+              <span className="text-stone-400 font-bold mr-1">$</span>
+              <input type="number" value={form.price} onChange={e => set('price', e.target.value)} required min="0"
+                placeholder="4500"
+                className="flex-1 bg-transparent py-2.5 text-stone-700 font-medium focus:outline-none" />
             </div>
           </div>
 
