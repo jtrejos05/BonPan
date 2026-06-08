@@ -274,6 +274,135 @@ function Stats() {
   )
 }
 
+/* ─── Historia / Timeline ───────────────────── */
+const HITOS = [
+  {
+    year: 'Antes de 2009',
+    title: 'Helatto — El primer sueño',
+    desc: 'Antes de BonPan, nació Helatto: el primer proyecto empresarial de la familia, que sembró la semilla del emprendimiento y el amor por la gastronomía artesanal.',
+    img: 'https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=800&q=80',
+  },
+  {
+    year: '3 sep 2009',
+    title: 'Nace BonPan en Manizales',
+    desc: 'El 3 de septiembre de 2009 abrió sus puertas BonPan en la ciudad de Manizales. Una panadería artesanal con recetas propias, masa madre y el sello de lo hecho a mano.',
+    img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80',
+  },
+  {
+    year: '2009 – 2014',
+    title: 'Cámara de Comercio & Manizales Más',
+    desc: 'BonPan fue respaldado por la Cámara de Comercio de Manizales y Manizales Más, el centro de emprendimiento que impulsó su crecimiento, formalización y visión de negocio.',
+    img: 'https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=800&q=80',
+  },
+  {
+    year: 'Diciembre 2021',
+    title: 'Un nuevo capítulo: Ibagué',
+    desc: 'Con nuevas metas y el mismo sabor de siempre, BonPan llegó a Ibagué, Tolima. Una ciudad que recibió con los brazos abiertos el pan artesanal y la tradición panadera.',
+    img: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=800&q=80',
+  },
+  {
+    year: '2022 – 2023',
+    title: 'Certificación SENA — Pan de Masa Madre',
+    desc: 'BonPan obtiene la certificación del SENA en elaboración de pan de masa madre, reconociendo oficialmente su técnica artesanal y el compromiso con la calidad.',
+    img: 'https://images.unsplash.com/photo-1549931319-a545dcf3bc73?w=800&q=80',
+  },
+  {
+    year: 'Octubre 2024',
+    title: 'Apertura del local — Santafé de Varsovia',
+    desc: 'BonPan abre oficialmente su local en la Crr 6 Sur #66-40, Santafé de Varsovia, Ibagué. Un espacio pensado para que cada visita sea una experiencia de sabor y calidez.',
+    img: 'https://images.unsplash.com/photo-1504093898956-c318a39e9eee?w=800&q=80',
+  },
+  {
+    year: 'Hoy',
+    title: 'Seguimos horneando con amor',
+    desc: 'Más de 15 años después del primer pan, BonPan sigue fiel a su esencia: ingredientes reales, recetas artesanales y el calor de un negocio familiar que hornea desde las 7am todos los días.',
+    img: 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=800&q=80',
+  },
+]
+
+function Historia() {
+  return (
+    <section className="bg-stone-950 py-20 sm:py-32 px-5 sm:px-8 overflow-hidden">
+      <div className="max-w-6xl mx-auto">
+
+        {/* Encabezado */}
+        <Reveal>
+          <p className="text-stone-500 text-xs tracking-[0.4em] uppercase font-semibold mb-4">
+            Desde 2009
+          </p>
+          <h2 className="text-5xl sm:text-7xl lg:text-8xl font-black text-white leading-none mb-4"
+              style={{fontFamily:'Elms Sans, sans-serif'}}>
+            Nuestra<br/><span className="text-amber-300">Historia.</span>
+          </h2>
+          <p className="text-stone-400 text-base sm:text-lg max-w-xl mt-6 mb-16 leading-relaxed">
+            Más de 15 años horneando con pasión, tradición y el sabor que nos hace únicos.
+          </p>
+        </Reveal>
+
+        {/* Timeline */}
+        <div className="relative">
+          {/* Línea vertical */}
+          <div className="absolute left-0 sm:left-1/2 top-0 bottom-0 w-px bg-stone-800 -translate-x-1/2 hidden sm:block" />
+
+          <div className="space-y-16 sm:space-y-0">
+            {HITOS.map((h, i) => (
+              <TimelineItem key={i} hito={h} index={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function TimelineItem({ hito, index }) {
+  const ref    = useRef(null)
+  const inView = useInView(ref, { once: true, amount: 0.1, margin: '0px 0px -40px 0px' })
+  const isLeft = index % 2 === 0
+
+  return (
+    <div ref={ref} className={`relative sm:grid sm:grid-cols-2 sm:gap-12 items-center mb-16 sm:mb-24`}>
+
+      {/* Punto en la línea */}
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden sm:block">
+        <motion.div
+          initial={{ scale: 0 }} animate={inView ? { scale: 1 } : {}}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="w-4 h-4 rounded-full bg-amber-300 border-4 border-stone-950 shadow-lg" />
+      </div>
+
+      {/* Imagen */}
+      <motion.div
+        initial={{ opacity: 0, x: isLeft ? -40 : 40 }}
+        animate={inView ? { opacity: 1, x: 0 } : {}}
+        transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
+        className={`relative overflow-hidden h-56 sm:h-72 ${isLeft ? 'sm:order-1' : 'sm:order-2'}`}>
+        <img src={hito.img} alt={hito.title}
+          className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700 sepia-[0.4]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 to-transparent" />
+        {/* Año sobre la imagen */}
+        <div className="absolute bottom-4 left-4">
+          <span className="bg-amber-300 text-stone-950 text-xs font-black px-3 py-1 tracking-widest uppercase">
+            {hito.year}
+          </span>
+        </div>
+      </motion.div>
+
+      {/* Texto */}
+      <motion.div
+        initial={{ opacity: 0, x: isLeft ? 40 : -40 }}
+        animate={inView ? { opacity: 1, x: 0 } : {}}
+        transition={{ duration: 0.9, delay: 0.15, ease: [0.25, 0.1, 0.25, 1] }}
+        className={`py-6 sm:py-0 ${isLeft ? 'sm:order-2' : 'sm:order-1 sm:text-right'}`}>
+        <p className="text-amber-300 text-xs tracking-[0.3em] uppercase font-bold mb-3">{hito.year}</p>
+        <h3 className="text-2xl sm:text-3xl font-black text-white mb-4 leading-tight"
+            style={{fontFamily:'Elms Sans, sans-serif'}}>{hito.title}</h3>
+        <p className="text-stone-400 text-sm sm:text-base leading-relaxed">{hito.desc}</p>
+      </motion.div>
+    </div>
+  )
+}
+
 /* ═══════════════════════════════════════════════
    COMPONENTE PRINCIPAL
 ═══════════════════════════════════════════════ */
@@ -465,6 +594,9 @@ export default function Home() {
         )}
       </AnimatePresence>
 
+
+      {/* ── HISTORIA ── */}
+      <Historia />
 
       {/* ── CTA FINAL ── */}
       <FinalCTA />
