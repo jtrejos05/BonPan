@@ -54,7 +54,7 @@ function DeliveryModal({ onClose, onConfirm }) {
 
         {/* Header */}
         <div className="flex items-start justify-between p-5 sm:p-6 border-b border-stone-100">
-          <h2 className="text-xl sm:text-2xl text-red-950" style={{fontFamily:'Playfair Display, serif'}}>
+          <h2 className="text-xl sm:text-2xl text-red-950" style={{fontFamily:'Elms Sans, sans-serif'}}>
             ¿Cómo quieres tu pedido?
           </h2>
           <button onClick={onClose} className="text-stone-400 hover:text-stone-600 transition-colors mt-1 p-1">
@@ -67,6 +67,7 @@ function DeliveryModal({ onClose, onConfirm }) {
           <div className="grid grid-cols-2 border border-stone-200 overflow-hidden">
             <button
               onClick={() => setTipo('domicilio')}
+              style={{fontFamily:'Elms Sans, sans-serif'}}
               className={`py-3 text-sm font-bold tracking-wide transition-all duration-200
                 ${tipo === 'domicilio'
                   ? 'bg-red-950 text-white'
@@ -75,6 +76,7 @@ function DeliveryModal({ onClose, onConfirm }) {
             </button>
             <button
               onClick={() => setTipo('retiro')}
+              style={{fontFamily:'Elms Sans, sans-serif'}}
               className={`py-3 text-sm font-bold tracking-wide transition-all duration-200 border-l border-stone-200
                 ${tipo === 'retiro'
                   ? 'bg-red-950 text-white'
@@ -102,7 +104,8 @@ function DeliveryModal({ onClose, onConfirm }) {
                     <div className="flex items-start gap-3">
                       <Store size={18} className={`mt-0.5 shrink-0 ${String(l.id) === localId ? 'text-red-800' : 'text-stone-400'}`} />
                       <div>
-                        <p className={`font-black text-sm ${String(l.id) === localId ? 'text-red-950' : 'text-stone-700'}`}>
+                        <p className={`font-black text-sm ${String(l.id) === localId ? 'text-red-950' : 'text-stone-700'}`}
+                           style={{fontFamily:'Elms Sans, sans-serif'}}>
                           {l.nombre}
                         </p>
                         {l.direccion && <p className="text-stone-500 text-xs mt-0.5">{l.direccion}</p>}
@@ -146,6 +149,7 @@ function DeliveryModal({ onClose, onConfirm }) {
 
           <button type="button" onClick={confirm}
             disabled={tipo === 'domicilio' && (!ciudad || !direccion)}
+            style={{fontFamily:'Elms Sans, sans-serif'}}
             className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase py-4
                        hover:bg-red-900 active:bg-red-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation">
             Confirmar
