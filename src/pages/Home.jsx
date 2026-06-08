@@ -297,7 +297,7 @@ export default function Home() {
   const [p1, p2, p3] = products
 
   return (
-    <div className="bg-white text-stone-900 overflow-x-hidden">
+    <div className="bg-white text-stone-900 overflow-x-hidden" style={{fontFamily:'Elms Sans, sans-serif'}}>
 
       {/* ── HERO ── */}
       <section ref={heroRef} className="relative h-screen min-h-[600px] flex items-end overflow-hidden">
