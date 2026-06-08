@@ -230,7 +230,7 @@ export default function Order() {
     <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center px-4 py-16">
       <div className="bg-white border border-stone-200 p-6 sm:p-10 max-w-md w-full text-center shadow-xl">
         <div className="text-4xl sm:text-5xl mb-5 sm:mb-6">🎉</div>
-        <h2 className="text-2xl sm:text-3xl text-red-950 mb-2" style={{fontFamily:'Playfair Display, serif'}}>
+        <h2 className="text-2xl sm:text-3xl text-red-950 mb-2" style={{fontFamily:'Elms Sans, sans-serif'}}>
           ¡Pedido Confirmado!
         </h2>
         <p className="text-stone-400 mb-1 font-medium text-sm sm:text-base">
@@ -285,7 +285,7 @@ export default function Order() {
         <div className="w-16 sm:w-20 h-16 sm:h-20 border-2 border-stone-200 flex items-center justify-center mx-auto mb-5 sm:mb-6">
           <ShoppingCart size={28} className="text-stone-300" />
         </div>
-        <h2 className="text-2xl sm:text-3xl text-red-950 mb-2" style={{fontFamily:'Playfair Display, serif'}}>
+        <h2 className="text-2xl sm:text-3xl text-red-950 mb-2" style={{fontFamily:'Elms Sans, sans-serif'}}>
           Tu carrito está vacío
         </h2>
         <p className="text-stone-400 mb-6 sm:mb-8 font-medium text-sm sm:text-base">Agrega productos desde el menú para continuar</p>
@@ -312,7 +312,7 @@ export default function Order() {
       <div className="bg-red-950 pt-14 sm:pt-16 pb-0 text-center relative overflow-hidden">
         <div className="relative z-10 pb-10 sm:pb-12 px-4">
           <p className="text-red-400 text-xs tracking-[0.4em] uppercase font-semibold mb-2 sm:mb-3">Mi Carrito</p>
-          <h1 className="text-3xl sm:text-5xl text-white" style={{fontFamily:'Playfair Display, serif'}}>Tu Pedido</h1>
+          <h1 className="text-3xl sm:text-5xl text-white" style={{fontFamily:'Elms Sans, sans-serif'}}>Tu Pedido</h1>
         </div>
         <svg viewBox="0 0 1440 50" className="w-full block" preserveAspectRatio="none">
           <path d="M0,25 C360,50 1080,0 1440,25 L1440,50 L0,50 Z" fill="#faf7f2" />
@@ -411,7 +411,7 @@ export default function Order() {
           <div className="lg:col-span-2">
             <div className="bg-white border border-stone-200 p-5 sm:p-6 lg:sticky lg:top-24">
               <h2 className="text-lg sm:text-xl text-red-950 mb-4 sm:mb-5 flex items-center gap-2"
-                  style={{fontFamily:'Playfair Display, serif'}}>
+                  style={{fontFamily:'Elms Sans, sans-serif'}}>
                 <ShoppingBag size={18} className="text-red-800" /> Resumen
               </h2>
 
