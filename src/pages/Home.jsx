@@ -380,7 +380,7 @@ function TimelineItem({ hito, index }) {
         transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
         className={`relative overflow-hidden h-56 sm:h-72 ${isLeft ? 'sm:order-1' : 'sm:order-2'}`}>
         <img src={hito.img} alt={hito.title}
-          className={`w-full h-full transition-all duration-700 ${hito.color ? 'object-contain bg-white' : 'object-cover grayscale hover:grayscale-0 sepia-[0.4]'}`} />
+          className={`w-full h-full transition-all duration-700 ${hito.color ? 'object-contain bg-stone-950' : 'object-cover grayscale hover:grayscale-0 sepia-[0.4]'}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 to-transparent" />
         {/* Año sobre la imagen */}
         <div className="absolute bottom-4 left-4">
