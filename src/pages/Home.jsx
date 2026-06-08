@@ -310,7 +310,7 @@ const HITOS = [
     year: 'Octubre 2024',
     title: 'Apertura del local — Santafé de Varsovia',
     desc: 'BonPan abre oficialmente su local en la Crr 6 Sur #66-40, Santafé de Varsovia, Ibagué. Un espacio pensado para que cada visita sea una experiencia de sabor y calidez.',
-    img: 'https://images.unsplash.com/photo-1504093898956-c318a39e9eee?w=800&q=80',
+    img: '/bonpanpunto.jpeg',
   },
   {
     year: 'Hoy',
