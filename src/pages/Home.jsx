@@ -80,7 +80,7 @@ function ProductHero({ img, tag, title, sub, price, reverse, onAdd, p }) {
             initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.2, duration: 0.9 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-black text-stone-900 leading-none mb-6"
-            style={{fontFamily:'Playfair Display, serif'}}>
+            style={{fontFamily:'Elms Sans, sans-serif'}}>
             {title}
           </motion.h2>
           <motion.p
@@ -163,7 +163,7 @@ function CraftSection() {
             initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.5, duration: 0.9 }}
             className="text-4xl sm:text-5xl font-black text-stone-900 leading-tight mb-6"
-            style={{fontFamily:'Playfair Display, serif'}}>
+            style={{fontFamily:'Elms Sans, sans-serif'}}>
             Cuando tú duermes,<br/>nosotros horneamos.
           </motion.h2>
           <motion.p
@@ -216,7 +216,7 @@ function FinalCTA() {
           initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ delay: 0.5, duration: 1, ease: [0.25,0.1,0.25,1] }}
           className="text-5xl sm:text-7xl lg:text-9xl text-white font-black leading-none mb-8"
-          style={{fontFamily:'Playfair Display, serif'}}>
+          style={{fontFamily:'Elms Sans, sans-serif'}}>
           Haz tu pedido<br/>
           <span className="text-amber-300">ahora.</span>
         </motion.h2>
@@ -265,7 +265,7 @@ function Stats() {
         ].map(s => (
           <motion.div key={s.n} variants={fadeUp} className="text-center sm:px-8">
             <p className="text-4xl sm:text-6xl font-black text-amber-300 mb-2"
-               style={{fontFamily:'Playfair Display,serif'}}>{s.n}</p>
+               style={{fontFamily:'Elms Sans, sans-serif'}}>{s.n}</p>
             <p className="text-stone-500 text-xs tracking-[0.2em] uppercase font-semibold">{s.label}</p>
           </motion.div>
         ))}
@@ -323,7 +323,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 1.1, ease: [0.25, 0.1, 0.25, 1] }}
             className="text-6xl sm:text-8xl lg:text-[120px] text-white font-black leading-none mb-8"
-            style={{fontFamily:'Playfair Display, serif'}}>
+            style={{fontFamily:'Elms Sans, sans-serif'}}>
             Hecho a mano.<br/>
             <span className="text-amber-300">Con amor.</span>
           </motion.h1>
@@ -371,7 +371,7 @@ export default function Home() {
           </Reveal>
           <Reveal delay={0.2} y={60}>
             <h2 className="text-4xl sm:text-6xl lg:text-8xl text-stone-900 font-black leading-tight"
-                style={{fontFamily:'Playfair Display, serif'}}>
+                style={{fontFamily:'Elms Sans, sans-serif'}}>
               "El mejor pan<br/>
               <em className="text-amber-500 not-italic">que vas a probar</em><br/>
               en Ibagué."
@@ -391,7 +391,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/25" />
         <Reveal delay={0.3} className="absolute bottom-8 sm:bottom-14 left-5 sm:left-14 bg-white/95 backdrop-blur px-6 sm:px-8 py-5 sm:py-6 max-w-xs sm:max-w-sm shadow-2xl">
           <p className="text-xs tracking-[0.3em] uppercase text-stone-400 font-semibold mb-2">Recién salido del horno</p>
-          <p className="text-xl sm:text-2xl font-black text-stone-900" style={{fontFamily:'Playfair Display,serif'}}>
+          <p className="text-xl sm:text-2xl font-black text-stone-900" style={{fontFamily:'Elms Sans, sans-serif'}}>
             Hojaldrado y dorado,<br/>cada mañana.
           </p>
         </Reveal>
@@ -448,7 +448,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
               <div>
                 <p className="text-red-200 text-xs tracking-[0.3em] uppercase font-semibold mb-2">🔥 Oferta especial</p>
-                <h2 className="text-3xl sm:text-5xl text-white font-black" style={{fontFamily:'Playfair Display,serif'}}>
+                <h2 className="text-3xl sm:text-5xl text-white font-black" style={{fontFamily:'Elms Sans, sans-serif'}}>
                   {promociones[0].nombre}
                 </h2>
                 {promociones[0].descripcion && (
@@ -478,7 +478,7 @@ export default function Home() {
               <div className="flex items-center gap-3 mb-4">
                 <img src="/logo.png" alt="Bon Pan" className="h-10 w-10 object-contain" />
                 <div>
-                  <p className="font-black text-white text-lg" style={{fontFamily:'Playfair Display,serif'}}>Bon Pan</p>
+                  <p className="font-black text-white text-lg" style={{fontFamily:'Elms Sans, sans-serif'}}>Bon Pan</p>
                   <p className="text-stone-600 text-xs tracking-widest uppercase">Panadería Artesanal</p>
                 </div>
               </div>
