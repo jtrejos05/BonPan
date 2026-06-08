@@ -279,7 +279,7 @@ const HITOS = [
   {
     year: 'Antes de 2009',
     title: 'Bon Pan — Nacimiento',
-    desc: 'Antes de BonPan, nació Helatto: el primer proyecto empresarial de la familia, que sembró la semilla del emprendimiento y el amor por la gastronomía artesanal.',
+    desc: 'Bonpan nace como marca en el 2009 en la ciudad de Manizales con la apertura de un punto de venta.',
     img: '/historia1.jpeg',
   },
   {
