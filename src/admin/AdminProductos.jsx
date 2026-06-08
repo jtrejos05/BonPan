@@ -115,19 +115,14 @@ function ProductModal({ initial, onSave, onClose }) {
               Foto del producto
             </label>
             <div
-              onClick={() => fileInputRef.current?.click()}
-              className={`relative border-2 border-dashed rounded-2xl overflow-hidden cursor-pointer
+              onClick={() => !preview && fileInputRef.current?.click()}
+              className={`relative border-2 border-dashed rounded-2xl overflow-hidden
                 transition-all duration-200 group
-                ${uploading ? 'border-red-300 bg-red-50' : 'border-stone-200 hover:border-red-400 hover:bg-red-50'}`}>
+                ${preview ? '' : 'cursor-pointer hover:border-red-400 hover:bg-red-50'}
+                ${uploading ? 'border-red-300 bg-red-50' : 'border-stone-200'}`}>
               {preview ? (
                 <div className="relative h-44">
                   <img src={preview} alt="Preview" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity
-                                  flex items-center justify-center">
-                    <p className="text-white font-bold text-sm flex items-center gap-2">
-                      <Upload size={16} /> Cambiar foto
-                    </p>
-                  </div>
                   {uploading && (
                     <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
                       <p className="text-red-700 font-bold text-sm animate-pulse">⏳ Subiendo imagen...</p>
@@ -147,30 +142,23 @@ function ProductModal({ initial, onSave, onClose }) {
               )}
             </div>
             {uploadError && <p className="text-red-500 text-xs mt-1 font-medium">{uploadError}</p>}
+            {/* Botones debajo de la imagen */}
+            <div className="flex gap-2 mt-2">
+              <button type="button" onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 text-xs font-bold border border-stone-200 px-3 py-2
+                           rounded-lg text-stone-600 hover:border-red-400 hover:text-red-700 transition-colors">
+                <Upload size={13} /> {preview ? 'Cambiar foto' : 'Subir foto'}
+              </button>
+              {preview && (
+                <button type="button" onClick={() => { setPreview(''); set('imagen', '') }}
+                  className="flex items-center gap-1.5 text-xs font-bold border border-red-200 px-3 py-2
+                             rounded-lg text-red-500 hover:bg-red-50 transition-colors">
+                  <Trash2 size={13} /> Eliminar imagen
+                </button>
+              )}
+            </div>
             <input ref={fileInputRef} type="file" accept="image/*" className="hidden"
               onChange={handleImageChange} />
-          </div>
-
-          {/* Emoji selector */}
-          <div>
-            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-              Ícono (si no tienes foto)
-            </label>
-            <div className="flex gap-2 flex-wrap">
-              {EMOJIS.map(e => (
-                <button key={e} type="button" onClick={() => set('emoji', e)}
-                  className={`w-10 h-10 text-2xl rounded-xl border-2 transition-all
-                    ${form.emoji === e ? 'border-red-800 bg-red-50 scale-110' : 'border-stone-200 hover:border-red-300'}`}>
-                  {e}
-                </button>
-              ))}
-              {/* Custom emoji */}
-              <input value={!EMOJIS.includes(form.emoji) ? form.emoji : ''}
-                onChange={e => set('emoji', e.target.value)}
-                placeholder="🍞"
-                className="w-10 h-10 text-2xl text-center border-2 border-dashed border-stone-300
-                           rounded-xl focus:outline-none focus:border-red-400" />
-            </div>
           </div>
 
           {/* Nombre */}
