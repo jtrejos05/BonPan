@@ -59,7 +59,7 @@ function ProductCard({ p, index, onAdd, added }) {
       <div className="p-4 sm:p-6 flex flex-col flex-1 border-t border-stone-100">
         <p className="text-[10px] text-stone-400 font-bold tracking-[0.2em] uppercase mb-1.5">{p.category}</p>
         <h3 className="text-base sm:text-lg font-black text-stone-900 leading-tight mb-2"
-            style={{fontFamily:'Playfair Display, serif'}}>{p.name}</h3>
+            style={{fontFamily:'Elms Sans, sans-serif'}}>{p.name}</h3>
         <p className="text-stone-400 text-xs leading-relaxed mb-4 line-clamp-2 flex-1 hidden sm:block">{p.description}</p>
 
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-stone-100">
