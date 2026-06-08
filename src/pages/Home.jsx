@@ -280,7 +280,8 @@ const HITOS = [
     year: 'Antes de 2009',
     title: 'Bon Pan — Nacimiento',
     desc: 'Bonpan nace como marca en el 2009 en la ciudad de Manizales con la apertura de un punto de venta.',
-    img: '/historia1.jpeg',
+    img: '/logo.png',
+    color: true,
   },
   {
     year: '3 sep 2009',
