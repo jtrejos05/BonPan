@@ -278,7 +278,7 @@ function Stats() {
 const HITOS = [
   {
     year: 'Antes de 2009',
-    title: 'Helatto — El primer sueño',
+    title: 'Bon Pan — Nacimiento',
     desc: 'Antes de BonPan, nació Helatto: el primer proyecto empresarial de la familia, que sembró la semilla del emprendimiento y el amor por la gastronomía artesanal.',
     img: '/historia1.jpeg',
   },
