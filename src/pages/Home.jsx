@@ -285,7 +285,7 @@ const HITOS = [
   {
     year: '3 sep 2009',
     title: 'Crecimiento',
-    desc: 'El 3 de septiembre de 2009 abrió sus puertas BonPan en la ciudad de Manizales. Una panadería artesanal con recetas propias, masa madre y el sello de lo hecho a mano.',
+    desc: 'BonPan crece vertiginosamente abriendo 2 puntos de venta más en Manizales y 3 en Pereira.',
     img: '/historia2.jpeg',
   },
   {
