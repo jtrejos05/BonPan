@@ -38,7 +38,7 @@ export default function Navbar() {
     <>
       {/* Franja superior */}
       <div className="bg-stone-900 text-stone-300 text-center py-2 text-[11px] font-medium tracking-[0.2em] uppercase">
-        Horneamos todos los días desde las 6am · Ibagué, Tolima
+        Horneamos todos los días desde las 7am · Ibagué, Tolima
       </div>
 
       <nav className={`sticky top-0 z-50 bg-white transition-shadow duration-300 ${scrolled ? 'shadow-sm' : ''}`}>
