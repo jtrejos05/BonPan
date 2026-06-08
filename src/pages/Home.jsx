@@ -291,7 +291,7 @@ const HITOS = [
   {
     year: '2009 – 2014',
     title: 'Evolución',
-    desc: '"BonPan nació del amor por la panadería artesanal y de la búsqueda constante por perfeccionar cada receta. Con el tiempo entendimos que no se trata de crecer rápido, sino de mantener la calidad, el propósito y la esencia en cada pan."',
+    desc: 'BonPan nace de la pasión por la panadería y de la búsqueda constante por perfeccionar procesos y productos. Con el tiempo entendimos que no se trata de crecer rápido sino de mantener la calidad, el propósito y la esencia de cada producto que hacemos. Hoy en día abastecemos nuestros clientes como cafés, panaderías, clínicas y otras instituciones con nuestros productos.',
     img: '/historia3.jpeg',
   },
   {
