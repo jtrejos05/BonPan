@@ -290,8 +290,8 @@ const HITOS = [
   },
   {
     year: '2009 – 2014',
-    title: 'Cámara de Comercio & Manizales Más',
-    desc: 'BonPan fue respaldado por la Cámara de Comercio de Manizales y Manizales Más, el centro de emprendimiento que impulsó su crecimiento, formalización y visión de negocio.',
+    title: 'Evolución',
+    desc: '"BonPan nació del amor por la panadería artesanal y de la búsqueda constante por perfeccionar cada receta. Con el tiempo entendimos que no se trata de crecer rápido, sino de mantener la calidad, el propósito y la esencia en cada pan."',
     img: '/historia3.jpeg',
   },
   {
