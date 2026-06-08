@@ -611,7 +611,7 @@ export default function Home() {
                 <img src="/logo.png" alt="Bon Pan" className="h-10 w-10 object-contain" />
                 <div>
                   <p className="font-black text-white text-lg" style={{fontFamily:'Elms Sans, sans-serif'}}>Bon Pan</p>
-                  <p className="text-stone-600 text-xs tracking-widest uppercase">Panadería Artesanal</p>
+                  <p className="text-white text-xs tracking-widest uppercase">Panadería Artesanal</p>
                 </div>
               </div>
               <p className="text-stone-600 text-sm leading-relaxed">
@@ -630,10 +630,8 @@ export default function Home() {
             <div className="col-span-2 sm:col-span-2">
               <p className="text-white text-xs tracking-[0.2em] uppercase font-bold mb-4">Contacto</p>
               <div className="space-y-2 text-sm text-stone-600">
-                <p>📍 Ibagué, Tolima</p>
-                <p>📞 +57 310 123 4567</p>
+                <p>📞 +57 305 306 7179</p>
                 <p>✉️ hola@bonpan.co</p>
-                <p>🕐 Lun–Vie: 6am – 7pm · Sáb–Dom: 7am – 5pm</p>
               </div>
             </div>
           </div>
