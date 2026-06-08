@@ -211,7 +211,7 @@ function BottomBanner() {
         <div>
           <p className="text-amber-700 text-xs tracking-[0.4em] uppercase font-bold mb-3">¿Listo para pedir?</p>
           <h3 className="text-3xl sm:text-4xl font-black text-stone-900 mb-4 leading-tight"
-              style={{fontFamily:'Playfair Display,serif'}}>
+              style={{fontFamily:'Elms Sans, sans-serif'}}>
             Tu pedido,<br/>en 15 minutos.
           </h3>
           <p className="text-stone-700 text-sm leading-relaxed mb-6 font-light">
@@ -307,7 +307,7 @@ export default function Menu() {
             initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 1.1, ease: [0.25, 0.1, 0.25, 1] }}
             className="text-6xl sm:text-8xl lg:text-[110px] text-white font-black leading-none"
-            style={{fontFamily:'Playfair Display, serif'}}>
+            style={{fontFamily:'Elms Sans, sans-serif'}}>
             Nuestro<br/>
             <span className="text-amber-300">Menú.</span>
           </motion.h1>
