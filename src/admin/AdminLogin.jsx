@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
-import { Lock, Eye, EyeOff, ArrowRight } from 'lucide-react'
+import { Lock, Eye, EyeOff, ArrowRight, User } from 'lucide-react'
 
 export default function AdminLogin() {
   const { adminLogin, adminAuth } = useApp()
   const navigate = useNavigate()
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError]       = useState('')
   const [show, setShow]         = useState(false)
@@ -17,9 +18,9 @@ export default function AdminLogin() {
     e.preventDefault()
     setLoading(true)
     try {
-      const ok = await adminLogin(password)
+      const ok = await adminLogin(username, password)
       if (ok) navigate('/admin/dashboard')
-      else setError('Contraseña incorrecta. Intenta de nuevo.')
+      else setError('Usuario o contraseña incorrectos.')
     } catch {
       setError('No se pudo conectar al servidor.')
     } finally {
@@ -53,6 +54,27 @@ export default function AdminLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Usuario */}
+            <div>
+              <label className="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">
+                Usuario
+              </label>
+              <div className="relative">
+                <User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+                <input
+                  type="text"
+                  value={username}
+                  onChange={e => { setUsername(e.target.value); setError('') }}
+                  placeholder="Ingresa tu usuario"
+                  autoComplete="username"
+                  className={`w-full border-2 rounded-2xl pl-11 pr-4 py-3.5 text-stone-700 font-medium
+                    focus:outline-none transition-colors
+                    ${error ? 'border-red-400 bg-red-50' : 'border-stone-100 focus:border-red-300'}`}
+                  required />
+              </div>
+            </div>
+
+            {/* Contraseña */}
             <div>
               <label className="block text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">
                 Contraseña
@@ -64,6 +86,7 @@ export default function AdminLogin() {
                   value={password}
                   onChange={e => { setPassword(e.target.value); setError('') }}
                   placeholder="••••••••••"
+                  autoComplete="current-password"
                   className={`w-full border-2 rounded-2xl pl-11 pr-12 py-3.5 text-stone-700 font-medium
                     focus:outline-none transition-colors
                     ${error ? 'border-red-400 bg-red-50' : 'border-stone-100 focus:border-red-300'}`}
