@@ -379,7 +379,7 @@ function TimelineItem({ hito, index }) {
         initial={{ opacity: 0, x: isLeft ? -40 : 40 }}
         animate={inView ? { opacity: 1, x: 0 } : {}}
         transition={{ duration: 0.9, ease: [0.25, 0.1, 0.25, 1] }}
-        className={`relative overflow-hidden h-56 sm:h-96 ${isLeft ? 'sm:order-1' : 'sm:order-2'}`}>
+        className={`relative overflow-hidden h-64 sm:h-[28rem] ${isLeft ? 'sm:order-1' : 'sm:order-2'}`}>
         <img src={hito.img} alt={hito.title}
           className={`w-full h-full transition-all duration-700 ${hito.color ? 'object-contain bg-stone-950 p-8' : 'object-cover grayscale hover:grayscale-0 sepia-[0.4]'}`} />
         <div className="absolute inset-0 bg-gradient-to-t from-stone-950/60 to-transparent" />
