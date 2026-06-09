@@ -201,7 +201,7 @@ function BottomBanner() {
       className="mt-16 sm:mt-24 grid grid-cols-1 lg:grid-cols-2 overflow-hidden">
       <div className="relative h-52 sm:h-72 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1504093898956-c318a39e9eee?w=900&q=80"
+          src="/bonpanpunto.jpeg"
           alt="Pan artesanal"
           className="w-full h-full object-cover"
         />
