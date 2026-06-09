@@ -70,7 +70,7 @@ function LoadingScreen({ onDone }) {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.7 }}
         className="text-stone-500 text-xs tracking-[0.4em] uppercase font-semibold">
-        Panadería · Ibagué
+        Panadería Artesanal
       </motion.p>
       {/* Barra de carga */}
       <motion.div className="w-32 h-0.5 bg-stone-800 rounded-full overflow-hidden mt-2">
