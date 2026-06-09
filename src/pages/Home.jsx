@@ -287,7 +287,7 @@ const HITOS = [
     year: '3 sep 2009',
     title: 'Crecimiento',
     desc: 'BonPan crece vertiginosamente abriendo 2 puntos de venta más en Manizales y 3 en Pereira, consolidando la marca en el eje cafetero.',
-    img: '/crecimiento.jpeg',
+    img: '/crecimiento2.jpeg',
     color: true,
   },
   {
