@@ -577,7 +577,7 @@ export default function Home() {
         />
         <div className="h-px bg-stone-100" />
         <ProductHero
-          img="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=1200&q=90"
+          img="/Pastel de Pollo.jpeg"
           tag="El favorito de todos"
           title="Pastel de Pollo."
           sub="Relleno generoso de pollo, con masa que se deshace en la boca. El que más piden, el que nunca falta."
