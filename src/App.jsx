@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -36,6 +37,54 @@ import PVDashboard from './punto-venta/PVDashboard'
 
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
 
+/* ─── Loading Screen ─────────────────────────── */
+function LoadingScreen({ onDone }) {
+  useEffect(() => {
+    const t = setTimeout(onDone, 2200)
+    return () => clearTimeout(t)
+  }, [onDone])
+
+  return (
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 0.6, ease: 'easeInOut' } }}
+      className="fixed inset-0 z-[9999] bg-stone-950 flex flex-col items-center justify-center gap-6">
+      <motion.img
+        src="/logo.png"
+        alt="Bon Pan"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.7, ease: [0.25, 0.1, 0.25, 1] }}
+        className="w-32 h-32 object-contain"
+      />
+      <motion.p
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.4 }}
+        className="text-white font-black text-2xl tracking-widest"
+        style={{ fontFamily: 'Playfair Display, serif' }}>
+        Bon Pan
+      </motion.p>
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, delay: 0.7 }}
+        className="text-stone-500 text-xs tracking-[0.4em] uppercase font-semibold">
+        Panadería · Ibagué
+      </motion.p>
+      {/* Barra de carga */}
+      <motion.div className="w-32 h-0.5 bg-stone-800 rounded-full overflow-hidden mt-2">
+        <motion.div
+          className="h-full bg-amber-300 rounded-full"
+          initial={{ width: '0%' }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 1.8, ease: 'easeInOut' }}
+        />
+      </motion.div>
+    </motion.div>
+  )
+}
+
 function ClientLayout() {
   return (
     <>
@@ -53,10 +102,20 @@ function ClientLayout() {
 }
 
 export default function App() {
+  const [loading, setLoading] = useState(() => {
+    // Solo mostrar loading en la primera visita de la sesión
+    if (sessionStorage.getItem('bp_loaded')) return false
+    sessionStorage.setItem('bp_loaded', '1')
+    return true
+  })
+
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <AppProvider>
         <AuthProvider>
+          <AnimatePresence>
+            {loading && <LoadingScreen key="loader" onDone={() => setLoading(false)} />}
+          </AnimatePresence>
           <BrowserRouter>
             <ScrollToTop />
             <Routes>

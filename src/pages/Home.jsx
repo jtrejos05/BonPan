@@ -248,6 +248,35 @@ function FinalCTA() {
   )
 }
 
+/* ─── Contador animado ──────────────────────── */
+function AnimatedCounter({ value, suffix = '', duration = 1.8 }) {
+  const [display, setDisplay] = useState('0')
+  const ref    = useRef(null)
+  const inView = useInView(ref, { once: true, amount: 0.1 })
+
+  useEffect(() => {
+    if (!inView) return
+    // Si es texto puro (ej: "7am"), animamos solo el número dentro
+    const match = String(value).match(/^(\d+)(.*)$/)
+    if (!match) { setDisplay(value); return }
+    const target   = parseInt(match[1])
+    const rest     = match[2] // ej: "am", "+", "%"
+    const start    = performance.now()
+    function step(now) {
+      const elapsed  = now - start
+      const progress = Math.min(elapsed / (duration * 1000), 1)
+      // easeOut
+      const eased    = 1 - Math.pow(1 - progress, 3)
+      const current  = Math.round(eased * target)
+      setDisplay(`${current}${rest}${suffix}`)
+      if (progress < 1) requestAnimationFrame(step)
+    }
+    requestAnimationFrame(step)
+  }, [inView, value, suffix, duration])
+
+  return <span ref={ref}>{display}</span>
+}
+
 /* ─── Stats ─────────────────────────────────── */
 function Stats() {
   const ref   = useRef(null)
@@ -258,14 +287,16 @@ function Stats() {
         initial="hidden" animate={inView ? 'show' : 'hidden'} variants={stagger}
         className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-0 sm:divide-x divide-stone-800">
         {[
-          { n: '7am',  label: 'Abrimos cada día'     },
-          { n: '15+',  label: 'Años horneando'        },
+          { n: '7am',  label: 'Abrimos cada día'      },
+          { n: '15+',  label: 'Años horneando'         },
           { n: '100%', label: 'Ingredientes naturales' },
-          { n: '0',    label: 'Conservantes'          },
+          { n: '0',    label: 'Conservantes'           },
         ].map(s => (
           <motion.div key={s.n} variants={fadeUp} className="text-center sm:px-8">
             <p className="text-4xl sm:text-6xl font-black text-amber-300 mb-2"
-               style={{fontFamily:'Elms Sans, sans-serif'}}>{s.n}</p>
+               style={{fontFamily:'Elms Sans, sans-serif'}}>
+              <AnimatedCounter value={s.n} />
+            </p>
             <p className="text-stone-500 text-xs tracking-[0.2em] uppercase font-semibold">{s.label}</p>
           </motion.div>
         ))}
