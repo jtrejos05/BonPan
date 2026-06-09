@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../context/AppContext'
-import { ShoppingCart, Check } from 'lucide-react'
+import { ShoppingCart, Check, X } from 'lucide-react'
 import { api } from '../services/api'
-import { motion, useInView, useScroll, useTransform } from 'framer-motion'
+import { motion, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion'
 
 const ALL = 'Todos'
 
@@ -16,8 +16,89 @@ const stagger = {
   show:   { transition: { staggerChildren: 0.07 } },
 }
 
+/* ─── Bottom Sheet móvil ─────────────────────── */
+function ProductBottomSheet({ p, onClose, onAdd, added }) {
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}>
+      {/* Fondo oscuro */}
+      <motion.div
+        className="absolute inset-0 bg-black/50"
+        onClick={onClose}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      />
+      {/* Panel */}
+      <motion.div
+        className="relative bg-white w-full sm:max-w-sm rounded-t-3xl sm:rounded-2xl overflow-hidden shadow-2xl z-10"
+        initial={{ y: '100%' }}
+        animate={{ y: 0 }}
+        exit={{ y: '100%' }}
+        transition={{ type: 'spring', damping: 28, stiffness: 300 }}>
+
+        {/* Imagen */}
+        <div className="relative h-56 bg-stone-100">
+          {p.imagen
+            ? <img src={p.imagen} alt={p.name} className="w-full h-full object-cover" />
+            : <div className="w-full h-full flex items-center justify-center text-7xl">{p.emoji}</div>
+          }
+          {p.stock === 0 && (
+            <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+              <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Agotado</span>
+            </div>
+          )}
+          {/* Botón cerrar */}
+          <button onClick={onClose}
+            className="absolute top-3 right-3 bg-black/40 text-white rounded-full p-1.5 backdrop-blur-sm">
+            <X size={18} />
+          </button>
+          {/* Handle drag indicator */}
+          <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1 bg-white/60 rounded-full sm:hidden" />
+        </div>
+
+        {/* Info */}
+        <div className="p-6">
+          <p className="text-[10px] text-stone-400 font-bold tracking-[0.2em] uppercase mb-1">{p.category}</p>
+          <h3 className="text-2xl font-black text-stone-900 leading-tight mb-3"
+              style={{fontFamily:'Elms Sans, sans-serif'}}>{p.name}</h3>
+          {p.description && (
+            <p className="text-stone-500 text-sm leading-relaxed mb-5">{p.description}</p>
+          )}
+          <div className="flex items-center justify-between pt-4 border-t border-stone-100">
+            <p className="font-black text-stone-900 text-2xl">${p.price.toLocaleString()}</p>
+            <button
+              onClick={() => { onAdd(p); setTimeout(onClose, 800) }}
+              disabled={p.stock === 0}
+              className={`flex items-center gap-2 text-xs font-bold tracking-widest uppercase
+                transition-all duration-300 py-3 px-6 border-2 touch-manipulation
+                ${p.stock === 0
+                  ? 'text-stone-300 border-stone-200 cursor-not-allowed'
+                  : added === p.id
+                    ? 'bg-amber-400 text-stone-900 border-amber-400'
+                    : 'border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white'}`}>
+              {added === p.id
+                ? <><Check size={13} /> Listo</>
+                : p.stock === 0 ? 'Agotado'
+                : <><ShoppingCart size={13} /> Agregar al carrito</>}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 /* ─── Tarjeta de producto ────────────────────── */
-function ProductCard({ p, index, onAdd, added }) {
+function ProductCard({ p, index, onAdd, added, onOpen }) {
   const ref    = useRef(null)
   const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
 
@@ -27,7 +108,8 @@ function ProductCard({ p, index, onAdd, added }) {
       initial={{ opacity: 0, y: 40 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, delay: (index % 4) * 0.08, ease: [0.25, 0.1, 0.25, 1] }}
-      className="group bg-white overflow-hidden flex flex-col">
+      onClick={onOpen}
+      className="group bg-white overflow-hidden flex flex-col cursor-pointer">
 
       {/* Imagen */}
       <div className="relative overflow-hidden bg-stone-100 h-44 sm:h-60">
@@ -39,19 +121,16 @@ function ProductCard({ p, index, onAdd, added }) {
               {p.emoji}
             </div>
         }
-        {/* Badge agotado */}
         {p.stock === 0 && (
           <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
             <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Agotado</span>
           </div>
         )}
-        {/* Badge últimos */}
         {p.stock > 0 && p.stock <= 5 && (
           <span className="absolute top-3 left-3 bg-amber-400 text-stone-900 text-[9px] font-black tracking-widest uppercase px-2.5 py-1">
             ¡Últimos!
           </span>
         )}
-        {/* Overlay hover con precio */}
         <div className="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/20 transition-all duration-500" />
       </div>
 
@@ -64,11 +143,12 @@ function ProductCard({ p, index, onAdd, added }) {
 
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-stone-100">
           <p className="font-black text-stone-900 text-base sm:text-lg">${p.price.toLocaleString()}</p>
+          {/* En desktop: botón directo. En móvil: se abre el sheet al tocar la tarjeta */}
           <button
-            onClick={() => onAdd(p)}
+            onClick={e => { e.stopPropagation(); onAdd(p) }}
             disabled={p.stock === 0}
-            className={`flex items-center gap-1.5 text-[10px] sm:text-xs font-bold tracking-widest uppercase
-              transition-all duration-300 py-2 px-3 sm:px-4 border touch-manipulation
+            className={`hidden sm:flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase
+              transition-all duration-300 py-2 px-4 border touch-manipulation
               ${p.stock === 0
                 ? 'text-stone-300 border-stone-200 cursor-not-allowed'
                 : added === p.id
@@ -79,6 +159,10 @@ function ProductCard({ p, index, onAdd, added }) {
               : p.stock === 0 ? 'Agotado'
               : <><ShoppingCart size={11} /> Agregar</>}
           </button>
+          {/* En móvil: indicador visual */}
+          <span className="sm:hidden text-[10px] text-stone-400 font-bold tracking-widest uppercase">
+            Ver →
+          </span>
         </div>
       </div>
     </motion.div>
@@ -235,10 +319,11 @@ function BottomBanner() {
 export default function Menu() {
   const { products, addToCart, loading } = useApp()
 
-  const [activeCategory, setActiveCategory] = useState(ALL)
-  const [added,          setAdded]          = useState(null)
-  const [search,         setSearch]         = useState('')
-  const [promociones,    setPromociones]    = useState([])
+  const [activeCategory,  setActiveCategory]  = useState(ALL)
+  const [added,           setAdded]           = useState(null)
+  const [search,          setSearch]          = useState('')
+  const [promociones,     setPromociones]     = useState([])
+  const [selectedProduct, setSelectedProduct] = useState(null)
 
   // Parallax header
   const heroRef = useRef(null)
@@ -280,6 +365,18 @@ export default function Menu() {
 
   return (
     <div className="bg-white text-stone-900 overflow-x-hidden">
+
+      {/* Bottom Sheet */}
+      <AnimatePresence>
+        {selectedProduct && (
+          <ProductBottomSheet
+            p={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            onAdd={handleAdd}
+            added={added}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ══════════════════════════════════════
           HERO con parallax
@@ -414,6 +511,7 @@ export default function Menu() {
                 index={i}
                 onAdd={handleAdd}
                 added={added}
+                onOpen={() => setSelectedProduct(p)}
               />
             ))}
           </div>
