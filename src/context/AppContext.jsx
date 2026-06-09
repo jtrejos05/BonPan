@@ -137,14 +137,18 @@ export function AppProvider({ children }) {
   }
 
   // ── Auth ──────────────────────────────────────────────────────
-  async function adminLogin(password) {
-    const res = await api.auth.login(password)
-    if (res.ok) {
-      setAdminAuth(true)
-      api.actividad.log('sistema', 'Inicio de sesión en panel admin').catch(() => {})
-      return true
+  async function adminLogin(username, password) {
+    try {
+      const res = await api.auth.login(username, password)
+      if (res.ok) {
+        setAdminAuth(true)
+        api.actividad.log('sistema', 'Inicio de sesión en panel admin').catch(() => {})
+        return true
+      }
+      return false
+    } catch {
+      return false
     }
-    return false
   }
 
   function adminLogout() {
