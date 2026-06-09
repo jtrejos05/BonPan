@@ -48,7 +48,7 @@ export default function AdminLogin() {
                 className="relative h-20 w-20 mx-auto rounded-2xl object-contain shadow-lg mb-4" />
             </div>
             <h1 className="text-2xl font-black text-red-900 mt-4"
-                style={{fontFamily:'Montserrat,sans-serif'}}>Panel Administrativo</h1>
+                style={{fontFamily:'Elms Sans, sans-serif'}}>Panel Administrativo</h1>
             <p className="text-stone-400 text-sm mt-1 font-medium">Acceso exclusivo para el equipo Bon Pan</p>
           </div>
 

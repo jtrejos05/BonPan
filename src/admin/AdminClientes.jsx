@@ -44,7 +44,7 @@ export default function AdminClientes() {
   return (
     <div className="p-6 space-y-5">
       <div>
-        <h1 className="text-3xl font-black text-red-900" style={{fontFamily:'Montserrat,sans-serif'}}>Clientes</h1>
+        <h1 className="text-3xl font-black text-red-900" style={{fontFamily:'Elms Sans, sans-serif'}}>Clientes</h1>
         <p className="text-stone-500 text-sm mt-1">Historial de compras y comportamiento por cliente</p>
       </div>
 

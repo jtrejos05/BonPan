@@ -80,7 +80,7 @@ function PromoModal({ initial, onSave, onClose }) {
 
         {/* Header */}
         <div className="bg-red-950 px-6 py-5 flex items-center justify-between sticky top-0 z-10">
-          <h2 className="text-white font-black text-xl" style={{fontFamily:'Playfair Display,serif'}}>
+          <h2 className="text-white font-black text-xl" style={{fontFamily:'Elms Sans, sans-serif'}}>
             {initial ? '✏️ Editar Promoción' : '🎉 Nueva Promoción'}
           </h2>
           <button onClick={onClose} className="text-red-300 hover:text-white"><X size={20} /></button>
@@ -302,7 +302,7 @@ function PromoCard({ p, onToggle, onEdit, onDelete }) {
           </div>}
           <div>
             <h3 className="font-black text-red-950 text-base leading-tight"
-                style={{fontFamily:'Playfair Display,serif'}}>{p.nombre}</h3>
+                style={{fontFamily:'Elms Sans, sans-serif'}}>{p.nombre}</h3>
             {p.codigo && (
               <span className="text-xs font-mono font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded mt-0.5 inline-block tracking-widest">
                 {p.codigo}
@@ -429,7 +429,7 @@ export default function AdminPromociones() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDel(null)} />
           <div className="relative bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl z-10">
             <div className="text-5xl mb-4">🗑️</div>
-            <h3 className="font-black text-red-950 text-xl mb-2" style={{fontFamily:'Playfair Display,serif'}}>
+            <h3 className="font-black text-red-950 text-xl mb-2" style={{fontFamily:'Elms Sans, sans-serif'}}>
               ¿Eliminar promoción?
             </h3>
             <p className="text-stone-400 text-sm mb-6">Esta acción no se puede deshacer.</p>
@@ -450,7 +450,7 @@ export default function AdminPromociones() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Playfair Display,serif'}}>
+          <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Elms Sans, sans-serif'}}>
             Promociones
           </h1>
           <p className="text-stone-400 text-sm mt-1">

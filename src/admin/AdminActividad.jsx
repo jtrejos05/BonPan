@@ -20,7 +20,7 @@ export default function AdminActividad() {
   return (
     <div className="p-6 space-y-5">
       <div>
-        <h1 className="text-3xl font-black text-red-900" style={{fontFamily:'Montserrat,sans-serif'}}>Log de Actividad</h1>
+        <h1 className="text-3xl font-black text-red-900" style={{fontFamily:'Elms Sans, sans-serif'}}>Log de Actividad</h1>
         <p className="text-stone-500 text-sm mt-1">Registro completo de todas las acciones del módulo de clientes y admin</p>
       </div>
 

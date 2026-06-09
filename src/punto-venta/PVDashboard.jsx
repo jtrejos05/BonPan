@@ -70,7 +70,7 @@ export default function PVDashboard() {
         <div className="flex items-center gap-3">
           <img src="/logo.png" alt="Bon Pan" className="h-10 w-10 object-contain rounded-lg"/>
           <div>
-            <p className="font-black text-base" style={{fontFamily:'Playfair Display,serif'}}>{pvData.nombre}</p>
+            <p className="font-black text-base" style={{fontFamily:'Elms Sans, sans-serif'}}>{pvData.nombre}</p>
             <p className="text-red-300 text-xs font-medium">Panel de Ventas</p>
           </div>
         </div>

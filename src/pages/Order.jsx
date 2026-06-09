@@ -369,7 +369,7 @@ export default function Order() {
                     : item.emoji}
                 </div>
                 <div className="flex-1 min-w-0 text-left">
-                  <h3 className="font-bold text-red-950 text-xs sm:text-sm truncate" style={{fontFamily:'Playfair Display,serif'}}>
+                  <h3 className="font-bold text-red-950 text-xs sm:text-sm truncate" style={{fontFamily:'Elms Sans, sans-serif'}}>
                     {item.name}
                   </h3>
                   <p className="text-stone-400 text-xs mt-0.5">${item.price.toLocaleString()} c/u</p>

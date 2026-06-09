@@ -27,7 +27,7 @@ function PVModal({ initial, onSave, onClose }) {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose}/>
       <div className="relative bg-white w-full max-w-md shadow-2xl z-10 rounded-2xl overflow-hidden">
         <div className="bg-red-950 px-6 py-5 flex items-center justify-between">
-          <h2 className="text-white font-black text-xl" style={{fontFamily:'Playfair Display,serif'}}>
+          <h2 className="text-white font-black text-xl" style={{fontFamily:'Elms Sans, sans-serif'}}>
             {initial ? '✏️ Editar Local' : '🏪 Nuevo Local'}
           </h2>
           <button onClick={onClose} className="text-red-300 hover:text-white"><X size={20}/></button>
@@ -134,7 +134,7 @@ export default function AdminPuntosVenta() {
           <div className="absolute inset-0 bg-black/40" onClick={()=>setConfirmDel(null)}/>
           <div className="relative bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl z-10">
             <div className="text-5xl mb-4">🏪</div>
-            <h3 className="font-black text-red-950 text-xl mb-2" style={{fontFamily:'Playfair Display,serif'}}>
+            <h3 className="font-black text-red-950 text-xl mb-2" style={{fontFamily:'Elms Sans, sans-serif'}}>
               ¿Desactivar este local?
             </h3>
             <p className="text-stone-400 text-sm mb-6">El local no aparecerá para nuevos pedidos.</p>
@@ -155,7 +155,7 @@ export default function AdminPuntosVenta() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Playfair Display,serif'}}>
+          <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Elms Sans, sans-serif'}}>
             Puntos de Venta
           </h1>
           <p className="text-stone-400 text-sm mt-1">{locales.filter(l=>l.activo).length} locales activos</p>
@@ -205,7 +205,7 @@ export default function AdminPuntosVenta() {
                     <Store size={22} className="text-red-700"/>
                   </div>
                   <div>
-                    <h3 className="font-black text-red-950 text-base" style={{fontFamily:'Playfair Display,serif'}}>
+                    <h3 className="font-black text-red-950 text-base" style={{fontFamily:'Elms Sans, sans-serif'}}>
                       {l.nombre}
                     </h3>
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full

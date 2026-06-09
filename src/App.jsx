@@ -62,7 +62,7 @@ function LoadingScreen({ onDone }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
         className="text-white font-black text-2xl tracking-widest"
-        style={{ fontFamily: 'Playfair Display, serif' }}>
+        style={{ fontFamily: 'Elms Sans, sans-serif' }}>
         Bon Pan
       </motion.p>
       <motion.p

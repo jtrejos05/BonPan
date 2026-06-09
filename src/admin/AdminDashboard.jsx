@@ -37,7 +37,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Montserrat,sans-serif'}}>
+          <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Elms Sans, sans-serif'}}>
             Dashboard
           </h1>
           <p className="text-gray-400 text-sm mt-1 font-medium">Vista general del negocio en tiempo real</p>
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
         {/* Últimos pedidos */}
         <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
           <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
-              style={{fontFamily:'Montserrat,sans-serif'}}>
+              style={{fontFamily:'Elms Sans, sans-serif'}}>
             <ShoppingBag size={20} className="text-red-500" /> Últimos Pedidos
           </h2>
           {recentOrders.length === 0 ? (
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
         {/* Top productos */}
         <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
           <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
-              style={{fontFamily:'Montserrat,sans-serif'}}>
+              style={{fontFamily:'Elms Sans, sans-serif'}}>
             <TrendingUp size={20} className="text-red-500" /> Más Vendidos
           </h2>
           {topProducts.length === 0 ? (
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
       {/* Actividad reciente */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
         <h2 className="font-black text-gray-900 text-lg mb-5"
-            style={{fontFamily:'Montserrat,sans-serif'}}>Actividad Reciente</h2>
+            style={{fontFamily:'Elms Sans, sans-serif'}}>Actividad Reciente</h2>
         {activityLog.length === 0 ? (
           <p className="text-gray-300 text-sm text-center py-6 font-medium">Sin actividad registrada</p>
         ) : (

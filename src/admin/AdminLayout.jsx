@@ -32,7 +32,7 @@ export default function AdminLayout() {
                          group-hover:scale-105 transition-transform" />
             <div>
               <p className="font-black text-base leading-tight"
-                 style={{fontFamily:'Montserrat,sans-serif'}}>Bon Pan</p>
+                 style={{fontFamily:'Elms Sans, sans-serif'}}>Bon Pan</p>
               <p className="text-red-400 text-xs font-semibold tracking-wide">Panel Admin</p>
             </div>
           </Link>

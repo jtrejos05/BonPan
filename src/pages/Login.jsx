@@ -51,7 +51,7 @@ export default function Login() {
         <div className="absolute inset-0 bg-stone-900/40" />
         <div className="absolute bottom-10 left-10 right-10">
           <p className="text-white/60 text-xs tracking-[0.3em] uppercase mb-3">Bon Pan</p>
-          <p className="text-white text-3xl font-black leading-tight" style={{fontFamily:'Playfair Display,serif'}}>
+          <p className="text-white text-3xl font-black leading-tight" style={{fontFamily:'Elms Sans, sans-serif'}}>
             "Pan hecho a mano, todos los días."
           </p>
         </div>
@@ -65,13 +65,13 @@ export default function Login() {
           <Link to="/" className="flex items-center gap-3 mb-10 group">
             <img src="/logo.png" alt="Bon Pan" className="h-10 w-10 object-contain group-hover:opacity-70 transition-opacity" />
             <div>
-              <p className="font-black text-stone-900 text-lg leading-none" style={{fontFamily:'Playfair Display,serif'}}>Bon Pan</p>
+              <p className="font-black text-stone-900 text-lg leading-none" style={{fontFamily:'Elms Sans, sans-serif'}}>Bon Pan</p>
               <p className="text-stone-400 text-[10px] tracking-widest uppercase">Panadería · Ibagué</p>
             </div>
           </Link>
 
           <h1 className="text-3xl sm:text-4xl font-black text-stone-900 mb-2"
-              style={{fontFamily:'Playfair Display, serif'}}>
+              style={{fontFamily:'Elms Sans, sans-serif'}}>
             Bienvenido.
           </h1>
           <p className="text-stone-400 text-sm mb-8">Ingresa a tu cuenta para continuar</p>

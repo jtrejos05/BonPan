@@ -48,7 +48,7 @@ export default function PVLogin() {
         <div className="bg-white rounded-3xl shadow-2xl p-8 text-left">
           <div className="text-center mb-8">
             <img src="/logo.png" alt="Bon Pan" className="h-16 w-16 object-contain mx-auto mb-4"/>
-            <h1 className="text-2xl font-black text-red-900" style={{fontFamily:'Playfair Display,serif'}}>
+            <h1 className="text-2xl font-black text-red-900" style={{fontFamily:'Elms Sans, sans-serif'}}>
               Panel de Ventas
             </h1>
             <p className="text-stone-400 text-sm mt-1 font-medium">Acceso para empleados</p>

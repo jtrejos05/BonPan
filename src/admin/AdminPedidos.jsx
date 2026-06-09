@@ -96,7 +96,7 @@ export default function AdminPedidos() {
   return (
     <div className="p-6 space-y-5">
       <div>
-        <h1 className="text-3xl font-black text-red-900" style={{fontFamily:'Montserrat,sans-serif'}}>Pedidos</h1>
+        <h1 className="text-3xl font-black text-red-900" style={{fontFamily:'Elms Sans, sans-serif'}}>Pedidos</h1>
         <p className="text-stone-500 text-sm mt-1">Trazabilidad completa de cada pedido</p>
       </div>
 

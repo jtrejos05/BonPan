@@ -4,7 +4,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Montserrat', system-ui, sans-serif;
+    font-family: 'Elms Sans', system-ui, sans-serif;
     background: #faf7f2;
     color: #1c0f00;
     text-align: center;
@@ -14,5 +14,5 @@
 
   p, li, td, th, label, input, textarea, select { text-align: left; }
 
-  h1, h2, h3 { font-family: 'Playfair Display', Georgia, serif; }
+  h1, h2, h3 { font-family: 'Elms Sans', system-ui, sans-serif; }
 }
