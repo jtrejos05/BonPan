@@ -1,4 +1,4 @@
-// En desarrollo apunta a localhost, en producción a Railway
+// En desarrollo apunta a localhost, en producción a Railway — v2
 const BASE = import.meta.env.VITE_API_URL
   || (import.meta.env.DEV ? 'http://localhost:4000/api' : 'https://bonpan-production.up.railway.app/api')
 
@@ -50,7 +50,7 @@ export const api = {
   },
 
   auth: {
-    login: (password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
+    login: (username, password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
   },
 
   puntosVenta: {
