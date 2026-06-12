@@ -13,76 +13,53 @@ function fmtDate(raw) {
   })
 }
 
-/** Obtiene año, mes (1-12) y día de un timestamp */
-function parseParts(raw) {
-  if (!raw) return null
+/** Convierte timestamp a YYYY-MM-DD para comparar con input date */
+function toDateStr(raw) {
+  if (!raw) return ''
   const d = new Date(raw)
-  if (isNaN(d)) return null
-  return { y: d.getFullYear(), m: d.getMonth() + 1, d: d.getDate() }
+  if (isNaN(d)) return ''
+  return d.toISOString().slice(0, 10)
 }
 
-const MONTHS = [
-  'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-  'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre',
-]
-
-const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Entregado', 'Cancelado']
+const STATUS_OPTIONS = ['Pendiente', 'Confirmado', 'En preparación', 'Listo para recoger', 'Entregado', 'Cancelado']
 const STATUS_COLORS  = {
-  'Pendiente':      'bg-yellow-100 text-yellow-700',
-  'En preparación': 'bg-blue-100   text-blue-700',
-  'Listo':          'bg-green-100  text-green-700',
-  'Entregado':      'bg-stone-100  text-stone-500',
-  'Cancelado':      'bg-red-100    text-red-600',
+  'Pendiente':          'bg-yellow-100 text-yellow-700',
+  'Confirmado':         'bg-purple-100 text-purple-700',
+  'En preparación':     'bg-blue-100   text-blue-700',
+  'Listo para recoger': 'bg-green-100  text-green-700',
+  'Entregado':          'bg-stone-100  text-stone-500',
+  'Cancelado':          'bg-red-100    text-red-600',
+}
+const STATUS_ICONS = {
+  'Pendiente':          '🕐',
+  'Confirmado':         '✅',
+  'En preparación':     '👨‍🍳',
+  'Listo para recoger': '📦',
+  'Entregado':          '🎉',
+  'Cancelado':          '❌',
 }
 
 export default function AdminPedidos() {
   const { orders, updateOrderStatus, loading } = useApp()
-  const [filter,   setFilter]   = useState('Todos')
-  const [expanded, setExpanded] = useState(null)
-  const [search,   setSearch]   = useState('')
+  const [filter,    setFilter]    = useState('Todos')
+  const [expanded,  setExpanded]  = useState(null)
+  const [search,    setSearch]    = useState('')
+  const [dateFrom,  setDateFrom]  = useState('')
+  const [dateTo,    setDateTo]    = useState('')
 
-  // Filtros de fecha
-  const [selYear,  setSelYear]  = useState('')
-  const [selMonth, setSelMonth] = useState('')
-  const [selDay,   setSelDay]   = useState('')
+  const hasDateFilter = dateFrom || dateTo
 
-  // Años disponibles según pedidos
-  const availableYears = useMemo(() => {
-    const years = [...new Set(orders.map(o => parseParts(o.created_at)?.y).filter(Boolean))]
-    return years.sort((a, b) => b - a)
-  }, [orders])
+  function clearDate() { setDateFrom(''); setDateTo('') }
 
-  // Días disponibles: todos los días del mes seleccionado
-  const availableDays = useMemo(() => {
-    if (!selYear || !selMonth) return []
-    const daysInMonth = new Date(Number(selYear), Number(selMonth), 0).getDate()
-    return Array.from({ length: daysInMonth }, (_, i) => i + 1)
-  }, [selYear, selMonth])
-
-  const hasDateFilter = selYear || selMonth || selDay
-
-  function clearDate() {
-    setSelYear(''); setSelMonth(''); setSelDay('')
-  }
-
-  // Cuando cambia el año, resetear mes y día
-  function handleYear(v) {
-    setSelYear(v); setSelMonth(''); setSelDay('')
-  }
-  function handleMonth(v) {
-    setSelMonth(v); setSelDay('')
-  }
-
-  const filtered = orders.filter(o => {
+  const filtered = useMemo(() => orders.filter(o => {
     const matchStatus = filter === 'Todos' || o.status === filter
-    const matchSearch = o.customer.name.toLowerCase().includes(search.toLowerCase()) ||
+    const matchSearch = o.customer?.name?.toLowerCase().includes(search.toLowerCase()) ||
                         String(o.id).includes(search)
-    const parts = parseParts(o.created_at)
-    const matchYear  = !selYear  || (parts && parts.y === Number(selYear))
-    const matchMonth = !selMonth || (parts && parts.m === Number(selMonth))
-    const matchDay   = !selDay   || (parts && parts.d === Number(selDay))
-    return matchStatus && matchSearch && matchYear && matchMonth && matchDay
-  })
+    const orderDate = toDateStr(o.created_at)
+    const matchFrom = !dateFrom || orderDate >= dateFrom
+    const matchTo   = !dateTo   || orderDate <= dateTo
+    return matchStatus && matchSearch && matchFrom && matchTo
+  }), [orders, filter, search, dateFrom, dateTo])
 
   if (loading.orders) return (
     <div className="p-6 flex items-center justify-center h-64">
@@ -121,58 +98,33 @@ export default function AdminPedidos() {
           </div>
         </div>
 
-        {/* Filtro por fecha */}
+        {/* Filtro por intervalo de fechas */}
         <div className="flex flex-wrap gap-2 items-center">
           <div className="flex items-center gap-1.5 text-stone-400">
             <CalendarDays size={15} />
-            <span className="text-xs font-semibold uppercase tracking-wider">Fecha:</span>
+            <span className="text-xs font-semibold uppercase tracking-wider">Período:</span>
           </div>
-
-          {/* Año */}
-          <select
-            value={selYear}
-            onChange={e => handleYear(e.target.value)}
-            className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700 focus:outline-none focus:border-red-400 bg-white">
-            <option value="">Año</option>
-            {availableYears.map(y => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-
-          {/* Mes — solo si hay año */}
-          <select
-            value={selMonth}
-            onChange={e => handleMonth(e.target.value)}
-            disabled={!selYear}
-            className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700 focus:outline-none focus:border-red-400 bg-white disabled:opacity-40">
-            <option value="">Mes</option>
-            {MONTHS.map((m, i) => (
-              <option key={i+1} value={i+1}>{m}</option>
-            ))}
-          </select>
-
-          {/* Día — solo si hay año + mes */}
-          <select
-            value={selDay}
-            onChange={e => setSelDay(e.target.value)}
-            disabled={!selYear || !selMonth}
-            className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700 focus:outline-none focus:border-red-400 bg-white disabled:opacity-40">
-            <option value="">Día</option>
-            {availableDays.map(d => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
-
-          {/* Limpiar filtro fecha */}
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={dateFrom}
+              onChange={e => setDateFrom(e.target.value)}
+              className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700 focus:outline-none focus:border-red-400 bg-white" />
+            <span className="text-xs text-stone-400">hasta</span>
+            <input
+              type="date"
+              value={dateTo}
+              min={dateFrom}
+              onChange={e => setDateTo(e.target.value)}
+              className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700 focus:outline-none focus:border-red-400 bg-white" />
+          </div>
           {hasDateFilter && (
             <button onClick={clearDate}
               className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-red-600 text-xs font-semibold hover:bg-red-100 transition-colors">
-              <X size={11} /> Limpiar fecha
+              <X size={11} /> Limpiar
             </button>
           )}
-
-          {/* Contador */}
-          <span className="text-xs text-stone-400 ml-1">
+          <span className="text-xs text-stone-400">
             {filtered.length} pedido{filtered.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -215,7 +167,7 @@ export default function AdminPedidos() {
                 </div>
                 <div className="flex items-center gap-3 ml-auto">
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[order.status]}`}>
-                    {order.status}
+                    {STATUS_ICONS[order.status]} {order.status}
                   </span>
                   <span className="font-bold text-red-800">${order.total.toLocaleString()}</span>
                   {expanded === order.id ? <ChevronUp size={18} className="text-stone-400" /> : <ChevronDown size={18} className="text-stone-400" />}
@@ -271,7 +223,7 @@ export default function AdminPedidos() {
                             )}
                           </div>
                           <div>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLORS[h.status]}`}>{h.status}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_COLORS[h.status]}`}>{STATUS_ICONS[h.status]} {h.status}</span>
                             <p className="text-xs text-stone-400 mt-0.5">{fmtDate(h.timestamp)}</p>
                           </div>
                         </div>
