@@ -421,7 +421,7 @@ export default function Menu() {
 
 
       {/* ══════════════════════════════════════
-          FILTROS + BÚSQUEDA
+          BARRA STICKY: navegación + búsqueda
       ══════════════════════════════════════ */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -430,19 +430,17 @@ export default function Menu() {
         className="sticky top-[58px] sm:top-[78px] z-40 bg-white border-b border-stone-100 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 sm:py-4
                         flex flex-col sm:flex-row gap-3 sm:gap-0 sm:items-center sm:justify-between">
-          {/* Categorías */}
-          <div className="flex gap-1 flex-wrap overflow-x-auto pb-0.5">
-            {categories.map(c => (
-              <motion.button
+          {/* Categorías — scroll a la sección */}
+          <div className="flex gap-1 overflow-x-auto pb-0.5 no-scrollbar">
+            {categories.filter(c => c !== ALL).map(c => (
+              <motion.a
                 key={c}
-                onClick={() => setActiveCategory(c)}
+                href={`#cat-${c.toLowerCase().replace(/\s+/g, '-')}`}
                 whileTap={{ scale: 0.95 }}
-                className={`px-4 py-2 text-xs font-bold tracking-[0.15em] uppercase transition-all duration-200 whitespace-nowrap
-                  ${activeCategory === c
-                    ? 'bg-stone-900 text-white'
-                    : 'bg-stone-100 text-stone-500 hover:bg-stone-200'}`}>
+                className="px-4 py-2 text-xs font-bold tracking-[0.15em] uppercase transition-all duration-200
+                           whitespace-nowrap bg-stone-100 text-stone-500 hover:bg-stone-900 hover:text-white">
                 {c}
-              </motion.button>
+              </motion.a>
             ))}
           </div>
           {/* Búsqueda */}
@@ -458,22 +456,18 @@ export default function Menu() {
       </motion.div>
 
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-10 sm:py-14 space-y-16">
 
         {/* ══ PROMOCIONES ══ */}
         {promociones.length > 0 && (
-          <div className="mb-12 sm:mb-16">
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.7 }}
-              className="flex items-center gap-4 mb-6">
+          <div>
+            <div className="flex items-center gap-4 mb-6">
               <div className="h-px flex-1 bg-stone-200" />
               <p className="text-xs font-bold tracking-[0.3em] uppercase text-amber-500 shrink-0">
                 🔥 Promociones activas
               </p>
               <div className="h-px flex-1 bg-stone-200" />
-            </motion.div>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-x divide-y divide-stone-200">
               {promociones.map((p, i) => (
                 <PromoCard key={p.id} p={p} index={i} onAdd={addToCart} />
@@ -482,44 +476,58 @@ export default function Menu() {
           </div>
         )}
 
-
-        {/* ══ CONTADOR ══ */}
-        <div className="flex items-center gap-4 mb-8 sm:mb-10">
-          <div className="h-px flex-1 bg-stone-100" />
-          <p className="text-stone-400 text-xs tracking-widest uppercase font-semibold shrink-0">
-            {filtered.length} producto{filtered.length !== 1 ? 's' : ''}
-          </p>
-          <div className="h-px flex-1 bg-stone-100" />
-        </div>
-
-
-        {/* ══ GRID DE PRODUCTOS ══ */}
-        {filtered.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
-            className="text-center py-24">
-            <p className="text-6xl mb-4">🔍</p>
-            <p className="text-stone-400 font-semibold text-lg">Sin resultados.</p>
-            <p className="text-stone-300 text-sm mt-1">Prueba con otra búsqueda o categoría</p>
-          </motion.div>
+        {/* ══ BÚSQUEDA ACTIVA: lista plana ══ */}
+        {search ? (
+          filtered.length === 0 ? (
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+              className="text-center py-24">
+              <p className="text-6xl mb-4">🔍</p>
+              <p className="text-stone-400 font-semibold text-lg">Sin resultados.</p>
+              <p className="text-stone-300 text-sm mt-1">Prueba con otro nombre</p>
+            </motion.div>
+          ) : (
+            <div>
+              <p className="text-stone-400 text-xs tracking-widest uppercase font-semibold mb-6">
+                {filtered.length} resultado{filtered.length !== 1 ? 's' : ''} para "{search}"
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 divide-x divide-y divide-stone-200">
+                {filtered.map((p, i) => (
+                  <ProductCard key={p.id} p={p} index={i} onAdd={handleAdd} added={added} onOpen={() => setSelectedProduct(p)} />
+                ))}
+              </div>
+            </div>
+          )
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 divide-x divide-y divide-stone-200">
-            {filtered.map((p, i) => (
-              <ProductCard
-                key={p.id}
-                p={p}
-                index={i}
-                onAdd={handleAdd}
-                added={added}
-                onOpen={() => setSelectedProduct(p)}
-              />
-            ))}
-          </div>
+          /* ══ SECCIONES POR CATEGORÍA ══ */
+          categories.filter(c => c !== ALL).map(cat => {
+            const catProducts = products.filter(p => p.category === cat && p.active !== false)
+            if (catProducts.length === 0) return null
+            return (
+              <section key={cat} id={`cat-${cat.toLowerCase().replace(/\s+/g, '-')}`}>
+                {/* Título de sección */}
+                <div className="flex items-center gap-4 mb-6">
+                  <h2 className="text-2xl sm:text-3xl font-black text-stone-900 whitespace-nowrap"
+                      style={{fontFamily:'Elms Sans, sans-serif'}}>
+                    {cat}
+                  </h2>
+                  <div className="h-px flex-1 bg-stone-200" />
+                  <span className="text-xs text-stone-400 font-semibold whitespace-nowrap">
+                    {catProducts.length} producto{catProducts.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                {/* Grid de la categoría */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 divide-x divide-y divide-stone-200">
+                  {catProducts.map((p, i) => (
+                    <ProductCard key={p.id} p={p} index={i} onAdd={handleAdd} added={added} onOpen={() => setSelectedProduct(p)} />
+                  ))}
+                </div>
+              </section>
+            )
+          })
         )}
 
-
         {/* ══ BANNER INFERIOR ══ */}
-        {filtered.length > 0 && <BottomBanner />}
+        <BottomBanner />
 
       </div>
     </div>
