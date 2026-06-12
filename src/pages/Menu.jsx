@@ -474,7 +474,7 @@ export default function Menu() {
               </p>
               <div className="h-px flex-1 bg-stone-200" />
             </motion.div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-stone-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-x divide-y divide-stone-200">
               {promociones.map((p, i) => (
                 <PromoCard key={p.id} p={p} index={i} onAdd={addToCart} />
               ))}
@@ -503,7 +503,7 @@ export default function Menu() {
             <p className="text-stone-300 text-sm mt-1">Prueba con otra búsqueda o categoría</p>
           </motion.div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-px bg-stone-200">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 divide-x divide-y divide-stone-200">
             {filtered.map((p, i) => (
               <ProductCard
                 key={p.id}
