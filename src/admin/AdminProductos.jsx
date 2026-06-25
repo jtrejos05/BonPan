@@ -95,20 +95,23 @@ function ProductModal({ initial, onSave, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white w-full max-w-lg shadow-2xl z-10 rounded-t-2xl sm:rounded-2xl flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex flex-col sm:items-center sm:justify-center">
+      {/* Fondo — solo visible en desktop */}
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm hidden sm:block" onClick={onClose} />
+
+      {/* Modal: pantalla completa en móvil, centrado en desktop */}
+      <div className="relative bg-white w-full h-full sm:h-auto sm:max-w-lg sm:max-h-[90vh] sm:rounded-2xl shadow-2xl z-10 flex flex-col">
         {/* Header fijo */}
-        <div className="bg-red-950 px-6 py-5 flex items-center justify-between rounded-t-2xl shrink-0">
-          <h2 className="text-white font-black text-xl" style={{fontFamily:'Elms Sans, sans-serif'}}>
+        <div className="bg-red-950 px-6 py-4 flex items-center justify-between shrink-0">
+          <h2 className="text-white font-black text-lg" style={{fontFamily:'Elms Sans, sans-serif'}}>
             {initial ? '✏️ Editar Producto' : '➕ Nuevo Producto'}
           </h2>
-          <button onClick={onClose} className="text-red-300 hover:text-white transition-colors">
-            <X size={20} />
+          <button onClick={onClose} className="text-red-300 hover:text-white transition-colors p-1">
+            <X size={22} />
           </button>
         </div>
 
-        <form onSubmit={submit} className="p-6 space-y-5 overflow-y-auto">
+        <form onSubmit={submit} className="p-6 space-y-5 overflow-y-auto flex-1">
           {/* Imagen del producto */}
           <div>
             <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
