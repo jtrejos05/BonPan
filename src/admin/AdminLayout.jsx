@@ -28,11 +28,22 @@ function SidebarContent({ pathname, pending, onClose, adminLogout }) {
             <p className="text-red-400 text-xs font-semibold tracking-wide">Panel Admin</p>
           </div>
         </Link>
-        {onClose && (
-          <button onClick={onClose} className="lg:hidden text-red-300 hover:text-white transition-colors p-1">
-            <X size={22} />
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          {/* Cerrar sesión — visible en desktop sidebar */}
+          {!onClose && (
+            <button onClick={adminLogout}
+              className="text-red-300 hover:text-white transition-colors p-1.5 rounded-lg hover:bg-red-900"
+              title="Cerrar sesión">
+              <LogOut size={18} />
+            </button>
+          )}
+          {/* Cerrar drawer — solo en móvil */}
+          {onClose && (
+            <button onClick={onClose} className="text-red-300 hover:text-white transition-colors p-1">
+              <X size={22} />
+            </button>
+          )}
+        </div>
       </div>
 
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -109,14 +120,19 @@ export default function AdminLayout() {
             <img src="/logo.png" alt="Bon Pan" className="h-8 w-8 rounded-lg object-contain bg-white/10 p-0.5" />
             <span className="font-black text-sm" style={{fontFamily:'Elms Sans, sans-serif'}}>Panel Admin</span>
           </div>
-          {pending > 0 ? (
-            <Link to="/admin/pedidos" onClick={closeMenu}
-              className="bg-red-500 text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center">
-              {pending}
-            </Link>
-          ) : (
-            <div className="w-8" />
-          )}
+          <div className="flex items-center gap-2">
+            {pending > 0 && (
+              <Link to="/admin/pedidos" onClick={closeMenu}
+                className="bg-red-500 text-white text-xs font-black w-6 h-6 rounded-full flex items-center justify-center">
+                {pending}
+              </Link>
+            )}
+            <button onClick={adminLogout}
+              className="text-red-200 hover:text-white transition-colors p-1"
+              title="Cerrar sesión">
+              <LogOut size={20} />
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 overflow-auto bg-gray-50">
