@@ -336,7 +336,7 @@ export default function Menu() {
     api.promociones.getActivas().then(setPromociones).catch(() => {})
   }, [])
 
-  const ORDEN_CATS = ['Desayunos', 'Hojaldre Dulce', 'Pasteles Salados', 'Congelados', 'Restaurante']
+  const ORDEN_CATS = ['Restaurante', 'Panadería', 'Pastelería', 'Bebidas', 'Congelados']
   const catsEnUso  = new Set(products.map(p => p.category))
   const categories = [ALL, ...ORDEN_CATS.filter(c => catsEnUso.has(c)), ...[...catsEnUso].filter(c => !ORDEN_CATS.includes(c))]
   const filtered   = products.filter(p => {

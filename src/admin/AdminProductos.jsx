@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext'
 import { Plus, Pencil, Trash2, Check, X, ToggleLeft, ToggleRight, PackageOpen, Upload, Image } from 'lucide-react'
 import { api } from '../services/api'
 
-const CATEGORIAS = ['Pasteles Salados', 'Hojaldre Dulce', 'Desayunos', 'Congelados', 'Restaurante']
+const CATEGORIAS = ['Restaurante', 'Panadería', 'Pastelería', 'Bebidas', 'Congelados']
 const EMOJIS     = ['🥐','🥧','🍰','🍪','🍫','☕','🧁','🫓','🥯']
 
 function ProductCard({ p, onEdit, onDelete, onToggle }) {
