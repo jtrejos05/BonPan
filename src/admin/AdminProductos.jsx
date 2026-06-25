@@ -95,11 +95,11 @@ function ProductModal({ initial, onSave, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white w-full max-w-lg shadow-2xl z-10 rounded-2xl overflow-hidden">
-        {/* Header */}
-        <div className="bg-red-950 px-6 py-5 flex items-center justify-between">
+      <div className="relative bg-white w-full max-w-lg shadow-2xl z-10 rounded-t-2xl sm:rounded-2xl flex flex-col max-h-[92vh]">
+        {/* Header fijo */}
+        <div className="bg-red-950 px-6 py-5 flex items-center justify-between rounded-t-2xl shrink-0">
           <h2 className="text-white font-black text-xl" style={{fontFamily:'Elms Sans, sans-serif'}}>
             {initial ? '✏️ Editar Producto' : '➕ Nuevo Producto'}
           </h2>
@@ -108,7 +108,7 @@ function ProductModal({ initial, onSave, onClose }) {
           </button>
         </div>
 
-        <form onSubmit={submit} className="p-6 space-y-5">
+        <form onSubmit={submit} className="p-6 space-y-5 overflow-y-auto">
           {/* Imagen del producto */}
           <div>
             <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
