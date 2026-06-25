@@ -71,8 +71,12 @@ function ProductBottomSheet({ p, onClose, onAdd, added }) {
           <h3 className="text-2xl font-black text-stone-900 leading-tight mb-3"
               style={{fontFamily:'Elms Sans, sans-serif'}}>{p.name}</h3>
           {p.description && (
-            <p className="text-stone-500 text-sm leading-relaxed mb-5">{p.description}</p>
+            <p className="text-stone-500 text-sm leading-relaxed">{p.description}</p>
           )}
+          {p.description_en && (
+            <p className="text-stone-400 text-sm leading-relaxed italic mt-1 mb-5">{p.description_en}</p>
+          )}
+          {(p.description || p.description_en) && <div className="mb-5" />}
           <div className="flex items-center justify-between pt-4 border-t border-stone-100">
             <p className="font-black text-stone-900 text-2xl">${p.price.toLocaleString()}</p>
             <button

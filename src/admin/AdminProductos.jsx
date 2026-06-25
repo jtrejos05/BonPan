@@ -56,8 +56,8 @@ function ProductCard({ p, onEdit, onDelete, onToggle }) {
 
 function ProductModal({ initial, onSave, onClose }) {
   const [form, setForm] = useState(initial || {
-    name: '', category: 'Croissants', price: '',
-    description: '', emoji: '🥐', stock: 99, imagen: ''
+    name: '', category: 'Restaurante', price: '',
+    description: '', description_en: '', emoji: '🥐', stock: 99, imagen: ''
   })
   const [saving,       setSaving]       = useState(false)
   const [uploading,    setUploading]    = useState(false)
@@ -203,14 +203,26 @@ function ProductModal({ initial, onSave, onClose }) {
             </div>
           </div>
 
-          {/* Descripción */}
+          {/* Descripción español */}
           <div>
             <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-              Descripción
+              Descripción 🇨🇴
             </label>
             <textarea value={form.description} onChange={e => set('description', e.target.value)}
               placeholder="Describe brevemente el producto..."
-              rows={3}
+              rows={2}
+              className="w-full border-2 border-stone-100 rounded-xl px-4 py-3 text-stone-700
+                         font-medium text-sm focus:outline-none focus:border-red-300 resize-none transition-colors" />
+          </div>
+
+          {/* Descripción inglés */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              Description in English 🇺🇸
+            </label>
+            <textarea value={form.description_en} onChange={e => set('description_en', e.target.value)}
+              placeholder="Briefly describe the product in English..."
+              rows={2}
               className="w-full border-2 border-stone-100 rounded-xl px-4 py-3 text-stone-700
                          font-medium text-sm focus:outline-none focus:border-red-300 resize-none transition-colors" />
           </div>

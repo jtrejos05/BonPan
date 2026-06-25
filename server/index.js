@@ -36,9 +36,21 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Error interno del servidor' })
 })
 
+// ── Migraciones automáticas ───────────────────────────────────
+const db = require('./db')
+async function runMigrations() {
+  try {
+    await db.query(`ALTER TABLE productos ADD COLUMN IF NOT EXISTS description_en TEXT`)
+    console.log('✅ Migración: description_en lista')
+  } catch (e) {
+    console.error('⚠️ Migración falló:', e.message)
+  }
+}
+
 // ── Start ─────────────────────────────────────────────────────
 const PORT = process.env.PORT || 4000
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`\n🥐 Bon Pan API corriendo en http://localhost:${PORT}`)
   console.log(`   Health: http://localhost:${PORT}/api/health\n`)
+  await runMigrations()
 })
