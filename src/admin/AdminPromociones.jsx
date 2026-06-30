@@ -1,0 +1,511 @@
+import { useState, useEffect, useRef } from 'react'
+import { api } from '../services/api'
+import { Plus, X, Check, Tag, ToggleLeft, ToggleRight, Trash2, Calendar, Percent, DollarSign, Pencil, RefreshCw, Image, Upload } from 'lucide-react'
+
+const CATEGORIAS = ['Todos los productos', 'Croissants', 'Pasteles Salados', 'Hojaldre Dulce', 'Bebidas']
+
+// ── Modal crear/editar ───────────────────────────────────────
+function PromoModal({ initial, onSave, onClose }) {
+  const [form, setForm] = useState(initial ? {
+    nombre:      initial.nombre      || '',
+    descripcion: initial.descripcion || '',
+    tipo:        initial.tipo        || 'porcentaje',
+    valor:       initial.valor       || '',
+    codigo:      initial.codigo      || '',
+    categorias:  initial.categorias  || [],
+    activa:      initial.activa !== false,
+    fecha_inicio: initial.fecha_inicio ? initial.fecha_inicio.slice(0,10) : '',
+    fecha_fin:    initial.fecha_fin   ? initial.fecha_fin.slice(0,10)   : '',
+    imagen:      initial.imagen      || '',
+    precio:      initial.precio      || '',
+  } : {
+    nombre: '', descripcion: '', tipo: 'porcentaje', valor: '',
+    codigo: '', categorias: [], activa: true, fecha_inicio: '', fecha_fin: '',
+    imagen: '', precio: '',
+  })
+  const [saving,      setSaving]      = useState(false)
+  const [error,       setError]       = useState('')
+  const [uploading,   setUploading]   = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const [preview,     setPreview]     = useState(initial?.imagen || '')
+  const fileInputRef = useRef(null)
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  async function handleImageChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadError('')
+    setPreview(URL.createObjectURL(file))
+    setUploading(true)
+    try {
+      const { url } = await api.upload.imagen(file)
+      set('imagen', url)
+    } catch {
+      setUploadError('Error al subir la imagen. Intenta de nuevo.')
+      setPreview(initial?.imagen || '')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  function toggleCat(c) {
+    setForm(f => ({
+      ...f,
+      categorias: f.categorias.includes(c)
+        ? f.categorias.filter(x => x !== c)
+        : [...f.categorias, c]
+    }))
+  }
+
+  async function submit(e) {
+    e.preventDefault()
+    if (!form.nombre) return setError('El nombre es requerido')
+    if (!form.valor && !form.precio) return setError('Debes ingresar un porcentaje/valor de descuento o un precio especial')
+    setSaving(true)
+    setError('')
+    try {
+      await onSave(form)
+      onClose()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white w-full max-w-lg shadow-2xl z-10 rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+
+        {/* Header */}
+        <div className="bg-red-950 px-6 py-5 flex items-center justify-between sticky top-0 z-10">
+          <h2 className="text-white font-black text-xl" style={{fontFamily:'Elms Sans, sans-serif'}}>
+            {initial ? '✏️ Editar Promoción' : '🎉 Nueva Promoción'}
+          </h2>
+          <button onClick={onClose} className="text-red-300 hover:text-white"><X size={20} /></button>
+        </div>
+
+        <form onSubmit={submit} className="p-6 space-y-5">
+          {/* Imagen */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              Imagen de la promoción
+            </label>
+            <div onClick={() => fileInputRef.current?.click()}
+              className={`relative border-2 border-dashed rounded-2xl overflow-hidden cursor-pointer
+                transition-all duration-200 group
+                ${uploading ? 'border-red-300 bg-red-50' : 'border-stone-200 hover:border-red-400 hover:bg-red-50'}`}>
+              {preview ? (
+                <div className="relative h-40">
+                  <img src={preview} alt="Preview" className="w-full h-full object-cover"/>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity
+                                  flex items-center justify-center">
+                    <p className="text-white font-bold text-sm flex items-center gap-2">
+                      <Upload size={16}/> Cambiar foto
+                    </p>
+                  </div>
+                  {uploading && (
+                    <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                      <p className="text-red-700 font-bold text-sm animate-pulse">⏳ Subiendo imagen...</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="h-40 flex flex-col items-center justify-center gap-2 text-stone-400">
+                  <Image size={28}/>
+                  <p className="font-bold text-sm text-stone-500">Haz clic para subir una foto</p>
+                  <p className="text-xs">JPG, PNG · Máx 5MB</p>
+                </div>
+              )}
+            </div>
+            {uploadError && <p className="text-red-500 text-xs mt-1 font-medium">{uploadError}</p>}
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange}/>
+          </div>
+
+          {/* Nombre */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">Nombre *</label>
+            <input value={form.nombre} onChange={e => set('nombre', e.target.value)} required
+              placeholder="Ej: 2x1 en Croissants"
+              className="w-full border-b-2 border-stone-200 bg-transparent py-2.5 text-stone-700
+                         font-medium focus:outline-none focus:border-red-800 transition-colors" />
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              Descripción (visible al cliente)
+            </label>
+            <textarea value={form.descripcion} onChange={e => set('descripcion', e.target.value)}
+              placeholder="Ej: Lleva 2 croissants y paga solo 1"
+              rows={2}
+              className="w-full border-2 border-stone-100 rounded-xl px-4 py-3 text-stone-700
+                         font-medium text-sm focus:outline-none focus:border-red-300 resize-none" />
+          </div>
+
+          {/* Tipo */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">Tipo de descuento</label>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { key: 'porcentaje', label: '% Porcentaje', icon: <Percent size={16} />, ex: 'Ej: 20% de descuento' },
+                { key: 'valor',      label: '$ Valor fijo',  icon: <DollarSign size={16} />, ex: 'Ej: $5.000 menos' },
+              ].map(t => (
+                <button key={t.key} type="button" onClick={() => set('tipo', t.key)}
+                  className={`p-4 border-2 rounded-xl text-left transition-all
+                    ${form.tipo === t.key ? 'border-red-800 bg-red-50' : 'border-stone-200 hover:border-red-200'}`}>
+                  <div className={`flex items-center gap-2 font-bold text-sm mb-1 ${form.tipo === t.key ? 'text-red-800' : 'text-stone-600'}`}>
+                    {t.icon} {t.label}
+                  </div>
+                  <p className="text-stone-400 text-xs">{t.ex}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Valor */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              {form.tipo === 'porcentaje' ? 'Porcentaje de descuento' : 'Valor a descontar (COP)'}
+              <span className="normal-case font-normal text-stone-300 ml-1">(opcional si hay precio especial)</span>
+            </label>
+            <div className="flex items-center border-b-2 border-stone-200 focus-within:border-red-800 transition-colors">
+              <span className="text-stone-400 font-bold mr-2">{form.tipo === 'porcentaje' ? '%' : '$'}</span>
+              <input type="number" value={form.valor} onChange={e => set('valor', e.target.value)}
+                min="1" max={form.tipo === 'porcentaje' ? 100 : undefined}
+                placeholder={form.tipo === 'porcentaje' ? '20' : '5000'}
+                className="flex-1 bg-transparent py-2.5 text-stone-700 font-medium focus:outline-none" />
+            </div>
+          </div>
+
+          {/* Precio especial */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              Precio especial (opcional)
+            </label>
+            <div className="flex items-center border-b-2 border-stone-200 focus-within:border-red-800 transition-colors">
+              <span className="text-stone-400 font-bold mr-2">$</span>
+              <input type="number" value={form.precio} onChange={e => set('precio', e.target.value)}
+                min="0" placeholder="Ej: 8000"
+                className="flex-1 bg-transparent py-2.5 text-stone-700 font-medium focus:outline-none"/>
+            </div>
+            <p className="text-stone-400 text-xs mt-1">Si la promoción tiene un precio fijo de venta, agrégalo aquí.</p>
+          </div>
+
+          {/* Código */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              Código promocional (opcional)
+            </label>
+            <input value={form.codigo} onChange={e => set('codigo', e.target.value.toUpperCase())}
+              placeholder="Ej: BONPAN20"
+              className="w-full border-b-2 border-stone-200 bg-transparent py-2.5 text-stone-700
+                         font-mono font-bold focus:outline-none focus:border-red-800 transition-colors tracking-widest" />
+            <p className="text-stone-400 text-xs mt-1">Si lo dejas vacío, aplica automáticamente.</p>
+          </div>
+
+          {/* Categorías */}
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">Aplicar a</label>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIAS.map(c => (
+                <button key={c} type="button" onClick={() => toggleCat(c)}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-full border-2 transition-all
+                    ${form.categorias.includes(c)
+                      ? 'bg-red-950 text-white border-red-950'
+                      : 'border-stone-200 text-stone-500 hover:border-red-300'}`}>
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Fechas */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+                <Calendar size={12} className="inline mr-1" /> Fecha inicio
+              </label>
+              <input type="date" value={form.fecha_inicio} onChange={e => set('fecha_inicio', e.target.value)}
+                className="w-full border-b-2 border-stone-200 bg-transparent py-2 text-stone-700
+                           font-medium text-sm focus:outline-none focus:border-red-800 transition-colors" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+                <Calendar size={12} className="inline mr-1" /> Fecha fin
+              </label>
+              <input type="date" value={form.fecha_fin} onChange={e => set('fecha_fin', e.target.value)}
+                className="w-full border-b-2 border-stone-200 bg-transparent py-2 text-stone-700
+                           font-medium text-sm focus:outline-none focus:border-red-800 transition-colors" />
+            </div>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+              <p className="text-red-600 text-sm font-medium">{error}</p>
+            </div>
+          )}
+
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose}
+              className="flex-1 border-2 border-stone-200 text-stone-600 font-bold py-3 rounded-xl text-sm">
+              Cancelar
+            </button>
+            <button type="submit" disabled={saving || uploading}
+              className="flex-1 bg-red-950 text-white font-bold py-3 rounded-xl text-sm
+                         hover:bg-red-900 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+              {uploading ? '⏳ Subiendo imagen...' : saving ? '⏳ Guardando...' : <><Check size={16}/> {initial ? 'Guardar cambios' : 'Crear promoción'}</>}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ── Tarjeta de promoción ─────────────────────────────────────
+function PromoCard({ p, onToggle, onEdit, onDelete }) {
+  const isExpired = p.fecha_fin && new Date(p.fecha_fin) < new Date()
+  const isActive  = p.activa && !isExpired
+
+  return (
+    <div className={`bg-white rounded-2xl border-2 overflow-hidden transition-all
+      ${isActive ? 'border-stone-100 hover:border-red-200 hover:shadow-md' : 'border-stone-100 opacity-60'}`}>
+
+      {/* Imagen */}
+      {p.imagen && (
+        <div className="h-44 overflow-hidden relative">
+          <img src={p.imagen} alt={p.nombre} className="w-full h-full object-cover"/>
+          <div className="absolute top-3 right-3">
+            <span className={`px-2.5 py-1 rounded-full text-xs font-bold border
+              ${isExpired ? 'bg-stone-100/90 text-stone-500 border-stone-200'
+                : isActive  ? 'bg-green-100/90 text-green-700 border-green-200'
+                : 'bg-yellow-100/90 text-yellow-700 border-yellow-200'}`}>
+              {isExpired ? 'Expirada' : isActive ? '● Activa' : '⏸ Pausada'}
+            </span>
+          </div>
+          {p.precio && (
+            <div className="absolute bottom-3 left-3 bg-red-950 text-white px-3 py-1 font-black text-sm">
+              ${Number(p.precio).toLocaleString()}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className={p.imagen ? 'p-5' : 'p-5'}>
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3">
+          {!p.imagen && <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0
+            ${isActive ? 'bg-red-50' : 'bg-stone-100'}`}>
+            🎉
+          </div>}
+          <div>
+            <h3 className="font-black text-red-950 text-base leading-tight"
+                style={{fontFamily:'Elms Sans, sans-serif'}}>{p.nombre}</h3>
+            {p.codigo && (
+              <span className="text-xs font-mono font-bold bg-stone-100 text-stone-600 px-2 py-0.5 rounded mt-0.5 inline-block tracking-widest">
+                {p.codigo}
+              </span>
+            )}
+          </div>
+        </div>
+        <span className={`px-3 py-1 rounded-full text-xs font-bold shrink-0
+          ${isExpired ? 'bg-stone-100 text-stone-400' : isActive ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+          {isExpired ? 'Expirada' : isActive ? '● Activa' : '⏸ Pausada'}
+        </span>
+      </div>
+
+      {p.descripcion && <p className="text-stone-500 text-sm mb-3">{p.descripcion}</p>}
+
+      <div className="flex items-center gap-3 flex-wrap text-xs text-stone-400 font-medium mb-4">
+        {p.valor ? (
+          <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
+            {p.tipo === 'porcentaje' ? <Percent size={12} /> : <DollarSign size={12} />}
+            {p.tipo === 'porcentaje' ? `${p.valor}% de descuento` : `$${Number(p.valor).toLocaleString()} menos`}
+          </span>
+        ) : (
+          <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
+            <DollarSign size={12} /> Solo precio especial
+          </span>
+        )}
+        {p.fecha_fin && (
+          <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
+            <Calendar size={12} /> Hasta {new Date(p.fecha_fin).toLocaleDateString('es-CO')}
+          </span>
+        )}
+        <span className="flex items-center gap-1 bg-stone-50 px-2 py-1 rounded-lg">
+          <Tag size={12} /> {p.usos || 0} usos
+        </span>
+      </div>
+
+      {p.categorias?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-4">
+          {p.categorias.map(c => (
+            <span key={c} className="text-[10px] font-bold bg-red-50 text-red-700 px-2 py-0.5 rounded-full uppercase tracking-wide">
+              {c}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <button onClick={() => onToggle(p.id)}
+          className={`flex items-center gap-1.5 flex-1 justify-center py-2 rounded-xl border-2 text-xs font-bold transition-colors
+            ${isActive ? 'border-orange-200 text-orange-600 hover:bg-orange-50' : 'border-green-200 text-green-600 hover:bg-green-50'}`}>
+          {isActive ? <><ToggleRight size={14} /> Pausar</> : <><ToggleLeft size={14} /> Activar</>}
+        </button>
+        <button onClick={() => onEdit(p)}
+          className="flex items-center gap-1 px-3 py-2 rounded-xl border-2 border-stone-200
+                     text-stone-500 hover:border-red-300 hover:text-red-700 transition-colors text-xs font-bold">
+          <Pencil size={13} /> Editar
+        </button>
+        <button onClick={() => onDelete(p.id)}
+          className="flex items-center justify-center px-3 py-2 rounded-xl border-2 border-stone-200
+                     text-stone-400 hover:border-red-300 hover:text-red-500 transition-colors">
+          <Trash2 size={14} />
+        </button>
+      </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Página principal ─────────────────────────────────────────
+export default function AdminPromociones() {
+  const [promociones, setPromociones] = useState([])
+  const [loading,     setLoading]     = useState(true)
+  const [showModal,   setShowModal]   = useState(false)
+  const [editing,     setEditing]     = useState(null)
+  const [confirmDel,  setConfirmDel]  = useState(null)
+
+  async function fetchPromociones() {
+    setLoading(true)
+    try {
+      const data = await api.promociones.getAll()
+      setPromociones(data)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchPromociones() }, [])
+
+  function openNew()   { setEditing(null); setShowModal(true) }
+  function openEdit(p) { setEditing(p);    setShowModal(true) }
+
+  async function handleSave(data) {
+    if (editing) await api.promociones.update(editing.id, data)
+    else         await api.promociones.create(data)
+    await fetchPromociones()
+  }
+
+  async function handleToggle(id) {
+    await api.promociones.toggle(id)
+    await fetchPromociones()
+  }
+
+  async function handleDelete(id) {
+    await api.promociones.remove(id)
+    setConfirmDel(null)
+    await fetchPromociones()
+  }
+
+  const activas  = promociones.filter(p => p.activa)
+  const pausadas = promociones.filter(p => !p.activa)
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Modal */}
+      {showModal && (
+        <PromoModal initial={editing} onSave={handleSave} onClose={() => setShowModal(false)} />
+      )}
+
+      {/* Confirm delete */}
+      {confirmDel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDel(null)} />
+          <div className="relative bg-white rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl z-10">
+            <div className="text-5xl mb-4">🗑️</div>
+            <h3 className="font-black text-red-950 text-xl mb-2" style={{fontFamily:'Elms Sans, sans-serif'}}>
+              ¿Eliminar promoción?
+            </h3>
+            <p className="text-stone-400 text-sm mb-6">Esta acción no se puede deshacer.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDel(null)}
+                className="flex-1 border-2 border-stone-200 text-stone-600 font-bold py-3 rounded-xl text-sm">
+                Cancelar
+              </button>
+              <button onClick={() => handleDelete(confirmDel)}
+                className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl text-sm hover:bg-red-700">
+                Sí, eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Elms Sans, sans-serif'}}>
+            Promociones
+          </h1>
+          <p className="text-stone-400 text-sm mt-1">
+            {activas.length} activas · {pausadas.length} pausadas
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={fetchPromociones}
+            className="flex items-center gap-2 border border-stone-200 text-stone-500 font-bold px-4 py-3
+                       rounded-xl hover:border-red-300 transition-colors text-sm">
+            <RefreshCw size={16} />
+          </button>
+          <button onClick={openNew}
+            className="flex items-center gap-2 bg-red-950 text-white font-bold px-6 py-3 rounded-xl
+                       hover:bg-red-900 transition-colors shadow-sm text-sm">
+            <Plus size={18} /> Nueva Promoción
+          </button>
+        </div>
+      </div>
+
+      {/* Info */}
+      <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3">
+        <span className="text-2xl shrink-0">💡</span>
+        <div className="text-left">
+          <p className="font-bold text-amber-900 text-sm">¿Cómo funcionan las promociones?</p>
+          <p className="text-amber-700 text-xs mt-1">
+            Las promociones se guardan en la base de datos y no se pierden. Puedes crear descuentos por porcentaje o valor fijo,
+            asignar un código que el cliente ingresa al pedir, y definir fechas de vigencia. Se activan y pausan con un clic.
+          </p>
+        </div>
+      </div>
+
+      {/* Lista */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {[1,2,3].map(i => <div key={i} className="bg-white rounded-2xl h-48 animate-pulse border border-stone-100" />)}
+        </div>
+      ) : promociones.length === 0 ? (
+        <div className="text-center py-20 text-stone-400">
+          <div className="text-5xl mb-3">🎉</div>
+          <p className="font-semibold">No hay promociones creadas aún</p>
+          <button onClick={openNew} className="mt-4 text-red-800 font-bold text-sm hover:underline">
+            + Crear la primera promoción
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {promociones.map(p => (
+            <PromoCard key={p.id} p={p}
+              onToggle={handleToggle}
+              onEdit={openEdit}
+              onDelete={(id) => setConfirmDel(id)} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
