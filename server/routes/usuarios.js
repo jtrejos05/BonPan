@@ -129,11 +129,40 @@ router.post('/google', async (req, res) => {
 router.get('/me', require('../middleware/authMiddleware'), async (req, res) => {
   try {
     const { rows } = await db.query(
-      'SELECT id, name, email, avatar, created_at FROM usuarios WHERE id = $1',
+      `SELECT id, name, email, avatar, created_at,
+              COALESCE(puntos, 0) AS puntos
+       FROM usuarios WHERE id = $1`,
       [req.user.id]
     )
     if (!rows.length) return res.status(404).json({ error: 'Usuario no encontrado' })
     res.json(rows[0])
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// ── POST /api/usuarios/me/canjear ─────────────────────────────
+// Canjea puntos y devuelve el descuento aplicado (100 puntos = $10.000)
+router.post('/me/canjear', require('../middleware/authMiddleware'), async (req, res) => {
+  const { puntos } = req.body
+  if (!puntos || puntos < 100)
+    return res.status(400).json({ error: 'Mínimo 100 puntos para canjear' })
+
+  try {
+    const { rows } = await db.query(
+      'SELECT COALESCE(puntos, 0) AS puntos FROM usuarios WHERE id = $1',
+      [req.user.id]
+    )
+    const disponibles = Number(rows[0]?.puntos || 0)
+    if (disponibles < puntos)
+      return res.status(400).json({ error: 'No tienes suficientes puntos' })
+
+    const descuento = Math.floor(puntos / 100) * 10000
+    await db.query(
+      'UPDATE usuarios SET puntos = puntos - $1 WHERE id = $2',
+      [puntos, req.user.id]
+    )
+    res.json({ descuento, puntosUsados: puntos, puntosRestantes: disponibles - puntos })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }

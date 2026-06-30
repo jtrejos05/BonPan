@@ -100,6 +100,10 @@ export default function Navbar() {
                       <div className="px-4 py-3 border-b border-stone-100">
                         <p className="font-bold text-stone-800 text-sm truncate">{user.name}</p>
                         <p className="text-stone-400 text-xs truncate">{user.email}</p>
+                        <div className="flex items-center gap-1.5 mt-2 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
+                          <span className="text-amber-500 text-xs">⭐</span>
+                          <span className="text-amber-700 text-xs font-black">{user.puntos || 0} puntos</span>
+                        </div>
                       </div>
                       <button onClick={() => { logout(); setUserMenu(false) }}
                         className="w-full flex items-center gap-2 px-4 py-3 text-sm text-stone-500

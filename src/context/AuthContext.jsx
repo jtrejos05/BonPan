@@ -40,13 +40,20 @@ export function AuthProvider({ children }) {
     return res.user
   }
 
+  async function refreshUser() {
+    try {
+      const u = await api.usuarios.me()
+      setUser(u)
+    } catch {}
+  }
+
   function logout() {
     localStorage.removeItem('bonpan_token')
     setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, loadingAuth, register, loginEmail, loginGoogle, logout }}>
+    <AuthContext.Provider value={{ user, loadingAuth, register, loginEmail, loginGoogle, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

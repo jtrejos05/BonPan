@@ -96,5 +96,6 @@ export const api = {
     login:       (data)       => request('/usuarios/login',    { method: 'POST', body: JSON.stringify(data) }),
     googleLogin: (credential) => request('/usuarios/google',   { method: 'POST', body: JSON.stringify({ credential }) }),
     me:          ()           => request('/usuarios/me'),
+    canjear:     (puntos)    => request('/usuarios/me/canjear', { method: 'POST', body: JSON.stringify({ puntos }) }),
   },
 }

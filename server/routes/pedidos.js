@@ -63,7 +63,7 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/pedidos  — crear pedido completo
 router.post('/', async (req, res) => {
-  const { customer, items, total } = req.body
+  const { customer, items, total, usuarioId } = req.body
   const client = await db.connect()
   try {
     await client.query('BEGIN')
@@ -100,6 +100,17 @@ router.post('/', async (req, res) => {
       `INSERT INTO pedido_estado_historial (pedido_id, status) VALUES ($1,'Pendiente')`,
       [pedidoId]
     )
+
+    // Sumar puntos al usuario registrado (1 punto por $1.000)
+    if (usuarioId) {
+      const puntosGanados = Math.floor(total / 1000)
+      if (puntosGanados > 0) {
+        await client.query(
+          'UPDATE usuarios SET puntos = COALESCE(puntos, 0) + $1 WHERE id = $2',
+          [puntosGanados, usuarioId]
+        )
+      }
+    }
 
     // Log actividad
     await client.query(

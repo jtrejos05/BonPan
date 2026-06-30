@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShoppingCart, X, MapPin, Store, ChevronDown, Tag, Check } from 'lucide-react'
+import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShoppingCart, X, MapPin, Store, ChevronDown, Tag, Check, Star } from 'lucide-react'
 import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
 
 // ── Modal de tipo de entrega ─────────────────────────────────
@@ -163,17 +164,25 @@ function DeliveryModal({ onClose, onConfirm }) {
 // ── Componente principal ─────────────────────────────────────
 export default function Order() {
   const { cart, cartTotal, removeFromCart, updateQty, placeOrder } = useApp()
-  const [form,         setForm]         = useState({ name: '', phone: '', notes: '' })
-  const [confirmed,    setConfirmed]    = useState(null)
-  const [errors,       setErrors]       = useState({})
-  const [submitting,   setSubmitting]   = useState(false)
-  const [submitError,  setSubmitError]  = useState('')
-  const [showModal,    setShowModal]    = useState(false)
-  const [delivery,     setDelivery]     = useState(null)
-  const [codigoInput,  setCodigoInput]  = useState('')
-  const [promo,        setPromo]        = useState(null)
-  const [promoError,   setPromoError]   = useState('')
-  const [promoLoading, setPromoLoading] = useState(false)
+  const { user, refreshUser } = useAuth()
+  const [form,           setForm]           = useState({ name: '', phone: '', notes: '' })
+  const [confirmed,      setConfirmed]      = useState(null)
+  const [errors,         setErrors]         = useState({})
+  const [submitting,     setSubmitting]     = useState(false)
+  const [submitError,    setSubmitError]    = useState('')
+  const [showModal,      setShowModal]      = useState(false)
+  const [delivery,       setDelivery]       = useState(null)
+  const [codigoInput,    setCodigoInput]    = useState('')
+  const [promo,          setPromo]          = useState(null)
+  const [promoError,     setPromoError]     = useState('')
+  const [promoLoading,   setPromoLoading]   = useState(false)
+  const [canjearPuntos,  setCanjearPuntos]  = useState(false)
+  const [puntosACanjear, setPuntosACanjear] = useState(100)
+
+  // Pre-llenar nombre y teléfono si el usuario está logueado
+  useEffect(() => {
+    if (user) setForm(f => ({ ...f, name: f.name || user.name || '', phone: f.phone || '' }))
+  }, [user])
 
   async function aplicarCodigo() {
     if (!codigoInput.trim()) return
@@ -190,10 +199,20 @@ export default function Order() {
     }
   }
 
+  const descuentoRegistrado = user ? Math.round(cartTotal * 0.05) : 0
+  const puntosDisponibles   = user ? (user.puntos || 0) : 0
+  const descuentoPuntos     = canjearPuntos && puntosDisponibles >= 100
+    ? Math.floor(Math.min(puntosACanjear, puntosDisponibles) / 100) * 10000
+    : 0
+
   function calcDescuento() {
-    if (!promo) return 0
-    if (promo.tipo === 'porcentaje') return Math.round(cartTotal * promo.valor / 100)
-    return Math.min(promo.valor, cartTotal)
+    let d = descuentoRegistrado + descuentoPuntos
+    if (promo) {
+      d += promo.tipo === 'porcentaje'
+        ? Math.round(cartTotal * promo.valor / 100)
+        : Math.min(Number(promo.valor), cartTotal)
+    }
+    return Math.min(d, cartTotal)
   }
 
   const descuento  = calcDescuento()
@@ -214,7 +233,12 @@ export default function Order() {
     setSubmitting(true)
     setSubmitError('')
     try {
-      const order = await placeOrder({ ...form, delivery })
+      // Canjear puntos antes de hacer el pedido
+      if (canjearPuntos && descuentoPuntos > 0) {
+        await api.usuarios.canjear(Math.min(puntosACanjear, puntosDisponibles))
+      }
+      const order = await placeOrder({ ...form, delivery, usuarioId: user?.id, totalConDescuento: totalFinal })
+      await refreshUser()
       setConfirmed(order)
       setForm({ name: '', phone: '', notes: '' })
       setDelivery(null)
@@ -478,16 +502,66 @@ export default function Order() {
                 )}
               </div>
 
+              {/* Banner cliente registrado */}
+              {user && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
+                  <Star size={16} className="text-amber-500 shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-amber-800 text-xs font-bold">¡Cliente registrado! 5% de descuento aplicado</p>
+                    <p className="text-amber-600 text-xs mt-0.5">Tienes <span className="font-black">{puntosDisponibles} puntos</span> acumulados</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Canjear puntos */}
+              {user && puntosDisponibles >= 100 && (
+                <div className="bg-stone-50 border border-stone-200 rounded-xl px-4 py-3 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+                      <Star size={13} className="text-yellow-500" /> Canjear puntos
+                    </p>
+                    <button onClick={() => setCanjearPuntos(v => !v)}
+                      className={`w-10 h-5 rounded-full transition-colors relative ${canjearPuntos ? 'bg-red-800' : 'bg-stone-300'}`}>
+                      <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${canjearPuntos ? 'left-5' : 'left-0.5'}`} />
+                    </button>
+                  </div>
+                  {canjearPuntos && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <input type="number" min={100} max={puntosDisponibles} step={100}
+                          value={puntosACanjear}
+                          onChange={e => setPuntosACanjear(Math.min(Number(e.target.value), puntosDisponibles))}
+                          className="w-24 border border-stone-200 rounded-lg px-2 py-1 text-xs font-bold text-center focus:outline-none focus:border-red-400" />
+                        <p className="text-xs text-stone-500">puntos = <span className="font-bold text-green-600">-${descuentoPuntos.toLocaleString()}</span></p>
+                      </div>
+                      <p className="text-stone-400 text-xs">100 puntos = $10.000 de descuento</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Subtotal y descuento */}
               <div className="space-y-2 mb-4 border-t border-stone-100 pt-4">
                 <div className="flex justify-between text-sm text-stone-500">
                   <span>Subtotal</span>
                   <span>${cartTotal.toLocaleString()}</span>
                 </div>
-                {descuento > 0 && (
+                {descuentoRegistrado > 0 && (
+                  <div className="flex justify-between text-sm text-green-600 font-bold">
+                    <span>Descuento cliente registrado (5%)</span>
+                    <span>-${descuentoRegistrado.toLocaleString()}</span>
+                  </div>
+                )}
+                {descuentoPuntos > 0 && (
+                  <div className="flex justify-between text-sm text-amber-600 font-bold">
+                    <span>Descuento puntos ({puntosACanjear} pts)</span>
+                    <span>-${descuentoPuntos.toLocaleString()}</span>
+                  </div>
+                )}
+                {promo && (
                   <div className="flex justify-between text-sm text-green-600 font-bold">
                     <span className="truncate mr-2">Descuento ({promo.nombre})</span>
-                    <span className="shrink-0">-${descuento.toLocaleString()}</span>
+                    <span className="shrink-0">-${(promo.tipo === 'porcentaje' ? Math.round(cartTotal * promo.valor / 100) : Math.min(Number(promo.valor), cartTotal)).toLocaleString()}</span>
                   </div>
                 )}
               </div>
