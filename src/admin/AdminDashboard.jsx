@@ -11,15 +11,13 @@ const STATUS_COLORS = {
 
 export default function AdminDashboard() {
   const { orders, products, activityLog } = useApp()
-  const [period, setPeriod] = useState('mes')
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const [dateFrom, setDateFrom] = useState(todayStr.slice(0, 7) + '-01')
+  const [dateTo,   setDateTo]   = useState(todayStr)
 
-  const now = new Date()
   const filteredOrders = orders.filter(o => {
-    const d = new Date(o.created_at)
-    if (period === 'dia')  return d.toDateString() === now.toDateString()
-    if (period === 'mes')  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-    if (period === 'año')  return d.getFullYear() === now.getFullYear()
-    return true
+    const d = new Date(o.created_at).toISOString().slice(0, 10)
+    return (!dateFrom || d >= dateFrom) && (!dateTo || d <= dateTo)
   })
 
   const revenue    = orders.filter(o => o.status !== 'Cancelado').reduce((s, o) => s + o.total, 0)
@@ -130,14 +128,14 @@ export default function AdminDashboard() {
                 style={{fontFamily:'Elms Sans, sans-serif'}}>
               <TrendingUp size={20} className="text-red-500" /> Más Vendidos
             </h2>
-            <div className="flex gap-1 bg-stone-100 rounded-xl p-1">
-              {[['dia','Hoy'],['mes','Mes'],['año','Año']].map(([key, label]) => (
-                <button key={key} onClick={() => setPeriod(key)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all
-                    ${period === key ? 'bg-white text-red-700 shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}>
-                  {label}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 flex-wrap">
+              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+                className="border border-stone-200 rounded-lg px-2 py-1.5 text-xs font-medium text-stone-600
+                           focus:outline-none focus:border-red-400" />
+              <span className="text-stone-400 text-xs font-bold">→</span>
+              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+                className="border border-stone-200 rounded-lg px-2 py-1.5 text-xs font-medium text-stone-600
+                           focus:outline-none focus:border-red-400" />
             </div>
           </div>
           {topProducts.length === 0 ? (
