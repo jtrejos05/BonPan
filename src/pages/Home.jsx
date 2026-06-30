@@ -457,7 +457,9 @@ export default function Home() {
 
   if (error) return <ServerError message={error} />
 
-  const [p1, p2, p3] = products
+  const p1 = products.find(p => p.name === 'Croissant de Mantequilla')
+  const p2 = products.find(p => p.name === 'Pastel de Pollo')
+  const p3 = products.find(p => p.name === 'Pastel de Carne')
 
   return (
     <div className="bg-white text-stone-900 overflow-x-hidden" style={{fontFamily:'Elms Sans, sans-serif'}}>
