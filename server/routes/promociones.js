@@ -7,8 +7,8 @@ router.get('/', async (req, res) => {
     const { rows } = await db.query(
       `SELECT * FROM promociones
        WHERE activa = TRUE
-         AND (fecha_inicio IS NULL OR fecha_inicio <= CURRENT_DATE)
-         AND (fecha_fin    IS NULL OR fecha_fin    >= CURRENT_DATE)
+         AND (fecha_inicio IS NULL OR fecha_inicio <= (NOW() AT TIME ZONE 'America/Bogota')::date)
+         AND (fecha_fin    IS NULL OR fecha_fin    >= (NOW() AT TIME ZONE 'America/Bogota')::date)
        ORDER BY created_at DESC`
     )
     res.json(rows)
