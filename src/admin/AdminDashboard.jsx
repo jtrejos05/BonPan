@@ -1,6 +1,10 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useApp } from '../context/AppContext'
 import { TrendingUp, ShoppingBag, Clock, AlertTriangle } from 'lucide-react'
+import {
+  BarChart, Bar, LineChart, Line, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, Legend
+} from 'recharts'
 
 const STATUS_COLORS = {
   'Pendiente':      'bg-yellow-100 text-yellow-700 border-yellow-200',
@@ -15,10 +19,55 @@ export default function AdminDashboard() {
   const [dateFrom, setDateFrom] = useState(todayStr.slice(0, 7) + '-01')
   const [dateTo,   setDateTo]   = useState(todayStr)
 
-  const filteredOrders = orders.filter(o => {
+  const filteredOrders = useMemo(() => orders.filter(o => {
     const d = new Date(o.created_at).toISOString().slice(0, 10)
     return (!dateFrom || d >= dateFrom) && (!dateTo || d <= dateTo)
-  })
+  }), [orders, dateFrom, dateTo])
+
+  // Ingresos por día
+  const ingresosPorDia = useMemo(() => {
+    const map = {}
+    filteredOrders.filter(o => o.status !== 'Cancelado').forEach(o => {
+      const d = new Date(o.created_at).toISOString().slice(0, 10)
+      map[d] = (map[d] || 0) + Number(o.total)
+    })
+    return Object.entries(map).sort((a,b) => a[0].localeCompare(b[0]))
+      .map(([fecha, total]) => ({ fecha: fecha.slice(5), total }))
+  }, [filteredOrders])
+
+  // Ventas por categoría
+  const CATEGORIA_COLORS = ['#ef4444','#f97316','#eab308','#22c55e','#3b82f6']
+  const ventasPorCategoria = useMemo(() => {
+    const map = {}
+    filteredOrders.forEach(o => o.items?.forEach(i => {
+      const cat = i.category || 'Sin categoría'
+      map[cat] = (map[cat] || 0) + i.qty
+    }))
+    return Object.entries(map).map(([name, value]) => ({ name, value }))
+  }, [filteredOrders])
+
+  // Pedidos por hora
+  const pedidosPorHora = useMemo(() => {
+    const map = {}
+    for (let h = 6; h <= 22; h++) map[h] = 0
+    filteredOrders.forEach(o => {
+      const h = new Date(o.created_at).getHours()
+      if (map[h] !== undefined) map[h]++
+    })
+    return Object.entries(map).map(([hora, pedidos]) => ({ hora: `${hora}h`, pedidos }))
+  }, [filteredOrders])
+
+  // Ingresos vs Cancelados por día
+  const ingresosVsCancelados = useMemo(() => {
+    const map = {}
+    filteredOrders.forEach(o => {
+      const d = new Date(o.created_at).toISOString().slice(0, 10)
+      if (!map[d]) map[d] = { fecha: d.slice(5), ingresos: 0, cancelados: 0 }
+      if (o.status === 'Cancelado') map[d].cancelados += Number(o.total)
+      else map[d].ingresos += Number(o.total)
+    })
+    return Object.values(map).sort((a,b) => a.fecha.localeCompare(b.fecha))
+  }, [filteredOrders])
 
   const revenue    = orders.filter(o => o.status !== 'Cancelado').reduce((s, o) => s + o.total, 0)
   const pending    = orders.filter(o => o.status === 'Pendiente').length
@@ -166,6 +215,95 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Ingresos por día */}
+      <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+        <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
+            style={{fontFamily:'Elms Sans, sans-serif'}}>
+          <TrendingUp size={20} className="text-red-500" /> Ingresos por Día
+        </h2>
+        {ingresosPorDia.length === 0 ? (
+          <p className="text-center text-stone-300 text-sm py-8">Sin datos en este período</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <LineChart data={ingresosPorDia}>
+              <XAxis dataKey="fecha" tick={{fontSize:11}} />
+              <YAxis tick={{fontSize:11}} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} />
+              <Tooltip formatter={v => [`$${Number(v).toLocaleString()}`, 'Ingresos']} />
+              <Line type="monotone" dataKey="total" stroke="#ef4444" strokeWidth={2} dot={{r:3}} />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Ventas por categoría */}
+        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+          <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
+              style={{fontFamily:'Elms Sans, sans-serif'}}>
+            <ShoppingBag size={20} className="text-red-500" /> Ventas por Categoría
+          </h2>
+          {ventasPorCategoria.length === 0 ? (
+            <p className="text-center text-stone-300 text-sm py-8">Sin datos en este período</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={ventasPorCategoria} dataKey="value" nameKey="name"
+                     cx="50%" cy="50%" outerRadius={80} label={({name, percent}) => `${name} ${(percent*100).toFixed(0)}%`}
+                     labelLine={false}>
+                  {ventasPorCategoria.map((_, i) => (
+                    <Cell key={i} fill={CATEGORIA_COLORS[i % CATEGORIA_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={v => [v, 'Unidades']} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* Pedidos por hora */}
+        <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+          <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
+              style={{fontFamily:'Elms Sans, sans-serif'}}>
+            <Clock size={20} className="text-red-500" /> Pedidos por Hora
+          </h2>
+          {filteredOrders.length === 0 ? (
+            <p className="text-center text-stone-300 text-sm py-8">Sin datos en este período</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={pedidosPorHora}>
+                <XAxis dataKey="hora" tick={{fontSize:10}} />
+                <YAxis tick={{fontSize:11}} allowDecimals={false} />
+                <Tooltip formatter={v => [v, 'Pedidos']} />
+                <Bar dataKey="pedidos" fill="#ef4444" radius={[4,4,0,0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      {/* Ingresos vs Cancelados */}
+      <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
+        <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
+            style={{fontFamily:'Elms Sans, sans-serif'}}>
+          <AlertTriangle size={20} className="text-red-500" /> Ingresos vs Cancelados
+        </h2>
+        {ingresosVsCancelados.length === 0 ? (
+          <p className="text-center text-stone-300 text-sm py-8">Sin datos en este período</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={ingresosVsCancelados}>
+              <XAxis dataKey="fecha" tick={{fontSize:11}} />
+              <YAxis tick={{fontSize:11}} tickFormatter={v => `$${(v/1000).toFixed(0)}k`} />
+              <Tooltip formatter={v => [`$${Number(v).toLocaleString()}`, '']} />
+              <Legend />
+              <Bar dataKey="ingresos"   name="Ingresos"   fill="#22c55e" radius={[4,4,0,0]} />
+              <Bar dataKey="cancelados" name="Cancelados" fill="#ef4444" radius={[4,4,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       {/* Actividad reciente */}
