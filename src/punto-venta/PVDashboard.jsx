@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
 import { LogOut, RefreshCw, Clock, CheckCircle, Package, Bike } from 'lucide-react'
 
-const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Entregado', 'Cancelado']
+const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Cancelado']
 const STATUS_META = {
   'Pendiente':      { color: 'bg-yellow-100 text-yellow-800 border-yellow-200', icon: '⏳' },
   'En preparación': { color: 'bg-blue-100   text-blue-800   border-blue-200',   icon: '👨‍🍳' },
   'Listo':          { color: 'bg-green-100  text-green-800  border-green-200',  icon: '✅' },
-  'Entregado':      { color: 'bg-stone-100  text-stone-600  border-stone-200',  icon: '📦' },
   'Cancelado':      { color: 'bg-red-100    text-red-700    border-red-200',    icon: '❌' },
 }
 

@@ -5,7 +5,6 @@ const STATUS_COLORS = {
   'Pendiente':      'bg-yellow-100 text-yellow-700 border-yellow-200',
   'En preparación': 'bg-blue-100   text-blue-700   border-blue-200',
   'Listo':          'bg-green-100  text-green-700  border-green-200',
-  'Entregado':      'bg-stone-100  text-stone-500  border-stone-200',
   'Cancelado':      'bg-red-100    text-red-600    border-red-200',
 }
 
@@ -15,7 +14,7 @@ export default function AdminDashboard() {
   const revenue    = orders.filter(o => o.status !== 'Cancelado').reduce((s, o) => s + o.total, 0)
   const pending    = orders.filter(o => o.status === 'Pendiente').length
   const inProgress = orders.filter(o => o.status === 'En preparación').length
-  const delivered  = orders.filter(o => o.status === 'Entregado').length
+  const delivered  = orders.filter(o => o.status === 'Listo').length
   const lowStock   = products.filter(p => p.stock <= 5).length
 
   const productCounts = {}
@@ -66,7 +65,7 @@ export default function AdminDashboard() {
         {[
           { label: 'Pendientes',     val: pending,    key: 'Pendiente'      },
           { label: 'En preparación', val: inProgress, key: 'En preparación' },
-          { label: 'Entregados',     val: delivered,  key: 'Entregado'      },
+          { label: 'Listos',         val: delivered,  key: 'Listo'          },
           { label: 'Cancelados',     val: orders.filter(o=>o.status==='Cancelado').length, key: 'Cancelado' },
         ].map(s => (
           <div key={s.label} className={`rounded-2xl px-4 py-4 border ${STATUS_COLORS[s.key]} flex items-center justify-between`}>

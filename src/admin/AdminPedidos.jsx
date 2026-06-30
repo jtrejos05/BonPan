@@ -21,22 +21,18 @@ function toDateStr(raw) {
   return d.toISOString().slice(0, 10)
 }
 
-const STATUS_OPTIONS = ['Pendiente', 'Confirmado', 'En preparación', 'Listo para recoger', 'Entregado', 'Cancelado']
+const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Cancelado']
 const STATUS_COLORS  = {
-  'Pendiente':          'bg-yellow-100 text-yellow-700',
-  'Confirmado':         'bg-purple-100 text-purple-700',
-  'En preparación':     'bg-blue-100   text-blue-700',
-  'Listo para recoger': 'bg-green-100  text-green-700',
-  'Entregado':          'bg-stone-100  text-stone-500',
-  'Cancelado':          'bg-red-100    text-red-600',
+  'Pendiente':      'bg-yellow-100 text-yellow-700',
+  'En preparación': 'bg-blue-100   text-blue-700',
+  'Listo':          'bg-green-100  text-green-700',
+  'Cancelado':      'bg-red-100    text-red-600',
 }
 const STATUS_ICONS = {
-  'Pendiente':          '🕐',
-  'Confirmado':         '✅',
-  'En preparación':     '👨‍🍳',
-  'Listo para recoger': '📦',
-  'Entregado':          '🎉',
-  'Cancelado':          '❌',
+  'Pendiente':      '🕐',
+  'En preparación': '👨‍🍳',
+  'Listo':          '📦',
+  'Cancelado':      '❌',
 }
 
 export default function AdminPedidos() {

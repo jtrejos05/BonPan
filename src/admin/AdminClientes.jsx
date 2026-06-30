@@ -6,7 +6,7 @@ const STATUS_COLORS = {
   'Pendiente':      'bg-yellow-100 text-yellow-700',
   'En preparación': 'bg-blue-100   text-blue-700',
   'Listo':          'bg-green-100  text-green-700',
-  'Entregado':      'bg-stone-100  text-stone-500',
+  'Listo':          'bg-green-100  text-green-700',
   'Cancelado':      'bg-red-100    text-red-600',
 }
 
