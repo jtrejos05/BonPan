@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { TrendingUp, ShoppingBag, Clock, AlertTriangle } from 'lucide-react'
 
@@ -10,6 +11,16 @@ const STATUS_COLORS = {
 
 export default function AdminDashboard() {
   const { orders, products, activityLog } = useApp()
+  const [period, setPeriod] = useState('mes')
+
+  const now = new Date()
+  const filteredOrders = orders.filter(o => {
+    const d = new Date(o.created_at)
+    if (period === 'dia')  return d.toDateString() === now.toDateString()
+    if (period === 'mes')  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    if (period === 'año')  return d.getFullYear() === now.getFullYear()
+    return true
+  })
 
   const revenue    = orders.filter(o => o.status !== 'Cancelado').reduce((s, o) => s + o.total, 0)
   const pending    = orders.filter(o => o.status === 'Pendiente').length
@@ -18,7 +29,7 @@ export default function AdminDashboard() {
   const lowStock   = products.filter(p => p.stock <= 5).length
 
   const productCounts = {}
-  orders.forEach(o => o.items?.forEach(i => {
+  filteredOrders.forEach(o => o.items?.forEach(i => {
     productCounts[i.name] = (productCounts[i.name] || 0) + i.qty
   }))
   const topProducts  = Object.entries(productCounts).sort((a, b) => b[1] - a[1]).slice(0, 5)
@@ -114,10 +125,21 @@ export default function AdminDashboard() {
 
         {/* Top productos */}
         <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
-          <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
-              style={{fontFamily:'Elms Sans, sans-serif'}}>
-            <TrendingUp size={20} className="text-red-500" /> Más Vendidos
-          </h2>
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+            <h2 className="font-black text-gray-900 text-lg flex items-center gap-2"
+                style={{fontFamily:'Elms Sans, sans-serif'}}>
+              <TrendingUp size={20} className="text-red-500" /> Más Vendidos
+            </h2>
+            <div className="flex gap-1 bg-stone-100 rounded-xl p-1">
+              {[['dia','Hoy'],['mes','Mes'],['año','Año']].map(([key, label]) => (
+                <button key={key} onClick={() => setPeriod(key)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all
+                    ${period === key ? 'bg-white text-red-700 shadow-sm' : 'text-stone-400 hover:text-stone-600'}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
           {topProducts.length === 0 ? (
             <div className="text-center py-8 text-gray-300">
               <TrendingUp size={40} className="mx-auto mb-2" />
