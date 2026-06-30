@@ -586,7 +586,11 @@ export default function Home() {
         />
         <div className="h-px bg-stone-100" />
         <ProductHero
+<<<<<<< HEAD
           img="https://images.unsplash.com/photo-1626078299034-558a37c0d9e5?w=1200&q=90"
+=======
+          img="https://images.unsplash.com/photo-1586444248879-bc604cbd555a?w=1200&q=90"
+>>>>>>> f8336675bce6b5e03cbc3de5ee94f400afc815f0
           tag="Sabor intenso"
           title="Pastel de Carne."
           sub="Masa hojaldrada con relleno de carne sazonada al estilo Bon Pan. Un bocado y ya no puedes parar."
