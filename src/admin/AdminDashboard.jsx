@@ -92,16 +92,24 @@ export default function AdminDashboard() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-black text-gray-900" style={{fontFamily:'Elms Sans, sans-serif'}}>
             Dashboard
           </h1>
           <p className="text-gray-400 text-sm mt-1 font-medium">Vista general del negocio en tiempo real</p>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-gray-400 font-medium">Hoy</p>
-          <p className="font-bold text-gray-700 text-sm">{new Date().toLocaleDateString('es-CO', {weekday:'long', day:'numeric', month:'long'})}</p>
+        <div className="flex flex-col items-end gap-1">
+          <p className="text-xs text-gray-400 font-medium">Período de análisis</p>
+          <div className="flex items-center gap-2">
+            <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+              className="border border-stone-200 rounded-lg px-2 py-1.5 text-xs font-medium text-stone-600
+                         focus:outline-none focus:border-red-400" />
+            <span className="text-stone-400 text-xs font-bold">→</span>
+            <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
+              className="border border-stone-200 rounded-lg px-2 py-1.5 text-xs font-medium text-stone-600
+                         focus:outline-none focus:border-red-400" />
+          </div>
         </div>
       </div>
 
@@ -172,21 +180,10 @@ export default function AdminDashboard() {
 
         {/* Top productos */}
         <div className="bg-white rounded-2xl shadow-sm border border-stone-100 p-6">
-          <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-            <h2 className="font-black text-gray-900 text-lg flex items-center gap-2"
-                style={{fontFamily:'Elms Sans, sans-serif'}}>
-              <TrendingUp size={20} className="text-red-500" /> Más Vendidos
-            </h2>
-            <div className="flex items-center gap-2 flex-wrap">
-              <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-                className="border border-stone-200 rounded-lg px-2 py-1.5 text-xs font-medium text-stone-600
-                           focus:outline-none focus:border-red-400" />
-              <span className="text-stone-400 text-xs font-bold">→</span>
-              <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-                className="border border-stone-200 rounded-lg px-2 py-1.5 text-xs font-medium text-stone-600
-                           focus:outline-none focus:border-red-400" />
-            </div>
-          </div>
+          <h2 className="font-black text-gray-900 text-lg mb-5 flex items-center gap-2"
+              style={{fontFamily:'Elms Sans, sans-serif'}}>
+            <TrendingUp size={20} className="text-red-500" /> Más Vendidos
+          </h2>
           {topProducts.length === 0 ? (
             <div className="text-center py-8 text-gray-300">
               <TrendingUp size={40} className="mx-auto mb-2" />
