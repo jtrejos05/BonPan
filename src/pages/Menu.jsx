@@ -53,10 +53,7 @@ function ProductBottomSheet({ p, onClose, onAdd, added }) {
           }
           {p.imagen && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-              <span className="font-black text-5xl tracking-widest rotate-[-30deg]"
-                    style={{fontFamily:'Elms Sans, sans-serif', color:'rgba(255,255,255,0.65)', textShadow:'0 2px 8px rgba(0,0,0,0.7)'}}>
-                BonPan
-              </span>
+              <img src="/logo.png" alt="BonPan" className="w-24 rotate-[-20deg]" style={{opacity:0.2}} />
             </div>
           )}
           {p.stock === 0 && (
@@ -135,10 +132,7 @@ function ProductCard({ p, index, onAdd, added, onOpen }) {
         }
         {p.imagen && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-            <span className="font-black text-3xl tracking-widest rotate-[-30deg]"
-                  style={{fontFamily:'Elms Sans, sans-serif', color:'rgba(255,255,255,0.65)', textShadow:'0 2px 8px rgba(0,0,0,0.7)'}}>
-              BonPan
-            </span>
+            <img src="/logo.png" alt="BonPan" className="w-16 rotate-[-20deg]" style={{opacity:0.2}} />
           </div>
         )}
         {p.stock === 0 && (
