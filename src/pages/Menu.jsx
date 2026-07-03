@@ -51,6 +51,14 @@ function ProductBottomSheet({ p, onClose, onAdd, added }) {
             ? <img src={p.imagen} alt={p.name} className="w-full h-full object-cover" />
             : <div className="w-full h-full flex items-center justify-center text-7xl">{p.emoji}</div>
           }
+          {p.imagen && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+              <span className="text-white/20 font-black text-4xl tracking-widest rotate-[-30deg]"
+                    style={{fontFamily:'Elms Sans, sans-serif', textShadow:'0 1px 3px rgba(0,0,0,0.3)'}}>
+                BonPan
+              </span>
+            </div>
+          )}
           {p.stock === 0 && (
             <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
               <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Agotado</span>
@@ -125,6 +133,14 @@ function ProductCard({ p, index, onAdd, added, onOpen }) {
               {p.emoji}
             </div>
         }
+        {p.imagen && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+            <span className="text-white/20 font-black text-2xl tracking-widest rotate-[-30deg]"
+                  style={{fontFamily:'Elms Sans, sans-serif', textShadow:'0 1px 3px rgba(0,0,0,0.3)'}}>
+              BonPan
+            </span>
+          </div>
+        )}
         {p.stock === 0 && (
           <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
             <span className="text-xs font-bold tracking-widest uppercase text-stone-400">Agotado</span>
