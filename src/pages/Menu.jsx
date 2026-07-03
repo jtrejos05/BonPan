@@ -418,7 +418,7 @@ export default function Menu() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.9 }}
             className="text-stone-300 text-base sm:text-lg font-light mt-5 max-w-lg leading-relaxed">
-            Todo elaborado a mano, fresco desde las 6am.
+            Todo elaborado a mano, fresco desde las 7am.
           </motion.p>
         </motion.div>
       </section>
