@@ -667,7 +667,7 @@ export default function Home() {
               <p className="text-white text-xs tracking-[0.2em] uppercase font-bold mb-4">Contacto</p>
               <div className="space-y-2 text-sm text-stone-600">
                 <p>📞 +57 305 306 7179</p>
-                <p>✉️ hola@bonpan.co</p>
+                <p>✉️ bon.gerencia@gmail.com</p>
               </div>
             </div>
           </div>
