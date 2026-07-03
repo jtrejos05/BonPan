@@ -105,21 +105,16 @@ export default function Contact() {
                   style={{fontFamily:'Elms Sans, sans-serif'}}>
                 Envíanos un Mensaje
               </h2>
-              <form ref={formRef} className="space-y-5" onSubmit={async (e) => {
+              <form ref={formRef} className="space-y-5" onSubmit={(e) => {
                   e.preventDefault()
-                  setStatus('sending')
-                  try {
-                    await emailjs.sendForm(
-                      EMAILJS_SERVICE_ID,
-                      EMAILJS_TEMPLATE_ID,
-                      formRef.current,
-                      EMAILJS_PUBLIC_KEY
-                    )
-                    setStatus('ok')
-                    formRef.current.reset()
-                  } catch {
-                    setStatus('error')
-                  }
+                  const data = new FormData(formRef.current)
+                  const nombre  = data.get('nombre')
+                  const correo  = data.get('correo')
+                  const mensaje = data.get('mensaje')
+                  const texto = `Hola BonPan! 👋\n\n*Nombre:* ${nombre}\n*Correo:* ${correo}\n\n*Mensaje:*\n${mensaje}`
+                  window.open(`https://wa.me/573053067179?text=${encodeURIComponent(texto)}`, '_blank')
+                  setStatus('ok')
+                  formRef.current.reset()
                 }}>
                 <div className="border-b border-stone-200">
                   <input
