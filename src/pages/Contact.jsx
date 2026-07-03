@@ -103,7 +103,7 @@ export default function Contact() {
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-stone-900 mb-6"
                   style={{fontFamily:'Elms Sans, sans-serif'}}>
-                Envíanos un Mensaje
+                Sugerencias
               </h2>
               <form ref={formRef} className="space-y-5" onSubmit={(e) => {
                   e.preventDefault()
