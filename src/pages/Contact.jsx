@@ -25,7 +25,7 @@ function FbIcon() {
 const INFO = [
   { icon: <MapPin size={18} />, title: 'Dirección', lines: ['Crr 6 Sur #66-40, Santafé de Varsovia Local 6', 'Ibagué, Tolima'] },
   { icon: <Phone size={18} />, title: 'Teléfono', lines: ['+57 305 306 7179'] },
-  { icon: <Mail size={18} />, title: 'Correo', lines: ['hola@bonpan.co'] },
+  { icon: <Mail size={18} />, title: 'Correo', lines: ['bon.gerencia@gmail.com'] },
   { icon: <Clock size={18} />, title: 'Horario', lines: [
     'Lunes – Jueves: 7:00am – 12:30pm y 2:00pm – 8:00pm',
     'Viernes – Sábado: 7:00am – 8:00pm',
