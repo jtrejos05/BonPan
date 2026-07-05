@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 /* ─── Botón flotante de WhatsApp ─────────────── */
 function WhatsAppButton() {
@@ -178,6 +179,7 @@ export default function App() {
               <Route path="/*" element={<ClientLayout />} />
             </Routes>
           </BrowserRouter>
+          <SpeedInsights />
         </AuthProvider>
       </AppProvider>
     </GoogleOAuthProvider>
