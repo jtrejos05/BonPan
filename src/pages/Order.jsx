@@ -232,7 +232,17 @@ export default function Order() {
   async function handleSubmit(ev) {
     ev.preventDefault()
     const e = validate()
-    if (Object.keys(e).length) return setErrors(e)
+    if (Object.keys(e).length) {
+      setErrors(e)
+      if (e.delivery) {
+        // El selector de entrega queda lejos del botón: abrir el modal directamente
+        setSubmitError('Falta seleccionar cómo quieres tu pedido (domicilio o retiro).')
+        setShowModal(true)
+      } else {
+        setSubmitError('Revisa los campos marcados en rojo.')
+      }
+      return
+    }
     setSubmitting(true)
     setSubmitError('')
     try {
@@ -383,7 +393,7 @@ export default function Order() {
       {showModal && (
         <DeliveryModal
           onClose={() => setShowModal(false)}
-          onConfirm={d => setDelivery(d)}
+          onConfirm={d => { setDelivery(d); setErrors(er => ({ ...er, delivery: undefined })); setSubmitError('') }}
         />
       )}
 

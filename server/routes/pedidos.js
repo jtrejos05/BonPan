@@ -86,12 +86,15 @@ router.post('/', async (req, res) => {
     )
     const pedidoId = pRows[0].id
 
-    // Insertar items
+    // Insertar items — las promos usan ids tipo "promo-5" que no existen
+    // en productos, así que solo se guarda producto_id cuando es numérico
     for (const item of items) {
+      const idNum = Number(item.id)
+      const productoId = Number.isInteger(idNum) && idNum > 0 ? idNum : null
       await client.query(
         `INSERT INTO pedido_items (pedido_id, producto_id, name, emoji, price, qty)
          VALUES ($1,$2,$3,$4,$5,$6)`,
-        [pedidoId, item.id, item.name, item.emoji, item.price, item.qty]
+        [pedidoId, productoId, item.name, item.emoji, item.price, item.qty]
       )
     }
 
