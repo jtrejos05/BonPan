@@ -91,6 +91,11 @@ export const api = {
     },
   },
 
+  pagos: {
+    firma:     (pedidoId, amountInCents) => request('/pagos/firma', { method: 'POST', body: JSON.stringify({ pedidoId, amountInCents }) }),
+    verificar: (transactionId)           => request(`/pagos/verificar/${transactionId}`),
+  },
+
   usuarios: {
     register:    (data)       => request('/usuarios/register', { method: 'POST', body: JSON.stringify(data) }),
     login:       (data)       => request('/usuarios/login',    { method: 'POST', body: JSON.stringify(data) }),

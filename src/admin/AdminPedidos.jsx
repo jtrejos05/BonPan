@@ -162,6 +162,15 @@ export default function AdminPedidos() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 ml-auto">
+                  {order.payment_status && (
+                    <span title={order.payment_method ? `Método: ${order.payment_method}` : undefined}
+                      className={`px-3 py-1 rounded-full text-xs font-semibold
+                        ${order.payment_status === 'Aprobado' ? 'bg-green-100 text-green-700'
+                          : order.payment_status === 'Pendiente' ? 'bg-amber-100 text-amber-700'
+                          : 'bg-red-100 text-red-600'}`}>
+                      💳 {order.payment_status === 'Aprobado' ? 'Pagado' : `Pago ${order.payment_status.toLowerCase()}`}
+                    </span>
+                  )}
                   <span className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[order.status]}`}>
                     {STATUS_ICONS[order.status]} {order.status}
                   </span>

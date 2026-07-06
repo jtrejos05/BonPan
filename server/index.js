@@ -24,6 +24,7 @@ app.use('/api/usuarios',  require('./routes/usuarios'))
 app.use('/api/upload',      require('./routes/upload'))
 app.use('/api/promociones',  require('./routes/promociones'))
 app.use('/api/puntos-venta', require('./routes/puntosVenta'))
+app.use('/api/pagos',        require('./routes/pagos'))
 
 // ── Health check ──────────────────────────────────────────────
 app.get('/api/health', (_req, res) => {
@@ -42,6 +43,14 @@ async function runMigrations() {
   try {
     await db.query(`ALTER TABLE productos ADD COLUMN IF NOT EXISTS description_en TEXT`)
     console.log('✅ Migración: description_en lista')
+    await db.query(`
+      ALTER TABLE pedidos
+        ADD COLUMN IF NOT EXISTS payment_status       VARCHAR(30),
+        ADD COLUMN IF NOT EXISTS payment_reference    VARCHAR(100),
+        ADD COLUMN IF NOT EXISTS wompi_transaction_id VARCHAR(100),
+        ADD COLUMN IF NOT EXISTS payment_method       VARCHAR(50)
+    `)
+    console.log('✅ Migración: columnas de pago (Wompi) listas')
   } catch (e) {
     console.error('⚠️ Migración falló:', e.message)
   }

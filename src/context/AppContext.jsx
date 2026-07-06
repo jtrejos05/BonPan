@@ -97,7 +97,8 @@ export function AppProvider({ children }) {
 
   // ── Pedidos ───────────────────────────────────────────────────
   async function placeOrder(customerInfo) {
-    const total = cart.reduce((s, i) => s + i.price * i.qty, 0)
+    // Si el checkout calculó un total con descuentos, ese es el que se cobra
+    const total = customerInfo.totalConDescuento ?? cart.reduce((s, i) => s + i.price * i.qty, 0)
     const orderData = { customer: customerInfo, items: cart, total }
     const newOrder = await api.pedidos.create(orderData)
     setOrders(prev => [{ ...newOrder, customer: customerInfo, items: cart, statusHistory: [{ status: 'Pendiente', timestamp: new Date().toLocaleString('es-CO') }] }, ...prev])

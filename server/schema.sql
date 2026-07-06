@@ -29,13 +29,18 @@ CREATE TABLE IF NOT EXISTS clientes (
 
 -- ── Pedidos ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS pedidos (
-  id          SERIAL PRIMARY KEY,
-  cliente_id  INTEGER     REFERENCES clientes(id),
-  total       INTEGER     NOT NULL CHECK (total >= 0),
-  status      VARCHAR(30) NOT NULL DEFAULT 'Pendiente',
-  notes       TEXT,
-  created_at  TIMESTAMPTZ DEFAULT NOW(),
-  updated_at  TIMESTAMPTZ DEFAULT NOW()
+  id                   SERIAL PRIMARY KEY,
+  cliente_id           INTEGER     REFERENCES clientes(id),
+  total                INTEGER     NOT NULL CHECK (total >= 0),
+  status               VARCHAR(30) NOT NULL DEFAULT 'Pendiente',
+  notes                TEXT,
+  -- Pago en línea (Wompi)
+  payment_status       VARCHAR(30),   -- Pendiente | Aprobado | Rechazado | Anulado | Error
+  payment_reference    VARCHAR(100),  -- referencia enviada a Wompi (BONPAN-<id>-<ts>)
+  wompi_transaction_id VARCHAR(100),
+  payment_method       VARCHAR(50),   -- CARD | PSE | NEQUI | BANCOLOMBIA_TRANSFER ...
+  created_at           TIMESTAMPTZ DEFAULT NOW(),
+  updated_at           TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ── Items de cada pedido ──────────────────────────────────────

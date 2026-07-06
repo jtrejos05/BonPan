@@ -4,6 +4,7 @@ import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShoppingCart, X, MapPin, 
 import { useApp } from '../context/AppContext'
 import { useAuth } from '../context/AuthContext'
 import { api } from '../services/api'
+import { openWompiCheckout } from '../services/wompi'
 
 // ── Modal de tipo de entrega ─────────────────────────────────
 function DeliveryModal({ onClose, onConfirm }) {
@@ -178,6 +179,8 @@ export default function Order() {
   const [promoLoading,   setPromoLoading]   = useState(false)
   const [canjearPuntos,  setCanjearPuntos]  = useState(false)
   const [puntosACanjear, setPuntosACanjear] = useState(100)
+  const [metodoPago,     setMetodoPago]     = useState('efectivo')  // 'efectivo' | 'wompi'
+  const [paymentInfo,    setPaymentInfo]    = useState(null)        // { status, statusLabel, method }
 
   // Pre-llenar nombre y teléfono si el usuario está logueado
   useEffect(() => {
@@ -239,6 +242,13 @@ export default function Order() {
       }
       const order = await placeOrder({ ...form, delivery, usuarioId: user?.id, totalConDescuento: totalFinal })
       await refreshUser()
+
+      if (metodoPago === 'wompi') {
+        await iniciarPagoWompi(order)
+      } else {
+        setPaymentInfo(null)
+      }
+
       setConfirmed(order)
       setForm({ name: '', phone: '', notes: '' })
       setDelivery(null)
@@ -246,6 +256,36 @@ export default function Order() {
       setSubmitError('Hubo un error al enviar el pedido. Intenta de nuevo.')
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  // Abre el widget de Wompi sobre la pantalla de confirmación.
+  // Si el cliente cierra el widget sin pagar, el pedido queda con pago pendiente.
+  async function iniciarPagoWompi(order) {
+    try {
+      const firma = await api.pagos.firma(order.id, order.total * 100)
+      setPaymentInfo({ status: 'PENDING', statusLabel: 'Pendiente' })
+      openWompiCheckout({
+        ...firma,
+        customerData: {
+          fullName: form.name,
+          phoneNumber: form.phone.replace(/\D/g, ''),
+          phoneNumberPrefix: '+57',
+          ...(user?.email ? { email: user.email } : {}),
+        },
+      }).then(async tx => {
+        try {
+          const v = await api.pagos.verificar(tx.id)
+          setPaymentInfo({ status: v.status, statusLabel: v.statusLabel, method: v.paymentMethod })
+        } catch {
+          setPaymentInfo({ status: tx.status, statusLabel: tx.status, method: tx.paymentMethodType || tx.payment_method_type })
+        }
+      }).catch(() => {
+        setPaymentInfo({ status: 'ERROR', statusLabel: 'Error' })
+      })
+    } catch {
+      // El pedido ya existe; solo falló iniciar el pago en línea
+      setPaymentInfo({ status: 'ERROR', statusLabel: 'Error' })
     }
   }
 
@@ -261,6 +301,21 @@ export default function Order() {
           Gracias, <strong className="text-stone-700">{confirmed.customer?.name}</strong>
         </p>
         <p className="text-stone-400 text-sm mb-3">Tu pedido está siendo preparado 🥐</p>
+
+        {paymentInfo && (
+          <div className={`border rounded px-4 py-3 mb-4 text-sm text-left font-medium
+            ${paymentInfo.status === 'APPROVED' ? 'bg-green-50 border-green-200 text-green-700'
+              : paymentInfo.status === 'PENDING' ? 'bg-amber-50 border-amber-200 text-amber-700'
+              : 'bg-red-50 border-red-200 text-red-700'}`}>
+            {paymentInfo.status === 'APPROVED' ? (
+              <p>✅ <strong>Pago aprobado</strong> vía Wompi{paymentInfo.method ? ` (${paymentInfo.method})` : ''}. ¡Gracias!</p>
+            ) : paymentInfo.status === 'PENDING' ? (
+              <p>⏳ <strong>Pago en proceso.</strong> Si no completaste el pago en línea, puedes pagar al recibir tu pedido.</p>
+            ) : (
+              <p>⚠️ <strong>El pago en línea no se completó</strong> ({paymentInfo.statusLabel}). No te preocupes: tu pedido quedó registrado y puedes pagar al recibirlo.</p>
+            )}
+          </div>
+        )}
 
         {confirmed.customer?.delivery && (
           <div className="bg-stone-50 border border-stone-200 rounded px-4 py-3 mb-5 sm:mb-6 text-sm text-left">
@@ -290,7 +345,7 @@ export default function Order() {
           </div>
         </div>
 
-        <button onClick={() => setConfirmed(null)}
+        <button onClick={() => { setConfirmed(null); setPaymentInfo(null) }}
           className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase py-4
                      hover:bg-red-900 transition-colors touch-manipulation">
           Hacer Otro Pedido
@@ -604,6 +659,36 @@ export default function Order() {
                                text-sm focus:outline-none focus:border-red-800 resize-none transition-colors" />
                 </div>
 
+                {/* Método de pago */}
+                <div>
+                  <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+                    Método de pago
+                  </label>
+                  <div className="grid grid-cols-2 border border-stone-200 overflow-hidden">
+                    <button type="button" onClick={() => setMetodoPago('efectivo')}
+                      style={{fontFamily:'Elms Sans, sans-serif'}}
+                      className={`py-3 text-xs font-bold tracking-wide transition-all duration-200
+                        ${metodoPago === 'efectivo'
+                          ? 'bg-red-950 text-white'
+                          : 'bg-white text-stone-500 hover:bg-stone-50'}`}>
+                      💵 Al recibir
+                    </button>
+                    <button type="button" onClick={() => setMetodoPago('wompi')}
+                      style={{fontFamily:'Elms Sans, sans-serif'}}
+                      className={`py-3 text-xs font-bold tracking-wide transition-all duration-200 border-l border-stone-200
+                        ${metodoPago === 'wompi'
+                          ? 'bg-red-950 text-white'
+                          : 'bg-white text-stone-500 hover:bg-stone-50'}`}>
+                      💳 En línea
+                    </button>
+                  </div>
+                  {metodoPago === 'wompi' && (
+                    <p className="text-xs text-stone-400 mt-2 font-medium">
+                      🔒 Tarjeta, PSE, Nequi y más — pago seguro con Wompi
+                    </p>
+                  )}
+                </div>
+
                 {submitError && (
                   <p className="text-red-500 text-xs font-semibold bg-red-50 p-3 border border-red-200">
                     {submitError}
@@ -613,7 +698,7 @@ export default function Order() {
                 <button type="submit" disabled={submitting}
                   className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase
                              py-4 hover:bg-red-900 active:bg-red-800 transition-colors disabled:opacity-50 mt-2 touch-manipulation">
-                  {submitting ? '⏳ Enviando...' : 'Confirmar Pedido'}
+                  {submitting ? '⏳ Enviando...' : metodoPago === 'wompi' ? '💳 Confirmar y Pagar' : 'Confirmar Pedido'}
                 </button>
               </form>
             </div>
