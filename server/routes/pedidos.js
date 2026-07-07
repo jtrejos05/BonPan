@@ -1,8 +1,9 @@
 const router = require('express').Router()
 const db     = require('../db')
+const { adminOnly, staff } = require('../middleware/staffAuth')
 
-// GET /api/pedidos
-router.get('/', async (req, res) => {
+// GET /api/pedidos (admin)
+router.get('/', adminOnly, async (req, res) => {
   try {
     // Pedidos con datos del cliente
     const { rows: pedidos } = await db.query(`
@@ -36,8 +37,8 @@ router.get('/', async (req, res) => {
   }
 })
 
-// GET /api/pedidos/:id
-router.get('/:id', async (req, res) => {
+// GET /api/pedidos/:id (admin)
+router.get('/:id', adminOnly, async (req, res) => {
   try {
     const { rows } = await db.query(`
       SELECT p.*, c.name AS cliente_name, c.phone AS cliente_phone
@@ -133,13 +134,24 @@ router.post('/', async (req, res) => {
   }
 })
 
-// PUT /api/pedidos/:id/estado  — cambiar estado
-router.put('/:id/estado', async (req, res) => {
+// PUT /api/pedidos/:id/estado  — cambiar estado (admin o empleado del local)
+router.put('/:id/estado', staff, async (req, res) => {
   const { status } = req.body
   const VALID = ['Pendiente','En preparación','Listo','Entregado','Cancelado']
   if (!VALID.includes(status)) return res.status(400).json({ error: 'Estado inválido' })
 
   try {
+    // Un empleado solo puede cambiar pedidos de su propio local
+    if (req.user.role === 'empleado') {
+      const { rows: pRows } = await db.query(
+        'SELECT punto_venta_id FROM pedidos WHERE id=$1', [req.params.id]
+      )
+      if (!pRows.length) return res.status(404).json({ error: 'Pedido no encontrado' })
+      if (pRows[0].punto_venta_id !== req.user.pv_id) {
+        return res.status(403).json({ error: 'Este pedido no pertenece a tu local' })
+      }
+    }
+
     const { rows } = await db.query(
       'UPDATE pedidos SET status=$1 WHERE id=$2 RETURNING *',
       [status, req.params.id]

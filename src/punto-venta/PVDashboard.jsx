@@ -25,6 +25,13 @@ export default function PVDashboard() {
       const data = await api.puntosVenta.getPedidos(pvData.id)
       setPedidos(data)
     } catch(err) {
+      // Sesión expirada o dispositivo revocado → volver al login
+      if (err.status === 401 || err.status === 403) {
+        localStorage.removeItem('pv_token')
+        localStorage.removeItem('pv_data')
+        navigate('/punto-venta')
+        return
+      }
       console.error(err)
     } finally {
       setLoading(false)

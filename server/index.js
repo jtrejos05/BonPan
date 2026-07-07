@@ -51,6 +51,47 @@ async function runMigrations() {
         ADD COLUMN IF NOT EXISTS payment_method       VARCHAR(50)
     `)
     console.log('✅ Migración: columnas de pago (Wompi) listas')
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS puntos_de_venta (
+        id         SERIAL PRIMARY KEY,
+        nombre     VARCHAR(100) NOT NULL,
+        direccion  VARCHAR(200),
+        telefono   VARCHAR(30),
+        pin        VARCHAR(30)  NOT NULL,
+        activo     BOOLEAN      DEFAULT TRUE,
+        created_at TIMESTAMPTZ  DEFAULT NOW()
+      )
+    `)
+    await db.query(`
+      ALTER TABLE puntos_de_venta
+        ADD COLUMN IF NOT EXISTS hora_apertura VARCHAR(5),
+        ADD COLUMN IF NOT EXISTS hora_cierre   VARCHAR(5)
+    `)
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS pv_dispositivos (
+        id             SERIAL PRIMARY KEY,
+        punto_venta_id INTEGER      NOT NULL REFERENCES puntos_de_venta(id) ON DELETE CASCADE,
+        nombre         VARCHAR(150),
+        device_token   VARCHAR(80)  NOT NULL,
+        aprobado       BOOLEAN      DEFAULT FALSE,
+        created_at     TIMESTAMPTZ  DEFAULT NOW(),
+        last_used_at   TIMESTAMPTZ,
+        UNIQUE (device_token, punto_venta_id)
+      )
+    `)
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS pv_accesos (
+        id             SERIAL PRIMARY KEY,
+        punto_venta_id INTEGER REFERENCES puntos_de_venta(id)  ON DELETE SET NULL,
+        dispositivo_id INTEGER REFERENCES pv_dispositivos(id)  ON DELETE SET NULL,
+        exito          BOOLEAN NOT NULL,
+        motivo         VARCHAR(120),
+        ip             VARCHAR(64),
+        user_agent     TEXT,
+        created_at     TIMESTAMPTZ DEFAULT NOW()
+      )
+    `)
+    console.log('✅ Migración: seguridad de puntos de venta lista')
   } catch (e) {
     console.error('⚠️ Migración falló:', e.message)
   }

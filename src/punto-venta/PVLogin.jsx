@@ -1,7 +1,32 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
-import { Eye, EyeOff, Store } from 'lucide-react'
+import { Eye, EyeOff, Store, ShieldAlert } from 'lucide-react'
+
+// Identificador único de este navegador/equipo. Se genera una sola vez
+// y el administrador debe aprobarlo para que el login funcione aquí.
+function getDeviceToken() {
+  let t = localStorage.getItem('pv_device_token')
+  if (!t) {
+    t = crypto.randomUUID ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    localStorage.setItem('pv_device_token', t)
+  }
+  return t
+}
+
+function getDeviceName() {
+  const ua = navigator.userAgent
+  const browser = ua.includes('Edg/') ? 'Edge'
+    : ua.includes('Chrome')  ? 'Chrome'
+    : ua.includes('Firefox') ? 'Firefox'
+    : ua.includes('Safari')  ? 'Safari' : 'Navegador'
+  const os = ua.includes('Windows') ? 'Windows'
+    : ua.includes('Android')   ? 'Android'
+    : /iPhone|iPad/.test(ua)   ? 'iPhone/iPad'
+    : ua.includes('Mac')       ? 'Mac' : 'PC'
+  return `${browser} en ${os}`
+}
 
 export default function PVLogin() {
   const navigate = useNavigate()
@@ -9,6 +34,7 @@ export default function PVLogin() {
   const [pvId,     setPvId]     = useState('')
   const [pin,      setPin]      = useState('')
   const [error,    setError]    = useState('')
+  const [pending,  setPending]  = useState(null)  // dispositivo pendiente de aprobación
   const [loading,  setLoading]  = useState(false)
   const [showPin,  setShowPin]  = useState(false)
 
@@ -25,14 +51,15 @@ export default function PVLogin() {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!pvId) return setError('Selecciona un local')
-    setLoading(true); setError('')
+    setLoading(true); setError(''); setPending(null)
     try {
-      const res = await api.puntosVenta.login(Number(pvId), pin)
+      const res = await api.puntosVenta.login(Number(pvId), pin, getDeviceToken(), getDeviceName())
       localStorage.setItem('pv_token',    res.token)
       localStorage.setItem('pv_data',     JSON.stringify(res.puntoVenta))
       navigate('/punto-venta/dashboard')
     } catch (err) {
-      setError(err.message)
+      if (err.data?.pendingDevice) setPending(err.data.dispositivo)
+      else setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -91,6 +118,19 @@ export default function PVLogin() {
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
                 <p className="text-red-600 text-sm font-semibold">{error}</p>
+              </div>
+            )}
+
+            {pending && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-1">
+                <p className="text-amber-800 text-sm font-bold flex items-center gap-2">
+                  <ShieldAlert size={16}/> Dispositivo no autorizado
+                </p>
+                <p className="text-amber-700 text-xs">
+                  Este equipo (<strong>{pending.nombre}</strong>, #{pending.id}) quedó registrado
+                  pero necesita la aprobación del administrador. Pídele que lo apruebe desde
+                  el panel admin en <strong>Puntos de Venta</strong> y vuelve a intentar.
+                </p>
               </div>
             )}
 

@@ -6,18 +6,37 @@ function getToken() {
   return localStorage.getItem('bonpan_token')
 }
 
-async function request(path, options = {}) {
+// Token del panel admin y del punto de venta (empleados)
+const adminAuth = () => {
+  const t = localStorage.getItem('bonpan_admin_token')
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+const pvAuth = () => {
+  const t = localStorage.getItem('pv_token')
+  return t ? { Authorization: `Bearer ${t}` } : {}
+}
+// Para rutas que acepta admin o empleado: usa el token que exista
+const staffAuth = () => {
+  const admin = adminAuth()
+  return admin.Authorization ? admin : pvAuth()
+}
+
+async function request(path, { headers = {}, ...options } = {}) {
   const token = getToken()
   const res = await fetch(`${BASE}${path}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
     },
     ...options,
   })
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: 'Error de red' }))
-    throw new Error(err.error || 'Error desconocido')
+    const data = await res.json().catch(() => ({ error: 'Error de red' }))
+    const error = new Error(data.error || 'Error desconocido')
+    error.status = res.status
+    error.data   = data
+    throw error
   }
   return res.json()
 }
@@ -32,9 +51,9 @@ export const api = {
   },
 
   pedidos: {
-    getAll:    ()               => request('/pedidos'),
+    getAll:    ()               => request('/pedidos', { headers: adminAuth() }),
     create:    (data)           => request('/pedidos',              { method: 'POST', body: JSON.stringify(data) }),
-    setStatus: (id, status)     => request(`/pedidos/${id}/estado`, { method: 'PUT',  body: JSON.stringify({ status }) }),
+    setStatus: (id, status)     => request(`/pedidos/${id}/estado`, { method: 'PUT',  body: JSON.stringify({ status }), headers: staffAuth() }),
   },
 
   clientes: {
@@ -55,11 +74,19 @@ export const api = {
 
   puntosVenta: {
     getAll:    ()          => request('/puntos-venta'),
-    create:    (data)      => request('/puntos-venta',          { method: 'POST',   body: JSON.stringify(data) }),
-    update:    (id, data)  => request(`/puntos-venta/${id}`,    { method: 'PUT',    body: JSON.stringify(data) }),
-    remove:    (id)        => request(`/puntos-venta/${id}`,    { method: 'DELETE' }),
-    login:     (id, pin)   => request('/puntos-venta/login',    { method: 'POST',   body: JSON.stringify({ id, pin }) }),
-    getPedidos:(id)        => request(`/puntos-venta/${id}/pedidos`),
+    create:    (data)      => request('/puntos-venta',          { method: 'POST',   body: JSON.stringify(data), headers: adminAuth() }),
+    update:    (id, data)  => request(`/puntos-venta/${id}`,    { method: 'PUT',    body: JSON.stringify(data), headers: adminAuth() }),
+    remove:    (id)        => request(`/puntos-venta/${id}`,    { method: 'DELETE', headers: adminAuth() }),
+    login:     (id, pin, deviceToken, deviceName) =>
+      request('/puntos-venta/login', { method: 'POST', body: JSON.stringify({ id, pin, deviceToken, deviceName }) }),
+    getPedidos:(id)        => request(`/puntos-venta/${id}/pedidos`, { headers: pvAuth() }),
+    // Seguridad (admin)
+    dispositivos: {
+      getAll:  ()   => request('/puntos-venta/dispositivos',                { headers: adminAuth() }),
+      aprobar: (id) => request(`/puntos-venta/dispositivos/${id}/aprobar`,  { method: 'PATCH',  headers: adminAuth() }),
+      remove:  (id) => request(`/puntos-venta/dispositivos/${id}`,          { method: 'DELETE', headers: adminAuth() }),
+    },
+    accesos: (limit = 100) => request(`/puntos-venta/accesos?limit=${limit}`, { headers: adminAuth() }),
   },
 
   promociones: {

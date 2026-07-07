@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
 import { api } from '../services/api'
-import { Plus, Pencil, Trash2, Check, X, Store, Eye, EyeOff } from 'lucide-react'
+import { Plus, Pencil, Trash2, Check, X, Store, Eye, EyeOff, Monitor, ShieldCheck, ShieldAlert, History, Clock } from 'lucide-react'
 
 function PVModal({ initial, onSave, onClose }) {
-  const [form,   setForm]   = useState(initial || { nombre:'', direccion:'', telefono:'', pin:'' })
+  const [form,   setForm]   = useState(initial
+    ? { ...initial, pin: '', hora_apertura: initial.hora_apertura || '', hora_cierre: initial.hora_cierre || '' }
+    : { nombre:'', direccion:'', telefono:'', pin:'', hora_apertura:'', hora_cierre:'' })
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState('')
   const [showPin,setShowPin]= useState(false)
@@ -74,6 +76,29 @@ function PVModal({ initial, onSave, onClose }) {
             <p className="text-stone-400 text-xs mt-1">El empleado usa este PIN para ingresar al panel del local.</p>
           </div>
 
+          <div>
+            <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
+              Horario de acceso al panel
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-stone-400 mb-1">Desde</p>
+                <input type="time" value={form.hora_apertura} onChange={e=>set('hora_apertura',e.target.value)}
+                  className="w-full border-b-2 border-stone-200 bg-transparent py-2 text-stone-700
+                             font-medium focus:outline-none focus:border-red-800 transition-colors"/>
+              </div>
+              <div>
+                <p className="text-xs text-stone-400 mb-1">Hasta</p>
+                <input type="time" value={form.hora_cierre} onChange={e=>set('hora_cierre',e.target.value)}
+                  className="w-full border-b-2 border-stone-200 bg-transparent py-2 text-stone-700
+                             font-medium focus:outline-none focus:border-red-800 transition-colors"/>
+              </div>
+            </div>
+            <p className="text-stone-400 text-xs mt-1">
+              Fuera de este horario los empleados no podrán ingresar al panel. Déjalo vacío para permitir siempre.
+            </p>
+          </div>
+
           {error && <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
             <p className="text-red-600 text-sm font-medium">{error}</p>
           </div>}
@@ -96,11 +121,14 @@ function PVModal({ initial, onSave, onClose }) {
 }
 
 export default function AdminPuntosVenta() {
-  const [locales,    setLocales]    = useState([])
-  const [loading,    setLoading]    = useState(true)
-  const [showModal,  setShowModal]  = useState(false)
-  const [editing,    setEditing]    = useState(null)
-  const [confirmDel, setConfirmDel] = useState(null)
+  const [locales,      setLocales]      = useState([])
+  const [loading,      setLoading]      = useState(true)
+  const [showModal,    setShowModal]    = useState(false)
+  const [editing,      setEditing]      = useState(null)
+  const [confirmDel,   setConfirmDel]   = useState(null)
+  const [dispositivos, setDispositivos] = useState([])
+  const [accesos,      setAccesos]      = useState([])
+  const [busyDevice,   setBusyDevice]   = useState(null)
 
   async function fetchLocales() {
     setLoading(true)
@@ -109,7 +137,32 @@ export default function AdminPuntosVenta() {
     finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchLocales() }, [])
+  async function fetchSeguridad() {
+    try {
+      const [d, a] = await Promise.all([
+        api.puntosVenta.dispositivos.getAll(),
+        api.puntosVenta.accesos(50),
+      ])
+      setDispositivos(d)
+      setAccesos(a)
+    } catch(err) { console.error(err) }
+  }
+
+  useEffect(() => { fetchLocales(); fetchSeguridad() }, [])
+
+  async function toggleDispositivo(id) {
+    setBusyDevice(id)
+    try { await api.puntosVenta.dispositivos.aprobar(id); await fetchSeguridad() }
+    catch(err) { alert(err.message) }
+    finally { setBusyDevice(null) }
+  }
+
+  async function eliminarDispositivo(id) {
+    setBusyDevice(id)
+    try { await api.puntosVenta.dispositivos.remove(id); await fetchSeguridad() }
+    catch(err) { alert(err.message) }
+    finally { setBusyDevice(null) }
+  }
 
   async function handleSave(data) {
     if (editing) await api.puntosVenta.update(editing.id, data)
@@ -219,6 +272,9 @@ export default function AdminPuntosVenta() {
               <div className="space-y-1.5 text-sm text-stone-500 font-medium mb-4">
                 {l.direccion && <p>📍 {l.direccion}</p>}
                 {l.telefono  && <p>📞 {l.telefono}</p>}
+                {l.hora_apertura && l.hora_cierre && (
+                  <p>🕐 Acceso empleados: {l.hora_apertura} – {l.hora_cierre}</p>
+                )}
               </div>
 
               {/* Link de acceso */}
@@ -245,6 +301,133 @@ export default function AdminPuntosVenta() {
           ))}
         </div>
       )}
+
+      {/* ── Dispositivos de empleados ─────────────────────────── */}
+      <div className="space-y-4 pt-4">
+        <div className="flex items-center gap-2">
+          <Monitor size={20} className="text-red-800"/>
+          <h2 className="text-xl font-black text-gray-900" style={{fontFamily:'Elms Sans, sans-serif'}}>
+            Dispositivos autorizados
+          </h2>
+          {dispositivos.filter(d=>!d.aprobado).length > 0 && (
+            <span className="bg-amber-100 text-amber-700 text-xs font-black px-2.5 py-1 rounded-full">
+              {dispositivos.filter(d=>!d.aprobado).length} pendiente(s)
+            </span>
+          )}
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 flex gap-3">
+          <span className="text-2xl shrink-0">🔒</span>
+          <div className="text-left">
+            <p className="font-bold text-blue-900 text-sm">Solo los equipos aprobados pueden entrar al panel de ventas</p>
+            <p className="text-blue-700 text-xs mt-1">
+              La primera vez que un equipo (tablet o computador del local) intenta ingresar, queda registrado aquí
+              como <strong>pendiente</strong>. Apruébalo solo si es un equipo del local. Si una empleada intenta
+              entrar desde su casa o su celular, aparecerá aquí y podrás rechazarlo.
+            </p>
+          </div>
+        </div>
+
+        {dispositivos.length === 0 ? (
+          <div className="text-center py-10 text-stone-400 bg-white rounded-2xl border border-stone-100">
+            <Monitor size={36} className="mx-auto mb-2 opacity-40"/>
+            <p className="font-semibold text-sm">Aún no hay dispositivos registrados</p>
+            <p className="text-xs mt-1">Aparecerán cuando un empleado intente ingresar al panel de ventas.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {dispositivos.map(d => (
+              <div key={d.id}
+                className={`bg-white rounded-2xl border-2 p-4 flex flex-wrap items-center gap-3
+                  ${d.aprobado ? 'border-stone-100' : 'border-amber-200 bg-amber-50/40'}`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0
+                  ${d.aprobado ? 'bg-green-50' : 'bg-amber-100'}`}>
+                  {d.aprobado
+                    ? <ShieldCheck size={20} className="text-green-600"/>
+                    : <ShieldAlert size={20} className="text-amber-600"/>}
+                </div>
+                <div className="flex-1 min-w-[180px]">
+                  <p className="font-bold text-stone-800 text-sm">
+                    {d.nombre || `Dispositivo #${d.id}`}
+                    <span className="text-stone-400 font-medium"> · {d.pv_nombre}</span>
+                  </p>
+                  <p className="text-xs text-stone-400">
+                    Registrado: {new Date(d.created_at).toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' })}
+                    {d.last_used_at && <> · Último uso: {new Date(d.last_used_at).toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' })}</>}
+                  </p>
+                </div>
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full
+                  ${d.aprobado ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
+                  {d.aprobado ? '● Aprobado' : '○ Pendiente'}
+                </span>
+                <div className="flex gap-2">
+                  <button onClick={()=>toggleDispositivo(d.id)} disabled={busyDevice===d.id}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors disabled:opacity-50
+                      ${d.aprobado
+                        ? 'border border-stone-200 text-stone-500 hover:border-red-300 hover:text-red-600'
+                        : 'bg-green-600 text-white hover:bg-green-700'}`}>
+                    {d.aprobado ? 'Revocar acceso' : '✓ Aprobar'}
+                  </button>
+                  <button onClick={()=>eliminarDispositivo(d.id)} disabled={busyDevice===d.id}
+                    className="px-3 py-2 rounded-xl border border-stone-200 text-stone-400
+                               hover:border-red-300 hover:text-red-500 transition-colors disabled:opacity-50">
+                    <Trash2 size={14}/>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Registro de accesos ───────────────────────────────── */}
+      <div className="space-y-4 pt-4">
+        <div className="flex items-center gap-2">
+          <History size={20} className="text-red-800"/>
+          <h2 className="text-xl font-black text-gray-900" style={{fontFamily:'Elms Sans, sans-serif'}}>
+            Últimos accesos al panel de ventas
+          </h2>
+        </div>
+
+        {accesos.length === 0 ? (
+          <div className="text-center py-10 text-stone-400 bg-white rounded-2xl border border-stone-100">
+            <Clock size={36} className="mx-auto mb-2 opacity-40"/>
+            <p className="font-semibold text-sm">Sin registros todavía</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-stone-100 overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs text-stone-400 uppercase tracking-wide border-b border-stone-100">
+                  <th className="px-4 py-3 font-bold">Fecha</th>
+                  <th className="px-4 py-3 font-bold">Local</th>
+                  <th className="px-4 py-3 font-bold">Dispositivo</th>
+                  <th className="px-4 py-3 font-bold">Resultado</th>
+                  <th className="px-4 py-3 font-bold">IP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {accesos.map(a => (
+                  <tr key={a.id} className="border-b border-stone-50 last:border-0">
+                    <td className="px-4 py-3 text-stone-500 whitespace-nowrap">
+                      {new Date(a.created_at).toLocaleString('es-CO', { dateStyle:'short', timeStyle:'short' })}
+                    </td>
+                    <td className="px-4 py-3 font-semibold text-stone-700">{a.pv_nombre || '—'}</td>
+                    <td className="px-4 py-3 text-stone-500">{a.dispositivo_nombre || '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap
+                        ${a.exito ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                        {a.exito ? '✓' : '✗'} {a.motivo}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-stone-400 font-mono text-xs">{a.ip}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
