@@ -16,7 +16,7 @@ function generateToken(user) {
 
 // ── POST /api/usuarios/register ───────────────────────────────
 router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body
+  const { name, email, password, phone } = req.body
   if (!name || !email || !password)
     return res.status(400).json({ error: 'Nombre, correo y contraseña son requeridos' })
   if (password.length < 6)
@@ -29,9 +29,9 @@ router.post('/register', async (req, res) => {
 
     const hash = await bcrypt.hash(password, 12)
     const { rows } = await db.query(
-      `INSERT INTO usuarios (name, email, password)
-       VALUES ($1, $2, $3) RETURNING id, name, email, avatar, created_at`,
-      [name.trim(), email.toLowerCase().trim(), hash]
+      `INSERT INTO usuarios (name, email, password, phone)
+       VALUES ($1, $2, $3, $4) RETURNING id, name, email, phone, avatar, created_at`,
+      [name.trim(), email.toLowerCase().trim(), hash, phone ? phone.trim() : null]
     )
     const user = rows[0]
     await db.query(
@@ -129,7 +129,7 @@ router.post('/google', async (req, res) => {
 router.get('/me', require('../middleware/authMiddleware'), async (req, res) => {
   try {
     const { rows } = await db.query(
-      `SELECT id, name, email, avatar, created_at,
+      `SELECT id, name, email, phone, avatar, created_at,
               COALESCE(puntos, 0) AS puntos
        FROM usuarios WHERE id = $1`,
       [req.user.id]

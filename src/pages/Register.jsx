@@ -8,7 +8,7 @@ export default function Register() {
   const { register, loginGoogle } = useAuth()
   const navigate = useNavigate()
 
-  const [form,    setForm]    = useState({ name: '', email: '', password: '', confirm: '' })
+  const [form,    setForm]    = useState({ name: '', email: '', phone: '', password: '', confirm: '' })
   const [error,   setError]   = useState('')
   const [loading, setLoading] = useState(false)
   const [show,    setShow]    = useState(false)
@@ -22,7 +22,7 @@ export default function Register() {
       return setError('La contraseña debe tener al menos 6 caracteres')
     setLoading(true)
     try {
-      await register(form.name, form.email, form.password)
+      await register(form.name, form.email, form.password, form.phone)
       navigate('/')
     } catch (err) {
       setError(err.message)
@@ -83,6 +83,7 @@ export default function Register() {
             {[
               { key: 'name',  label: 'Nombre completo',    type: 'text',  placeholder: 'Tu nombre' },
               { key: 'email', label: 'Correo electrónico', type: 'email', placeholder: 'tu@correo.com' },
+              { key: 'phone', label: 'Teléfono',           type: 'tel',   placeholder: '300 000 0000' },
             ].map(f => (
               <div key={f.key}>
                 <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">

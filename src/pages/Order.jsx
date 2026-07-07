@@ -184,7 +184,7 @@ export default function Order() {
 
   // Pre-llenar nombre y teléfono si el usuario está logueado
   useEffect(() => {
-    if (user) setForm(f => ({ ...f, name: f.name || user.name || '', phone: f.phone || '' }))
+    if (user) setForm(f => ({ ...f, name: f.name || user.name || '', phone: f.phone || user.phone || '' }))
   }, [user])
 
   async function aplicarCodigo() {

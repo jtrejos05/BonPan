@@ -92,6 +92,8 @@ async function runMigrations() {
       )
     `)
     console.log('✅ Migración: seguridad de puntos de venta lista')
+    await db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS phone VARCHAR(20)`)
+    console.log('✅ Migración: teléfono en usuarios listo')
   } catch (e) {
     console.error('⚠️ Migración falló:', e.message)
   }

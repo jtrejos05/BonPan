@@ -22,8 +22,8 @@ export function AuthProvider({ children }) {
     setUser(user)
   }
 
-  async function register(name, email, password) {
-    const res = await api.usuarios.register({ name, email, password })
+  async function register(name, email, password, phone) {
+    const res = await api.usuarios.register({ name, email, password, phone })
     saveSession(res)
     return res.user
   }

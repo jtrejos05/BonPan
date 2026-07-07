@@ -105,6 +105,14 @@ router.post('/', async (req, res) => {
       [pedidoId]
     )
 
+    // Guardar el teléfono en la cuenta del usuario si aún no tiene uno
+    if (usuarioId && customer.phone) {
+      await client.query(
+        `UPDATE usuarios SET phone = $1 WHERE id = $2 AND (phone IS NULL OR phone = '')`,
+        [customer.phone.trim(), usuarioId]
+      )
+    }
+
     // Sumar puntos al usuario registrado (1 punto por $1.000)
     if (usuarioId) {
       const puntosGanados = Math.floor(total / 1000)
