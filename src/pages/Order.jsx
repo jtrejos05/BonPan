@@ -9,7 +9,8 @@ import { openWompiCheckout } from '../services/wompi'
 // ── Modal de tipo de entrega ─────────────────────────────────
 function DeliveryModal({ onClose, onConfirm }) {
   const [tipo,       setTipo]       = useState('retiro')
-  const [ciudad,     setCiudad]     = useState('')
+  const [zonaId,     setZonaId]     = useState('')
+  const [zonas,      setZonas]      = useState([])
   const [direccion,  setDireccion]  = useState('')
   const [locales,    setLocales]    = useState([])
   const [localId,    setLocalId]    = useState('')
@@ -24,16 +25,22 @@ function DeliveryModal({ onClose, onConfirm }) {
       })
       .catch(() => {})
       .finally(() => setLoadingPV(false))
+    api.zonas.getActivas()
+      .then(setZonas)
+      .catch(() => {})
   }, [])
 
   const localSeleccionado = locales.find(l => String(l.id) === localId)
+  const zonaSeleccionada  = zonas.find(z => String(z.id) === zonaId)
 
   function confirm() {
-    if (tipo === 'domicilio' && (!ciudad.trim() || !direccion.trim())) return
+    if (tipo === 'domicilio' && (!zonaSeleccionada || !direccion.trim())) return
     if (tipo === 'retiro'   && !localId) return
     onConfirm({
       tipo,
-      ciudad,
+      ciudad:         tipo === 'domicilio' ? zonaSeleccionada.ciudad : '',
+      zona:           tipo === 'domicilio' ? zonaSeleccionada.nombre : null,
+      costoDomicilio: tipo === 'domicilio' ? Number(zonaSeleccionada.costo) : 0,
       direccion,
       puntoVentaId:        tipo === 'retiro' ? Number(localId) : null,
       puntoVentaNombre:    tipo === 'retiro' ? localSeleccionado?.nombre : null,
@@ -120,18 +127,22 @@ function DeliveryModal({ onClose, onConfirm }) {
             </div>
           ) : (
             <div className="space-y-4">
+              <p className="text-xs text-stone-500 font-medium bg-stone-50 border border-stone-100 rounded px-3 py-2">
+                🛵 Por ahora hacemos domicilios solo en <strong>Ibagué</strong>.
+              </p>
               <div>
                 <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-                  <MapPin size={12} className="inline mr-1" /> Ciudad
+                  <MapPin size={12} className="inline mr-1" /> Barrio
                 </label>
-                <select value={ciudad} onChange={e => setCiudad(e.target.value)}
+                <select value={zonaId} onChange={e => setZonaId(e.target.value)}
                   className="w-full border border-stone-200 px-4 py-3 text-sm text-stone-700 font-medium
                              focus:outline-none focus:border-red-800 bg-white appearance-none">
-                  <option value="">Selecciona una ciudad</option>
-                  <option>Ibagué</option>
-                  <option>El Espinal</option>
-                  <option>Melgar</option>
-                  <option>Armenia</option>
+                  <option value="">Selecciona tu barrio</option>
+                  {zonas.map(z => (
+                    <option key={z.id} value={z.id}>
+                      {z.nombre} — domicilio ${Number(z.costo).toLocaleString()}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -143,14 +154,23 @@ function DeliveryModal({ onClose, onConfirm }) {
                   className="w-full border border-stone-200 px-4 py-3 text-sm text-stone-700 font-medium
                              focus:outline-none focus:border-red-800" />
               </div>
+              {zonaSeleccionada && (
+                <p className="text-xs text-stone-500 font-medium">
+                  🛵 Costo del domicilio a {zonaSeleccionada.nombre}:{' '}
+                  <strong className="text-red-800">${Number(zonaSeleccionada.costo).toLocaleString()}</strong>
+                  {' '}(se suma al total)
+                </p>
+              )}
               <p className="text-xs text-stone-400 font-medium">
-                🛵 El domicilio tiene un costo adicional según la distancia.
+                ¿No encuentras tu barrio? Aún no llegamos a tu zona — puedes retirar en tienda o{' '}
+                <a href="https://wa.me/573053067179" target="_blank" rel="noopener noreferrer"
+                  className="text-red-700 font-bold hover:underline">escribirnos por WhatsApp</a>.
               </p>
             </div>
           )}
 
           <button type="button" onClick={confirm}
-            disabled={tipo === 'domicilio' && (!ciudad || !direccion)}
+            disabled={tipo === 'domicilio' && (!zonaId || !direccion)}
             style={{fontFamily:'Elms Sans, sans-serif'}}
             className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase py-4
                        hover:bg-red-900 active:bg-red-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation">
@@ -218,8 +238,9 @@ export default function Order() {
     return Math.min(d, cartTotal)
   }
 
-  const descuento  = calcDescuento()
-  const totalFinal = cartTotal - descuento
+  const descuento       = calcDescuento()
+  const costoDomicilio  = delivery?.tipo === 'domicilio' ? Number(delivery.costoDomicilio) || 0 : 0
+  const totalFinal      = cartTotal - descuento + costoDomicilio
 
   function validate() {
     const e = {}
@@ -335,7 +356,8 @@ export default function Order() {
               </p>
             ) : (
               <p className="text-stone-600 font-medium text-xs sm:text-sm">
-                🛵 <strong>Domicilio</strong> — {confirmed.customer.delivery.direccion}, {confirmed.customer.delivery.ciudad}
+                🛵 <strong>Domicilio</strong> — {confirmed.customer.delivery.direccion}
+                {confirmed.customer.delivery.zona && `, ${confirmed.customer.delivery.zona}`}, {confirmed.customer.delivery.ciudad}
               </p>
             )}
           </div>
@@ -438,8 +460,8 @@ export default function Order() {
                     </>
                   ) : (
                     <>
-                      <p className="font-bold text-red-950 text-sm">Domicilio a {delivery.ciudad}</p>
-                      <p className="text-stone-500 text-xs">{delivery.direccion}</p>
+                      <p className="font-bold text-red-950 text-sm">Domicilio · {delivery.zona}</p>
+                      <p className="text-stone-500 text-xs">{delivery.direccion} · +${Number(delivery.costoDomicilio || 0).toLocaleString()}</p>
                     </>
                   )}
                 </div>
@@ -510,7 +532,7 @@ export default function Order() {
                   <span className="text-base sm:text-lg">{delivery.tipo === 'retiro' ? '🏪' : '🛵'}</span>
                   <div className="text-left flex-1 min-w-0">
                     <p className="text-xs font-bold text-stone-700 truncate">
-                      {delivery.tipo === 'retiro' ? 'Retiro en tienda' : `Domicilio · ${delivery.ciudad}`}
+                      {delivery.tipo === 'retiro' ? 'Retiro en tienda' : `Domicilio · ${delivery.zona}`}
                     </p>
                     {delivery.tipo === 'retiro'
                       ? <p className="text-xs text-stone-400">15–20 min</p>
@@ -627,6 +649,12 @@ export default function Order() {
                   <div className="flex justify-between text-sm text-green-600 font-bold">
                     <span className="truncate mr-2">Descuento ({promo.nombre})</span>
                     <span className="shrink-0">-${(promo.tipo === 'porcentaje' ? Math.round(cartTotal * promo.valor / 100) : Math.min(Number(promo.valor), cartTotal)).toLocaleString()}</span>
+                  </div>
+                )}
+                {costoDomicilio > 0 && (
+                  <div className="flex justify-between text-sm text-stone-600 font-bold">
+                    <span className="truncate mr-2">🛵 Domicilio ({delivery.zona})</span>
+                    <span className="shrink-0">+${costoDomicilio.toLocaleString()}</span>
                   </div>
                 )}
               </div>

@@ -65,6 +65,7 @@ import AdminPedidos     from './admin/AdminPedidos'
 import AdminProductos   from './admin/AdminProductos'
 import AdminPromociones from './admin/AdminPromociones'
 import AdminPuntosVenta from './admin/AdminPuntosVenta'
+import AdminZonas       from './admin/AdminZonas'
 import AdminClientes    from './admin/AdminClientes'
 import AdminActividad   from './admin/AdminActividad'
 
@@ -166,6 +167,7 @@ export default function App() {
                 <Route path="productos"       element={<AdminProductos />} />
                 <Route path="promociones"     element={<AdminPromociones />} />
                 <Route path="puntos-venta"    element={<AdminPuntosVenta />} />
+                <Route path="zonas"           element={<AdminZonas />} />
                 <Route path="clientes"        element={<AdminClientes />} />
                 <Route path="actividad"       element={<AdminActividad />} />
               </Route>

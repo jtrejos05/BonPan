@@ -89,6 +89,15 @@ export const api = {
     accesos: (limit = 100) => request(`/puntos-venta/accesos?limit=${limit}`, { headers: adminAuth() }),
   },
 
+  zonas: {
+    getActivas: ()        => request('/zonas'),
+    getAll:     ()        => request('/zonas/admin',        { headers: adminAuth() }),
+    create:     (data)    => request('/zonas',              { method: 'POST',   body: JSON.stringify(data), headers: adminAuth() }),
+    update:     (id, d)   => request(`/zonas/${id}`,        { method: 'PUT',    body: JSON.stringify(d),    headers: adminAuth() }),
+    toggle:     (id)      => request(`/zonas/${id}/toggle`, { method: 'PATCH',  headers: adminAuth() }),
+    remove:     (id)      => request(`/zonas/${id}`,        { method: 'DELETE', headers: adminAuth() }),
+  },
+
   promociones: {
     getAll:       ()       => request('/promociones/admin'),
     getActivas:   ()       => request('/promociones'),

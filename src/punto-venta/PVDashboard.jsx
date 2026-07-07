@@ -171,6 +171,16 @@ export default function PVDashboard() {
                         </span>
                       ))}
                     </div>
+                    {pedido.tipo_entrega === 'domicilio' && (
+                      <p className="text-stone-500 text-xs mt-2 font-semibold">
+                        🛵 Domicilio{pedido.zona_entrega ? ` — ${pedido.zona_entrega}` : ''}
+                        {pedido.direccion_entrega ? ` · ${pedido.direccion_entrega}` : ''}
+                        {Number(pedido.costo_domicilio) > 0 ? ` · $${Number(pedido.costo_domicilio).toLocaleString()}` : ''}
+                      </p>
+                    )}
+                    {pedido.tipo_entrega === 'retiro' && (
+                      <p className="text-stone-500 text-xs mt-2 font-semibold">🏪 Retiro en tienda</p>
+                    )}
                     {pedido.notes && (
                       <p className="text-stone-400 text-xs mt-2">📝 {pedido.notes}</p>
                     )}

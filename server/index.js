@@ -24,6 +24,7 @@ app.use('/api/usuarios',  require('./routes/usuarios'))
 app.use('/api/upload',      require('./routes/upload'))
 app.use('/api/promociones',  require('./routes/promociones'))
 app.use('/api/puntos-venta', require('./routes/puntosVenta'))
+app.use('/api/zonas',        require('./routes/zonas'))
 app.use('/api/pagos',        require('./routes/pagos'))
 
 // ── Health check ──────────────────────────────────────────────
@@ -94,6 +95,51 @@ async function runMigrations() {
     console.log('✅ Migración: seguridad de puntos de venta lista')
     await db.query(`ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS phone VARCHAR(20)`)
     console.log('✅ Migración: teléfono en usuarios listo')
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS zonas_cobertura (
+        id         SERIAL PRIMARY KEY,
+        ciudad     VARCHAR(50)  NOT NULL DEFAULT 'Ibagué',
+        nombre     VARCHAR(100) NOT NULL,
+        costo      INTEGER      NOT NULL DEFAULT 4000 CHECK (costo >= 0),
+        activa     BOOLEAN      DEFAULT TRUE,
+        created_at TIMESTAMPTZ  DEFAULT NOW(),
+        UNIQUE (ciudad, nombre)
+      )
+    `)
+    await db.query(`
+      ALTER TABLE pedidos
+        ADD COLUMN IF NOT EXISTS tipo_entrega      VARCHAR(20),
+        ADD COLUMN IF NOT EXISTS ciudad_entrega    VARCHAR(50),
+        ADD COLUMN IF NOT EXISTS zona_entrega      VARCHAR(100),
+        ADD COLUMN IF NOT EXISTS direccion_entrega VARCHAR(200),
+        ADD COLUMN IF NOT EXISTS costo_domicilio   INTEGER DEFAULT 0
+    `)
+    // Barrios iniciales de Ibagué — solo la primera vez (luego se administran desde el panel)
+    const { rows: zCount } = await db.query('SELECT COUNT(*)::int AS n FROM zonas_cobertura')
+    if (zCount[0].n === 0) {
+      const barrios = [
+        // [nombre, costo]
+        ['Centro',          3000], ['La Pola',        3000], ['Belén',          3000],
+        ['Interlaken',      3000], ['San Simón',      3000], ['Restrepo',       3000],
+        ['Gaitán',          3000], ['Macarena',       3000], ['Cádiz',          3000],
+        ['Claret',          3000],
+        ['Piedra Pintada',  4000], ['Calambeo',       4000], ['Ambalá',         4000],
+        ['Jordán',          4000], ['El Vergel',      4000], ['Santa Helena',   4000],
+        ['La Francia',      4000], ['La Gaviota',     4000], ['Varsovia',       4000],
+        ['Simón Bolívar',   4000],
+        ['El Salado',       5000], ['Picaleña',       5000], ['Mirolindo',      5000],
+        ['La Samaria',      5000], ['El Topacio',     5000], ['Boquerón',       5000],
+      ]
+      for (const [nombre, costo] of barrios) {
+        await db.query(
+          `INSERT INTO zonas_cobertura (ciudad, nombre, costo) VALUES ('Ibagué', $1, $2)
+           ON CONFLICT (ciudad, nombre) DO NOTHING`,
+          [nombre, costo]
+        )
+      }
+      console.log('✅ Migración: zonas de cobertura de Ibagué sembradas')
+    }
+    console.log('✅ Migración: zonas de cobertura listas')
   } catch (e) {
     console.error('⚠️ Migración falló:', e.message)
   }

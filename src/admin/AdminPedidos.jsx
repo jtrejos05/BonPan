@@ -200,9 +200,17 @@ export default function AdminPedidos() {
                     {/* Entrega */}
                     {order.tipo_entrega && (
                       <div className="mt-3 bg-stone-50 rounded-xl p-3 text-sm text-stone-600">
-                        🚚 <span className="font-medium">Entrega:</span>{' '}
-                        {order.tipo_entrega === 'domicilio' ? 'Domicilio' : 'Recogida en punto'}
-                        {order.direccion_entrega && ` — ${order.direccion_entrega}`}
+                        {order.tipo_entrega === 'domicilio' ? (
+                          <>
+                            🛵 <span className="font-medium">Domicilio</span>
+                            {order.zona_entrega && <> — <strong>{order.zona_entrega}</strong></>}
+                            {order.direccion_entrega && ` · ${order.direccion_entrega}`}
+                            {Number(order.costo_domicilio) > 0 &&
+                              ` · $${Number(order.costo_domicilio).toLocaleString()}`}
+                          </>
+                        ) : (
+                          <>🏪 <span className="font-medium">Retiro en tienda</span></>
+                        )}
                       </div>
                     )}
                     {order.customer.notes && (

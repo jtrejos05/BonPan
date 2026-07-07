@@ -3,7 +3,7 @@ import { Link, useLocation, Navigate, Outlet } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import {
   LayoutDashboard, Package, ClipboardList, Activity,
-  LogOut, Users, Tag, Store, Menu, X, ChevronRight
+  LogOut, Users, Tag, Store, Menu, X, ChevronRight, Bike
 } from 'lucide-react'
 
 const navLinks = [
@@ -12,6 +12,7 @@ const navLinks = [
   { to: '/admin/productos',    label: 'Productos',       icon: <Package size={18} /> },
   { to: '/admin/promociones',  label: 'Promociones',     icon: <Tag size={18} /> },
   { to: '/admin/puntos-venta', label: 'Puntos de Venta', icon: <Store size={18} /> },
+  { to: '/admin/zonas',        label: 'Domicilios',      icon: <Bike size={18} /> },
   { to: '/admin/clientes',     label: 'Clientes',        icon: <Users size={18} /> },
   { to: '/admin/actividad',    label: 'Actividad',       icon: <Activity size={18} /> },
 ]
