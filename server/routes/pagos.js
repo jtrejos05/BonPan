@@ -104,7 +104,12 @@ async function aplicarTransaccion(tx) {
 router.post('/webhook', async (req, res) => {
   try {
     const evento = req.body
-    if (!evento?.data?.transaction || !evento.signature?.checksum) {
+    // Eventos que no son de transacciones (ej: nequi_token.updated) se
+    // aceptan con 200 y se ignoran, para que Wompi no los reintente
+    if (!evento?.data?.transaction) {
+      return res.json({ ok: true, ignored: true })
+    }
+    if (!evento.signature?.checksum) {
       return res.status(400).json({ error: 'Evento inválido' })
     }
 
@@ -120,6 +125,8 @@ router.post('/webhook', async (req, res) => {
       if (checksum !== evento.signature.checksum.toLowerCase()) {
         return res.status(403).json({ error: 'Checksum inválido' })
       }
+    } else {
+      console.warn('⚠️ WOMPI_EVENTS_SECRET no está configurado: se aceptan eventos sin verificar su firma')
     }
 
     await aplicarTransaccion(evento.data.transaction)
