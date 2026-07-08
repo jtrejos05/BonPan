@@ -140,6 +140,17 @@ async function runMigrations() {
       console.log('✅ Migración: zonas de cobertura de Ibagué sembradas')
     }
     console.log('✅ Migración: zonas de cobertura listas')
+    await db.query(`ALTER TABLE puntos_de_venta ADD COLUMN IF NOT EXISTS recibe_domicilios BOOLEAN DEFAULT FALSE`)
+    // Si ningún local recibe los domicilios aún, asignarlo al "Central" (o al primero activo)
+    await db.query(`
+      UPDATE puntos_de_venta SET recibe_domicilios = TRUE
+      WHERE id = (
+        SELECT id FROM puntos_de_venta WHERE activo = TRUE
+        ORDER BY (nombre ILIKE '%central%') DESC, id LIMIT 1
+      )
+      AND NOT EXISTS (SELECT 1 FROM puntos_de_venta WHERE recibe_domicilios = TRUE)
+    `)
+    console.log('✅ Migración: local receptor de domicilios listo')
   } catch (e) {
     console.error('⚠️ Migración falló:', e.message)
   }

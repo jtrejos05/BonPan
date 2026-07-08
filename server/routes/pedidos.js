@@ -79,13 +79,22 @@ router.post('/', async (req, res) => {
     )
     const clienteId = cRows[0].id
 
-    // Crear pedido
+    // Crear pedido — los retiros van al local que eligió el cliente; los
+    // domicilios (sin local) se asignan al local que recibe los domicilios
     const d = customer.delivery || {}
+    let puntoVentaId = d.puntoVentaId || null
+    if (!puntoVentaId) {
+      const { rows: pvRows } = await client.query(
+        `SELECT id FROM puntos_de_venta WHERE activo = TRUE
+         ORDER BY recibe_domicilios DESC, id LIMIT 1`
+      )
+      puntoVentaId = pvRows[0]?.id || null
+    }
     const { rows: pRows } = await client.query(
       `INSERT INTO pedidos (cliente_id, total, status, notes, punto_venta_id,
                             tipo_entrega, ciudad_entrega, zona_entrega, direccion_entrega, costo_domicilio)
        VALUES ($1,$2,'Pendiente',$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-      [clienteId, total, customer.notes || null, d.puntoVentaId || null,
+      [clienteId, total, customer.notes || null, puntoVentaId,
        d.tipo || null, d.ciudad || null, d.zona || null, d.direccion || null,
        Number(d.costoDomicilio) || 0]
     )

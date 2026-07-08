@@ -77,6 +77,7 @@ export const api = {
     create:    (data)      => request('/puntos-venta',          { method: 'POST',   body: JSON.stringify(data), headers: adminAuth() }),
     update:    (id, data)  => request(`/puntos-venta/${id}`,    { method: 'PUT',    body: JSON.stringify(data), headers: adminAuth() }),
     remove:    (id)        => request(`/puntos-venta/${id}`,    { method: 'DELETE', headers: adminAuth() }),
+    setDomicilios: (id)    => request(`/puntos-venta/${id}/domicilios`, { method: 'PATCH', headers: adminAuth() }),
     login:     (id, pin, deviceToken, deviceName) =>
       request('/puntos-venta/login', { method: 'POST', body: JSON.stringify({ id, pin, deviceToken, deviceName }) }),
     getPedidos:(id)        => request(`/puntos-venta/${id}/pedidos`, { headers: pvAuth() }),

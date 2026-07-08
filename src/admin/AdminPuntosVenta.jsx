@@ -176,6 +176,11 @@ export default function AdminPuntosVenta() {
     await fetchLocales()
   }
 
+  async function asignarDomicilios(id) {
+    try { await api.puntosVenta.setDomicilios(id); await fetchLocales() }
+    catch(err) { alert(err.message) }
+  }
+
   return (
     <div className="p-6 space-y-6">
       {showModal && (
@@ -274,6 +279,14 @@ export default function AdminPuntosVenta() {
                 {l.telefono  && <p>📞 {l.telefono}</p>}
                 {l.hora_apertura && l.hora_cierre && (
                   <p>🕐 Acceso empleados: {l.hora_apertura} – {l.hora_cierre}</p>
+                )}
+                {l.recibe_domicilios ? (
+                  <p className="text-green-700 font-bold">🛵 Recibe los pedidos a domicilio</p>
+                ) : l.activo && (
+                  <button onClick={()=>asignarDomicilios(l.id)}
+                    className="text-xs text-stone-400 font-bold hover:text-red-800 hover:underline transition-colors">
+                    🛵 Enviar los domicilios a este local
+                  </button>
                 )}
               </div>
 
