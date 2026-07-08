@@ -459,7 +459,8 @@ export default function Home() {
 
   const p1 = products.find(p => p.name === 'Croissant de Mantequilla')
   const p2 = products.find(p => p.name === 'Pastel de Pollo')
-  const p3 = products.find(p => p.name === 'Pastel de Carne')
+  const p3 = products.find(p => p.name.toLowerCase().includes('danesa'))
+    || products.find(p => p.name.toLowerCase().includes('canela'))
 
   return (
     <div className="bg-white text-stone-900 overflow-x-hidden" style={{fontFamily:'Elms Sans, sans-serif'}}>
@@ -588,10 +589,10 @@ export default function Home() {
         />
         <div className="h-px bg-stone-100" />
         <ProductHero
-          img="https://images.unsplash.com/photo-1626078299034-558a37c0d9e5?w=1200&q=90"
-          tag="Sabor intenso"
-          title="Pastel de Carne."
-          sub="Masa hojaldrada con relleno de carne sazonada al estilo Bon Pan. Un bocado y ya no puedes parar."
+          img={p3?.imagen || 'https://images.unsplash.com/photo-1509365465985-25d11c17e812?w=1200&q=90'}
+          tag="Dulce tentación"
+          title="Rollo de Canela."
+          sub="Espiral de hojaldre dorado con canela, azúcar y pasas. Recién horneado cada mañana, imposible comer solo uno."
           price={p3 ? p3.price.toLocaleString() : '5.000'}
           p={p3} onAdd={addToCart} reverse={false}
         />
