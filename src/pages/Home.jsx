@@ -591,7 +591,7 @@ export default function Home() {
         <ProductHero
           img={p3?.imagen || 'https://images.unsplash.com/photo-1509365465985-25d11c17e812?w=1200&q=90'}
           tag="Dulce tentación"
-          title="Rollo de Canela."
+          title="Danesa."
           sub="Espiral de hojaldre dorado con canela, azúcar y pasas. Recién horneado cada mañana, imposible comer solo uno."
           price={p3 ? p3.price.toLocaleString() : '5.000'}
           p={p3} onAdd={addToCart} reverse={false}
