@@ -75,6 +75,26 @@ async function aplicarTransaccion(tx) {
       ['pago', `Pago ${estado} — Pedido #${rows[0].id} ($${Math.round(tx.amount_in_cents / 100).toLocaleString('es-CO')})`,
        JSON.stringify({ pedidoId: rows[0].id, transactionId: tx.id, status: tx.status, method: tx.payment_method_type })]
     )
+    // Al aprobarse el pago, otorgar los puntos de fidelidad que quedaron
+    // pendientes al crear el pedido (una sola vez, aunque el webhook y la
+    // verificación lleguen ambos)
+    if (estado === 'Aprobado') {
+      const { rows: pRows } = await db.query(
+        `UPDATE pedidos SET puntos_otorgados = TRUE
+         WHERE id = $1 AND usuario_id IS NOT NULL AND puntos_otorgados = FALSE
+         RETURNING usuario_id, total`,
+        [rows[0].id]
+      )
+      if (pRows.length) {
+        const puntos = Math.floor(Number(pRows[0].total) / 1000)
+        if (puntos > 0) {
+          await db.query(
+            'UPDATE usuarios SET puntos = COALESCE(puntos, 0) + $1 WHERE id = $2',
+            [puntos, pRows[0].usuario_id]
+          )
+        }
+      }
+    }
   }
   return rows[0]?.id || null
 }

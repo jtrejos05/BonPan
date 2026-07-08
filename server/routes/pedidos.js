@@ -1,15 +1,20 @@
 const router = require('express').Router()
 const db     = require('../db')
 const { adminOnly, staff } = require('../middleware/staffAuth')
+const { expirarPagosPendientes } = require('../utils/pagosPendientes')
 
 // GET /api/pedidos (admin)
+// Los pedidos con pago en línea iniciado pero no aprobado aún no se muestran:
+// entran a los paneles solo cuando Wompi confirma el pago.
 router.get('/', adminOnly, async (req, res) => {
   try {
+    await expirarPagosPendientes()
     // Pedidos con datos del cliente
     const { rows: pedidos } = await db.query(`
       SELECT p.*, c.name AS cliente_name, c.phone AS cliente_phone
       FROM pedidos p
       JOIN clientes c ON c.id = p.cliente_id
+      WHERE (p.payment_status IS NULL OR p.payment_status = 'Aprobado')
       ORDER BY p.created_at DESC
     `)
 
@@ -65,6 +70,9 @@ router.get('/:id', adminOnly, async (req, res) => {
 // POST /api/pedidos  — crear pedido completo
 router.post('/', async (req, res) => {
   const { customer, items, total, usuarioId } = req.body
+  // Con pago en línea, el pedido queda oculto de los paneles hasta que
+  // Wompi apruebe la transacción (ver filtros en los GET y pagos.js)
+  const pagoEnLinea = customer?.metodoPago === 'wompi'
   const client = await db.connect()
   try {
     await client.query('BEGIN')
@@ -92,11 +100,13 @@ router.post('/', async (req, res) => {
     }
     const { rows: pRows } = await client.query(
       `INSERT INTO pedidos (cliente_id, total, status, notes, punto_venta_id,
-                            tipo_entrega, ciudad_entrega, zona_entrega, direccion_entrega, costo_domicilio)
-       VALUES ($1,$2,'Pendiente',$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+                            tipo_entrega, ciudad_entrega, zona_entrega, direccion_entrega, costo_domicilio,
+                            usuario_id, payment_status)
+       VALUES ($1,$2,'Pendiente',$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
       [clienteId, total, customer.notes || null, puntoVentaId,
        d.tipo || null, d.ciudad || null, d.zona || null, d.direccion || null,
-       Number(d.costoDomicilio) || 0]
+       Number(d.costoDomicilio) || 0,
+       usuarioId || null, pagoEnLinea ? 'Pendiente' : null]
     )
     const pedidoId = pRows[0].id
 
@@ -126,8 +136,9 @@ router.post('/', async (req, res) => {
       )
     }
 
-    // Sumar puntos al usuario registrado (1 punto por $1.000)
-    if (usuarioId) {
+    // Sumar puntos al usuario registrado (1 punto por $1.000).
+    // Con pago en línea, los puntos se otorgan cuando Wompi aprueba el pago.
+    if (usuarioId && !pagoEnLinea) {
       const puntosGanados = Math.floor(total / 1000)
       if (puntosGanados > 0) {
         await client.query(
@@ -135,6 +146,9 @@ router.post('/', async (req, res) => {
           [puntosGanados, usuarioId]
         )
       }
+      await client.query(
+        'UPDATE pedidos SET puntos_otorgados = TRUE WHERE id = $1', [pedidoId]
+      )
     }
 
     // Log actividad

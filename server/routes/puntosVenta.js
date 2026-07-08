@@ -3,6 +3,7 @@ const db     = require('../db')
 const jwt    = require('jsonwebtoken')
 const { adminOnly, pvEmpleado } = require('../middleware/staffAuth')
 const { fueraDeHorario } = require('../utils/horario')
+const { expirarPagosPendientes } = require('../utils/pagosPendientes')
 
 // ── Helpers de seguridad ──────────────────────────────────────
 function clientIp(req) {
@@ -261,13 +262,16 @@ router.post('/login', async (req, res) => {
 })
 
 // ── GET /api/puntos-venta/:id/pedidos — pedidos del local (empleado del local o admin) ──
+// Los pedidos con pago en línea aparecen solo cuando Wompi aprueba la transacción.
 router.get('/:id/pedidos', pvEmpleado, async (req, res) => {
   try {
+    await expirarPagosPendientes()
     const { rows: pedidos } = await db.query(`
       SELECT p.*, c.name AS cliente_name, c.phone AS cliente_phone
       FROM pedidos p
       JOIN clientes c ON c.id = p.cliente_id
       WHERE p.punto_venta_id = $1
+        AND (p.payment_status IS NULL OR p.payment_status = 'Aprobado')
       ORDER BY p.created_at DESC
     `, [req.params.id])
 

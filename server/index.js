@@ -151,6 +151,12 @@ async function runMigrations() {
       AND NOT EXISTS (SELECT 1 FROM puntos_de_venta WHERE recibe_domicilios = TRUE)
     `)
     console.log('✅ Migración: local receptor de domicilios listo')
+    await db.query(`
+      ALTER TABLE pedidos
+        ADD COLUMN IF NOT EXISTS usuario_id       INTEGER,
+        ADD COLUMN IF NOT EXISTS puntos_otorgados BOOLEAN DEFAULT FALSE
+    `)
+    console.log('✅ Migración: pago antes de preparación listo')
   } catch (e) {
     console.error('⚠️ Migración falló:', e.message)
   }

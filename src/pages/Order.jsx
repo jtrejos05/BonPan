@@ -271,7 +271,7 @@ export default function Order() {
       if (canjearPuntos && descuentoPuntos > 0) {
         await api.usuarios.canjear(Math.min(puntosACanjear, puntosDisponibles))
       }
-      const order = await placeOrder({ ...form, delivery, usuarioId: user?.id, totalConDescuento: totalFinal })
+      const order = await placeOrder({ ...form, delivery, usuarioId: user?.id, totalConDescuento: totalFinal, metodoPago })
       await refreshUser()
 
       if (metodoPago === 'wompi') {
@@ -339,11 +339,11 @@ export default function Order() {
               : paymentInfo.status === 'PENDING' ? 'bg-amber-50 border-amber-200 text-amber-700'
               : 'bg-red-50 border-red-200 text-red-700'}`}>
             {paymentInfo.status === 'APPROVED' ? (
-              <p>✅ <strong>Pago aprobado</strong> vía Wompi{paymentInfo.method ? ` (${paymentInfo.method})` : ''}. ¡Gracias!</p>
+              <p>✅ <strong>Pago aprobado</strong> vía Wompi{paymentInfo.method ? ` (${paymentInfo.method})` : ''}. ¡Tu pedido ya está en preparación!</p>
             ) : paymentInfo.status === 'PENDING' ? (
-              <p>⏳ <strong>Pago en proceso.</strong> Si no completaste el pago en línea, puedes pagar al recibir tu pedido.</p>
+              <p>⏳ <strong>Pago en proceso.</strong> Tu pedido entrará a preparación en cuanto se confirme el pago.</p>
             ) : (
-              <p>⚠️ <strong>El pago en línea no se completó</strong> ({paymentInfo.statusLabel}). No te preocupes: tu pedido quedó registrado y puedes pagar al recibirlo.</p>
+              <p>⚠️ <strong>El pago no se completó</strong> ({paymentInfo.statusLabel}), así que tu pedido <strong>no entrará a preparación</strong>. Puedes hacer el pedido de nuevo eligiendo pago al recibir, o escribirnos por WhatsApp.</p>
             )}
           </div>
         )}
