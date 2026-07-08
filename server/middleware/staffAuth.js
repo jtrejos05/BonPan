@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken')
 const db  = require('../db')
+const { fueraDeHorario } = require('../utils/horario')
 
 function verify(req) {
   const header = req.headers.authorization
@@ -11,15 +12,34 @@ function verify(req) {
   }
 }
 
-// Un token de empleado solo sirve mientras su dispositivo siga aprobado:
-// al revocar el dispositivo, la sesión activa queda inválida de inmediato.
-async function dispositivoSigueAprobado(user) {
-  if (user.role !== 'empleado') return true
-  if (!user.dispositivo_id) return false
+// Un token de empleado solo sirve mientras su dispositivo siga aprobado,
+// el local esté activo y estemos dentro del horario del local. Así, al
+// revocar un dispositivo o llegar la hora de cierre, las sesiones activas
+// quedan inválidas de inmediato sin intervención del administrador.
+async function empleadoAutorizado(user) {
+  if (user.role !== 'empleado') return { ok: true }
+  if (!user.dispositivo_id) return { ok: false, error: 'El acceso de este dispositivo fue revocado' }
   const { rows } = await db.query(
-    'SELECT aprobado FROM pv_dispositivos WHERE id=$1', [user.dispositivo_id]
+    `SELECT d.aprobado, pv.activo, pv.hora_apertura, pv.hora_cierre
+     FROM pv_dispositivos d
+     JOIN puntos_de_venta pv ON pv.id = d.punto_venta_id
+     WHERE d.id = $1`,
+    [user.dispositivo_id]
   )
-  return rows.length > 0 && rows[0].aprobado === true
+  const info = rows[0]
+  if (!info || info.aprobado !== true) {
+    return { ok: false, error: 'El acceso de este dispositivo fue revocado' }
+  }
+  if (info.activo === false) {
+    return { ok: false, error: 'Este punto de venta está inactivo' }
+  }
+  if (fueraDeHorario(info)) {
+    return {
+      ok: false,
+      error: `Acceso permitido solo de ${info.hora_apertura} a ${info.hora_cierre} (hora Colombia)`,
+    }
+  }
+  return { ok: true }
 }
 
 // Solo administradores
@@ -39,11 +59,10 @@ async function pvEmpleado(req, res, next) {
   if (user.role === 'admin') { req.user = user; return next() }
   if (user.role === 'empleado' && user.pv_id === Number(req.params.id)) {
     try {
-      if (!await dispositivoSigueAprobado(user)) {
-        return res.status(401).json({ error: 'El acceso de este dispositivo fue revocado' })
-      }
+      const auth = await empleadoAutorizado(user)
+      if (!auth.ok) return res.status(401).json({ error: auth.error })
     } catch {
-      return res.status(500).json({ error: 'Error verificando el dispositivo' })
+      return res.status(500).json({ error: 'Error verificando el acceso' })
     }
     req.user = user
     return next()
@@ -58,11 +77,10 @@ async function staff(req, res, next) {
     return res.status(401).json({ error: 'Sesión inválida o expirada' })
   }
   try {
-    if (!await dispositivoSigueAprobado(user)) {
-      return res.status(401).json({ error: 'El acceso de este dispositivo fue revocado' })
-    }
+    const auth = await empleadoAutorizado(user)
+    if (!auth.ok) return res.status(401).json({ error: auth.error })
   } catch {
-    return res.status(500).json({ error: 'Error verificando el dispositivo' })
+    return res.status(500).json({ error: 'Error verificando el acceso' })
   }
   req.user = user
   next()
