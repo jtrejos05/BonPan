@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
-import { LogOut, RefreshCw, Clock, CheckCircle, Package, Bike } from 'lucide-react'
+import { LogOut, RefreshCw, Clock, CheckCircle, Package, Bike, Volume2, VolumeX } from 'lucide-react'
 
 const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Cancelado']
 const STATUS_META = {
@@ -18,12 +18,75 @@ export default function PVDashboard() {
   const [loading,  setLoading]  = useState(true)
   const [filter,   setFilter]   = useState('Pendiente')
   const [updating, setUpdating] = useState(null)
+  const [soundOn,  setSoundOn]  = useState(() => localStorage.getItem('pv_sound') !== 'off')
+  const [alerta,   setAlerta]   = useState(null)   // cantidad de pedidos nuevos detectados
+  const soundOnRef  = useRef(soundOn)
+  const audioCtxRef = useRef(null)
+  const knownIdsRef = useRef(null)                 // ids ya vistos (null = primera carga)
+  const alertaRef   = useRef(null)                 // timeout del aviso visual
+
+  // El navegador solo permite sonido después de una interacción del usuario;
+  // el clic del login ya cuenta, y por si acaso se desbloquea con el primer clic.
+  function getAudioCtx() {
+    if (!audioCtxRef.current) {
+      const Ctx = window.AudioContext || window.webkitAudioContext
+      if (Ctx) audioCtxRef.current = new Ctx()
+    }
+    if (audioCtxRef.current?.state === 'suspended') {
+      audioCtxRef.current.resume().catch(() => {})
+    }
+    return audioCtxRef.current
+  }
+
+  // Timbre "din-don" repetido 4 veces, generado por el navegador (sin archivos).
+  // Onda cuadrada a volumen alto: suena fuerte y penetrante, como campana de alarma.
+  function playChime() {
+    const ctx = getAudioCtx()
+    if (!ctx) return
+    const start = ctx.currentTime
+    ;[0, 0.9, 1.8, 2.7].forEach(offset => {
+      ;[[987.77, 0], [783.99, 0.35]].forEach(([freq, delay]) => {
+        const osc  = ctx.createOscillator()
+        const gain = ctx.createGain()
+        osc.type = 'square'
+        osc.frequency.value = freq
+        const t = start + offset + delay
+        gain.gain.setValueAtTime(0.0001, t)
+        gain.gain.exponentialRampToValueAtTime(0.9, t + 0.02)
+        gain.gain.setValueAtTime(0.9, t + 0.3)
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.5)
+        osc.connect(gain)
+        gain.connect(ctx.destination)
+        osc.start(t)
+        osc.stop(t + 0.55)
+      })
+    })
+  }
+
+  function toggleSound() {
+    const next = !soundOn
+    setSoundOn(next)
+    soundOnRef.current = next
+    localStorage.setItem('pv_sound', next ? 'on' : 'off')
+    if (next) playChime()  // suena de una vez: confirma y desbloquea el audio
+  }
 
   const fetchPedidos = useCallback(async () => {
     if (!pvData?.id) return
     try {
       const data = await api.puntosVenta.getPedidos(pvData.id)
       setPedidos(data)
+      // Detectar pedidos nuevos desde la última consulta y avisar
+      if (knownIdsRef.current) {
+        const nuevos = data.filter(p => !knownIdsRef.current.has(p.id))
+        if (nuevos.length > 0) {
+          if (soundOnRef.current) playChime()
+          setAlerta(nuevos.length)
+          clearTimeout(alertaRef.current)
+          alertaRef.current = setTimeout(() => setAlerta(null), 8000)
+        }
+      }
+      knownIdsRef.current = new Set(data.map(p => p.id))
     } catch(err) {
       // Sesión expirada o dispositivo revocado → volver al login
       if (err.status === 401 || err.status === 403) {
@@ -42,10 +105,24 @@ export default function PVDashboard() {
     const token = localStorage.getItem('pv_token')
     if (!token) { navigate('/punto-venta'); return }
     fetchPedidos()
-    // Auto-refresh cada 30 segundos
-    const interval = setInterval(fetchPedidos, 30000)
-    return () => clearInterval(interval)
+    // Auto-refresh cada 15 segundos
+    const interval = setInterval(fetchPedidos, 15000)
+    // Desbloquear el audio con el primer clic en la página
+    const unlock = () => getAudioCtx()
+    window.addEventListener('click', unlock, { once: true })
+    return () => {
+      clearInterval(interval)
+      clearTimeout(alertaRef.current)
+      window.removeEventListener('click', unlock)
+    }
   }, [])
+
+  // Mostrar los pendientes en la pestaña del navegador
+  useEffect(() => {
+    const pend = pedidos.filter(p => p.status === 'Pendiente').length
+    document.title = pend > 0 ? `(${pend}) Pedidos — Bon Pan` : 'Panel de Ventas — Bon Pan'
+    return () => { document.title = 'Bon Pan – Panadería Artesanal' }
+  }, [pedidos])
 
   function logout() {
     localStorage.removeItem('pv_token')
@@ -71,6 +148,15 @@ export default function PVDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50" style={{textAlign:'left'}}>
+      {/* Aviso de pedido nuevo */}
+      {alerta && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-red-950 text-white
+                        px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-2
+                        font-bold text-sm animate-bounce">
+          🔔 ¡{alerta === 1 ? 'Nuevo pedido' : `${alerta} pedidos nuevos`}!
+        </div>
+      )}
+
       {/* Header */}
       <header className="bg-red-950 text-white px-6 py-4 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-3">
@@ -81,6 +167,12 @@ export default function PVDashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          <button onClick={toggleSound}
+            title={soundOn ? 'Silenciar aviso de pedidos nuevos' : 'Activar sonido de pedidos nuevos'}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition-colors
+              ${soundOn ? 'bg-red-900 hover:bg-red-800' : 'bg-red-900/50 text-red-300 hover:bg-red-800'}`}>
+            {soundOn ? <Volume2 size={15}/> : <VolumeX size={15}/>}
+          </button>
           <button onClick={fetchPedidos}
             className="flex items-center gap-2 bg-red-900 hover:bg-red-800 px-3 py-2 rounded-xl
                        text-sm font-semibold transition-colors">
@@ -215,7 +307,7 @@ export default function PVDashboard() {
       <div className="fixed bottom-4 right-4 bg-white border border-stone-200 rounded-full px-4 py-2
                       text-xs text-stone-400 font-medium shadow-sm flex items-center gap-2">
         <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"/>
-        Se actualiza cada 30s
+        Se actualiza cada 15s {soundOn ? '· 🔔 sonido activo' : '· 🔕 silenciado'}
       </div>
     </div>
   )
