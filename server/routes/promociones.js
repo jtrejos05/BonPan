@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const db     = require('../db')
+const { adminOnly } = require('../middleware/staffAuth')
 
 // GET /api/promociones — todas las promociones activas (para clientes)
 router.get('/', async (req, res) => {
@@ -18,7 +19,7 @@ router.get('/', async (req, res) => {
 })
 
 // GET /api/promociones/admin — todas (para panel admin)
-router.get('/admin', async (req, res) => {
+router.get('/admin', adminOnly, async (req, res) => {
   try {
     const { rows } = await db.query(
       'SELECT * FROM promociones ORDER BY created_at DESC'
@@ -48,8 +49,8 @@ router.get('/codigo/:codigo', async (req, res) => {
   }
 })
 
-// POST /api/promociones — crear promoción
-router.post('/', async (req, res) => {
+// POST /api/promociones — crear promoción (admin)
+router.post('/', adminOnly, async (req, res) => {
   const { nombre, descripcion, tipo, valor, codigo, categorias, activa, fecha_inicio, fecha_fin, imagen, precio } = req.body
   if (!nombre || (!valor && !precio)) return res.status(400).json({ error: 'Nombre y valor o precio especial son requeridos' })
   try {
@@ -78,8 +79,8 @@ router.post('/', async (req, res) => {
   }
 })
 
-// PUT /api/promociones/:id — editar
-router.put('/:id', async (req, res) => {
+// PUT /api/promociones/:id — editar (admin)
+router.put('/:id', adminOnly, async (req, res) => {
   const { nombre, descripcion, tipo, valor, codigo, categorias, activa, fecha_inicio, fecha_fin, imagen, precio } = req.body
   try {
     const { rows } = await db.query(
@@ -108,8 +109,8 @@ router.put('/:id', async (req, res) => {
   }
 })
 
-// PATCH /api/promociones/:id/toggle — activar/pausar
-router.patch('/:id/toggle', async (req, res) => {
+// PATCH /api/promociones/:id/toggle — activar/pausar (admin)
+router.patch('/:id/toggle', adminOnly, async (req, res) => {
   try {
     const { rows } = await db.query(
       'UPDATE promociones SET activa = NOT activa WHERE id = $1 RETURNING *',
@@ -122,8 +123,8 @@ router.patch('/:id/toggle', async (req, res) => {
   }
 })
 
-// DELETE /api/promociones/:id
-router.delete('/:id', async (req, res) => {
+// DELETE /api/promociones/:id (admin)
+router.delete('/:id', adminOnly, async (req, res) => {
   try {
     const { rows } = await db.query(
       'DELETE FROM promociones WHERE id = $1 RETURNING nombre',

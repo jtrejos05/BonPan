@@ -45,9 +45,9 @@ async function request(path, { headers = {}, ...options } = {}) {
 export const api = {
   productos: {
     getAll:     ()          => request('/productos'),
-    create:     (data)      => request('/productos',        { method: 'POST',   body: JSON.stringify(data) }),
-    update:     (id, data)  => request(`/productos/${id}`,  { method: 'PUT',    body: JSON.stringify(data) }),
-    delete:     (id)        => request(`/productos/${id}`,  { method: 'DELETE' }),
+    create:     (data)      => request('/productos',        { method: 'POST',   body: JSON.stringify(data), headers: adminAuth() }),
+    update:     (id, data)  => request(`/productos/${id}`,  { method: 'PUT',    body: JSON.stringify(data), headers: adminAuth() }),
+    delete:     (id)        => request(`/productos/${id}`,  { method: 'DELETE', headers: adminAuth() }),
   },
 
   pedidos: {
@@ -57,13 +57,13 @@ export const api = {
   },
 
   clientes: {
-    getAll:     ()    => request('/clientes'),
-    getPedidos: (id)  => request(`/clientes/${id}/pedidos`),
+    getAll:     ()    => request('/clientes',               { headers: adminAuth() }),
+    getPedidos: (id)  => request(`/clientes/${id}/pedidos`, { headers: adminAuth() }),
   },
 
   actividad: {
     getAll: (limit = 100, type) =>
-      request(`/actividad?limit=${limit}${type ? `&type=${type}` : ''}`),
+      request(`/actividad?limit=${limit}${type ? `&type=${type}` : ''}`, { headers: adminAuth() }),
     log: (type, description, data) =>
       request('/actividad', { method: 'POST', body: JSON.stringify({ type, description, data }) }),
   },
@@ -100,24 +100,23 @@ export const api = {
   },
 
   promociones: {
-    getAll:       ()       => request('/promociones/admin'),
+    getAll:       ()       => request('/promociones/admin',        { headers: adminAuth() }),
     getActivas:   ()       => request('/promociones'),
     getByCodigo:  (codigo) => request(`/promociones/codigo/${codigo}`),
-    create:       (data)   => request('/promociones',           { method: 'POST',  body: JSON.stringify(data) }),
-    update:       (id, d)  => request(`/promociones/${id}`,     { method: 'PUT',   body: JSON.stringify(d) }),
-    toggle:       (id)     => request(`/promociones/${id}/toggle`, { method: 'PATCH' }),
-    remove:       (id)     => request(`/promociones/${id}`,     { method: 'DELETE' }),
-    usar:         (id)     => request(`/promociones/${id}/usar`, { method: 'POST' }),
+    create:       (data)   => request('/promociones',              { method: 'POST',   body: JSON.stringify(data), headers: adminAuth() }),
+    update:       (id, d)  => request(`/promociones/${id}`,        { method: 'PUT',    body: JSON.stringify(d),    headers: adminAuth() }),
+    toggle:       (id)     => request(`/promociones/${id}/toggle`, { method: 'PATCH',  headers: adminAuth() }),
+    remove:       (id)     => request(`/promociones/${id}`,        { method: 'DELETE', headers: adminAuth() }),
+    usar:         (id)     => request(`/promociones/${id}/usar`,   { method: 'POST' }),
   },
 
   upload: {
     imagen: async (file) => {
       const formData = new FormData()
       formData.append('imagen', file)
-      const token = getToken()
       const res = await fetch(`${BASE}/upload/imagen`, {
         method: 'POST',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        headers: adminAuth(),
         body: formData,
       })
       if (!res.ok) {

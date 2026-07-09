@@ -1,8 +1,9 @@
 const router = require('express').Router()
 const db     = require('../db')
+const { adminOnly } = require('../middleware/staffAuth')
 
-// GET /api/actividad?limit=50&type=pedido
-router.get('/', async (req, res) => {
+// GET /api/actividad?limit=50&type=pedido (admin)
+router.get('/', adminOnly, async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 100, 500)
   const type  = req.query.type
   try {

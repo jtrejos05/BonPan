@@ -1,8 +1,9 @@
 const router = require('express').Router()
 const db     = require('../db')
+const { adminOnly } = require('../middleware/staffAuth')
 
-// GET /api/clientes — todos los clientes con sus métricas
-router.get('/', async (req, res) => {
+// GET /api/clientes — todos los clientes con sus métricas (admin)
+router.get('/', adminOnly, async (req, res) => {
   try {
     const { rows } = await db.query(`
       SELECT
@@ -25,8 +26,8 @@ router.get('/', async (req, res) => {
   }
 })
 
-// GET /api/clientes/:id/pedidos — historial completo de un cliente
-router.get('/:id/pedidos', async (req, res) => {
+// GET /api/clientes/:id/pedidos — historial completo de un cliente (admin)
+router.get('/:id/pedidos', adminOnly, async (req, res) => {
   try {
     const { rows: pedidos } = await db.query(
       `SELECT * FROM pedidos WHERE cliente_id = $1 ORDER BY created_at DESC`,
