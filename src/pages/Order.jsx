@@ -34,12 +34,14 @@ function DeliveryModal({ onClose, onConfirm }) {
   const zonaSeleccionada  = zonas.find(z => String(z.id) === zonaId)
 
   function confirm() {
-    if (tipo === 'domicilio' && (!zonaSeleccionada || !direccion.trim())) return
-    if (tipo === 'retiro'   && !localId) return
+    const conDireccion = tipo === 'domicilio' || tipo === 'ruta'
+    if (conDireccion && (!zonaSeleccionada || !direccion.trim())) return
+    if (tipo === 'retiro' && !localId) return
     onConfirm({
       tipo,
-      ciudad:         tipo === 'domicilio' ? zonaSeleccionada.ciudad : '',
-      zona:           tipo === 'domicilio' ? zonaSeleccionada.nombre : null,
+      ciudad:         conDireccion ? zonaSeleccionada.ciudad : '',
+      zona:           conDireccion ? zonaSeleccionada.nombre : null,
+      // La entrega en ruta (día siguiente) no cobra domicilio
       costoDomicilio: tipo === 'domicilio' ? Number(zonaSeleccionada.costo) : 0,
       direccion,
       puntoVentaId:        tipo === 'retiro' ? Number(localId) : null,
@@ -72,26 +74,29 @@ function DeliveryModal({ onClose, onConfirm }) {
         </div>
 
         <div className="p-5 sm:p-6 space-y-4 sm:space-y-5">
-          {/* Toggle Domicilio / Retiro */}
-          <div className="grid grid-cols-2 border border-stone-200 overflow-hidden">
-            <button
-              onClick={() => setTipo('domicilio')}
-              style={{fontFamily:'Elms Sans, sans-serif'}}
-              className={`py-3 text-sm font-bold tracking-wide transition-all duration-200
-                ${tipo === 'domicilio'
-                  ? 'bg-red-950 text-white'
-                  : 'bg-white text-stone-500 hover:bg-stone-50'}`}>
-              🛵 Domicilio
-            </button>
-            <button
-              onClick={() => setTipo('retiro')}
-              style={{fontFamily:'Elms Sans, sans-serif'}}
-              className={`py-3 text-sm font-bold tracking-wide transition-all duration-200 border-l border-stone-200
-                ${tipo === 'retiro'
-                  ? 'bg-red-950 text-white'
-                  : 'bg-white text-stone-500 hover:bg-stone-50'}`}>
-              🏪 Retiro en tienda
-            </button>
+          {/* Tipo de entrega: domicilio inmediato, ruta del día siguiente o retiro */}
+          <div className="space-y-2">
+            {[
+              { id: 'domicilio', icon: '🛵', titulo: 'Domicilio (entrega inmediata)',
+                sub: 'Te llega hoy mismo · costo según tu barrio' },
+              { id: 'ruta',      icon: '🚚', titulo: 'Entrega en ruta',
+                sub: 'Te llega mañana con nuestra ruta · sin costo de domicilio' },
+              { id: 'retiro',    icon: '🏪', titulo: 'Retiro en tienda',
+                sub: 'Listo en 15–20 minutos' },
+            ].map(op => (
+              <button key={op.id} type="button" onClick={() => setTipo(op.id)}
+                className={`w-full text-left p-3.5 border-2 transition-all rounded flex items-center gap-3
+                  ${tipo === op.id ? 'border-red-800 bg-red-50' : 'border-stone-200 hover:border-red-300'}`}>
+                <span className="text-xl shrink-0">{op.icon}</span>
+                <span>
+                  <span className={`block font-black text-sm ${tipo === op.id ? 'text-red-950' : 'text-stone-700'}`}
+                        style={{fontFamily:'Elms Sans, sans-serif'}}>
+                    {op.titulo}
+                  </span>
+                  <span className="block text-stone-500 text-xs mt-0.5">{op.sub}</span>
+                </span>
+              </button>
+            ))}
           </div>
 
           {/* Contenido según tipo */}
@@ -140,7 +145,7 @@ function DeliveryModal({ onClose, onConfirm }) {
                   <option value="">Selecciona tu barrio</option>
                   {zonas.map(z => (
                     <option key={z.id} value={z.id}>
-                      {z.nombre} — domicilio ${Number(z.costo).toLocaleString()}
+                      {z.nombre}{tipo === 'domicilio' ? ` — domicilio $${Number(z.costo).toLocaleString()}` : ''}
                     </option>
                   ))}
                 </select>
@@ -154,11 +159,17 @@ function DeliveryModal({ onClose, onConfirm }) {
                   className="w-full border border-stone-200 px-4 py-3 text-sm text-stone-700 font-medium
                              focus:outline-none focus:border-red-800" />
               </div>
-              {zonaSeleccionada && (
+              {tipo === 'domicilio' && zonaSeleccionada && (
                 <p className="text-xs text-stone-500 font-medium">
                   🛵 Costo del domicilio a {zonaSeleccionada.nombre}:{' '}
                   <strong className="text-red-800">${Number(zonaSeleccionada.costo).toLocaleString()}</strong>
                   {' '}(se suma al total)
+                </p>
+              )}
+              {tipo === 'ruta' && (
+                <p className="text-xs text-green-700 font-semibold bg-green-50 border border-green-200 rounded px-3 py-2">
+                  🚚 Tu pedido se entrega <strong>mañana</strong> con nuestra ruta de reparto,
+                  {' '}<strong>sin costo de domicilio</strong>.
                 </p>
               )}
               <p className="text-xs text-stone-400 font-medium">
@@ -170,7 +181,7 @@ function DeliveryModal({ onClose, onConfirm }) {
           )}
 
           <button type="button" onClick={confirm}
-            disabled={tipo === 'domicilio' && (!zonaId || !direccion)}
+            disabled={tipo !== 'retiro' && (!zonaId || !direccion)}
             style={{fontFamily:'Elms Sans, sans-serif'}}
             className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase py-4
                        hover:bg-red-900 active:bg-red-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation">
@@ -354,6 +365,11 @@ export default function Order() {
               <p className="text-stone-600 font-medium text-xs sm:text-sm">
                 🏪 <strong>Retiro en tienda</strong> — {confirmed.customer.delivery.puntoVentaNombre} · {confirmed.customer.delivery.puntoVentaDireccion}
               </p>
+            ) : confirmed.customer.delivery.tipo === 'ruta' ? (
+              <p className="text-stone-600 font-medium text-xs sm:text-sm">
+                🚚 <strong>Entrega en ruta</strong> — te llega <strong>mañana</strong> en {confirmed.customer.delivery.direccion}
+                {confirmed.customer.delivery.zona && `, ${confirmed.customer.delivery.zona}`}, sin costo de domicilio
+              </p>
             ) : (
               <p className="text-stone-600 font-medium text-xs sm:text-sm">
                 🛵 <strong>Domicilio</strong> — {confirmed.customer.delivery.direccion}
@@ -445,22 +461,27 @@ export default function Order() {
                 ${errors.delivery ? 'border-red-400 bg-red-50' : delivery ? 'border-red-950 bg-white' : 'border-dashed border-stone-300 bg-white hover:border-red-800'}`}>
               <div className="flex items-center gap-3 text-left">
                 <div className="w-8 sm:w-9 h-8 sm:h-9 bg-red-950 text-white flex items-center justify-center shrink-0 text-base sm:text-lg">
-                  {!delivery ? '📦' : delivery.tipo === 'retiro' ? '🏪' : '🛵'}
+                  {!delivery ? '📦' : delivery.tipo === 'retiro' ? '🏪' : delivery.tipo === 'ruta' ? '🚚' : '🛵'}
                 </div>
                 <div>
                   {!delivery ? (
                     <>
                       <p className="font-bold text-stone-700 text-sm">Seleccionar tipo de entrega</p>
-                      <p className="text-stone-400 text-xs">Domicilio o retiro en tienda</p>
+                      <p className="text-stone-400 text-xs">Domicilio, entrega en ruta o retiro en tienda</p>
                     </>
                   ) : delivery.tipo === 'retiro' ? (
                     <>
                       <p className="font-bold text-red-950 text-sm">Retiro en tienda</p>
                       <p className="text-stone-500 text-xs">{delivery.puntoVentaNombre} · 15–20 min</p>
                     </>
+                  ) : delivery.tipo === 'ruta' ? (
+                    <>
+                      <p className="font-bold text-red-950 text-sm">Entrega en ruta (mañana) · {delivery.zona}</p>
+                      <p className="text-stone-500 text-xs">{delivery.direccion} · sin costo de domicilio</p>
+                    </>
                   ) : (
                     <>
-                      <p className="font-bold text-red-950 text-sm">Domicilio · {delivery.zona}</p>
+                      <p className="font-bold text-red-950 text-sm">Domicilio (entrega inmediata) · {delivery.zona}</p>
                       <p className="text-stone-500 text-xs">{delivery.direccion} · +${Number(delivery.costoDomicilio || 0).toLocaleString()}</p>
                     </>
                   )}
@@ -529,10 +550,12 @@ export default function Order() {
               {/* Entrega seleccionada */}
               {delivery && (
                 <div className="bg-stone-50 border border-stone-100 px-3 sm:px-4 py-3 mb-4 flex items-center gap-2">
-                  <span className="text-base sm:text-lg">{delivery.tipo === 'retiro' ? '🏪' : '🛵'}</span>
+                  <span className="text-base sm:text-lg">{delivery.tipo === 'retiro' ? '🏪' : delivery.tipo === 'ruta' ? '🚚' : '🛵'}</span>
                   <div className="text-left flex-1 min-w-0">
                     <p className="text-xs font-bold text-stone-700 truncate">
-                      {delivery.tipo === 'retiro' ? 'Retiro en tienda' : `Domicilio · ${delivery.zona}`}
+                      {delivery.tipo === 'retiro' ? 'Retiro en tienda'
+                        : delivery.tipo === 'ruta' ? `Entrega en ruta (mañana) · ${delivery.zona}`
+                        : `Domicilio · ${delivery.zona}`}
                     </p>
                     {delivery.tipo === 'retiro'
                       ? <p className="text-xs text-stone-400">15–20 min</p>
@@ -655,6 +678,12 @@ export default function Order() {
                   <div className="flex justify-between text-sm text-stone-600 font-bold">
                     <span className="truncate mr-2">🛵 Domicilio ({delivery.zona})</span>
                     <span className="shrink-0">+${costoDomicilio.toLocaleString()}</span>
+                  </div>
+                )}
+                {delivery?.tipo === 'ruta' && (
+                  <div className="flex justify-between text-sm text-green-600 font-bold">
+                    <span className="truncate mr-2">🚚 Entrega en ruta (mañana)</span>
+                    <span className="shrink-0">Gratis</span>
                   </div>
                 )}
               </div>

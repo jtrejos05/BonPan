@@ -265,9 +265,15 @@ export default function PVDashboard() {
                     </div>
                     {pedido.tipo_entrega === 'domicilio' && (
                       <p className="text-stone-500 text-xs mt-2 font-semibold">
-                        🛵 Domicilio{pedido.zona_entrega ? ` — ${pedido.zona_entrega}` : ''}
+                        🛵 Domicilio (entrega inmediata){pedido.zona_entrega ? ` — ${pedido.zona_entrega}` : ''}
                         {pedido.direccion_entrega ? ` · ${pedido.direccion_entrega}` : ''}
                         {Number(pedido.costo_domicilio) > 0 ? ` · $${Number(pedido.costo_domicilio).toLocaleString()}` : ''}
+                      </p>
+                    )}
+                    {pedido.tipo_entrega === 'ruta' && (
+                      <p className="text-amber-700 text-xs mt-2 font-semibold">
+                        🚚 Entrega en ruta — MAÑANA{pedido.zona_entrega ? ` — ${pedido.zona_entrega}` : ''}
+                        {pedido.direccion_entrega ? ` · ${pedido.direccion_entrega}` : ''} · sin costo de domicilio
                       </p>
                     )}
                     {pedido.tipo_entrega === 'retiro' && (

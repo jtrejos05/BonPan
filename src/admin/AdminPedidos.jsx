@@ -202,11 +202,18 @@ export default function AdminPedidos() {
                       <div className="mt-3 bg-stone-50 rounded-xl p-3 text-sm text-stone-600">
                         {order.tipo_entrega === 'domicilio' ? (
                           <>
-                            🛵 <span className="font-medium">Domicilio</span>
+                            🛵 <span className="font-medium">Domicilio (entrega inmediata)</span>
                             {order.zona_entrega && <> — <strong>{order.zona_entrega}</strong></>}
                             {order.direccion_entrega && ` · ${order.direccion_entrega}`}
                             {Number(order.costo_domicilio) > 0 &&
                               ` · $${Number(order.costo_domicilio).toLocaleString()}`}
+                          </>
+                        ) : order.tipo_entrega === 'ruta' ? (
+                          <>
+                            🚚 <span className="font-medium">Entrega en ruta (día siguiente)</span>
+                            {order.zona_entrega && <> — <strong>{order.zona_entrega}</strong></>}
+                            {order.direccion_entrega && ` · ${order.direccion_entrega}`}
+                            {' '}· sin costo de domicilio
                           </>
                         ) : (
                           <>🏪 <span className="font-medium">Retiro en tienda</span></>
