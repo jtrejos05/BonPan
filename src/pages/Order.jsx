@@ -210,7 +210,6 @@ export default function Order() {
   const [promoLoading,   setPromoLoading]   = useState(false)
   const [canjearPuntos,  setCanjearPuntos]  = useState(false)
   const [puntosACanjear, setPuntosACanjear] = useState(100)
-  const [metodoPago,     setMetodoPago]     = useState('efectivo')  // 'efectivo' | 'wompi'
   const [paymentInfo,    setPaymentInfo]    = useState(null)        // { status, statusLabel, method }
 
   // Pre-llenar nombre y teléfono si el usuario está logueado
@@ -282,14 +281,11 @@ export default function Order() {
       if (canjearPuntos && descuentoPuntos > 0) {
         await api.usuarios.canjear(Math.min(puntosACanjear, puntosDisponibles))
       }
-      const order = await placeOrder({ ...form, delivery, usuarioId: user?.id, totalConDescuento: totalFinal, metodoPago })
+      const order = await placeOrder({ ...form, delivery, usuarioId: user?.id, totalConDescuento: totalFinal, metodoPago: 'wompi' })
       await refreshUser()
 
-      if (metodoPago === 'wompi') {
-        await iniciarPagoWompi(order)
-      } else {
-        setPaymentInfo(null)
-      }
+      // El pago siempre es en línea con Wompi
+      await iniciarPagoWompi(order)
 
       setConfirmed(order)
       setForm({ name: '', phone: '', notes: '' })
@@ -354,7 +350,8 @@ export default function Order() {
             ) : paymentInfo.status === 'PENDING' ? (
               <p>⏳ <strong>Pago en proceso.</strong> Tu pedido entrará a preparación en cuanto se confirme el pago.</p>
             ) : (
-              <p>⚠️ <strong>El pago no se completó</strong> ({paymentInfo.statusLabel}), así que tu pedido <strong>no entrará a preparación</strong>. Puedes hacer el pedido de nuevo eligiendo pago al recibir, o escribirnos por WhatsApp.</p>
+              <p>⚠️ <strong>El pago no se completó</strong> ({paymentInfo.statusLabel}), así que tu pedido <strong>no entrará a preparación</strong>. Puedes intentar de nuevo desde el menú, o{' '}
+                <a href="https://wa.me/573053067179" target="_blank" rel="noopener noreferrer" className="font-bold underline">escribirnos por WhatsApp</a> para ayudarte.</p>
             )}
           </div>
         )}
@@ -732,34 +729,13 @@ export default function Order() {
                                text-sm focus:outline-none focus:border-red-800 resize-none transition-colors" />
                 </div>
 
-                {/* Método de pago */}
-                <div>
-                  <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-                    Método de pago
-                  </label>
-                  <div className="grid grid-cols-2 border border-stone-200 overflow-hidden">
-                    <button type="button" onClick={() => setMetodoPago('efectivo')}
-                      style={{fontFamily:'Elms Sans, sans-serif'}}
-                      className={`py-3 text-xs font-bold tracking-wide transition-all duration-200
-                        ${metodoPago === 'efectivo'
-                          ? 'bg-red-950 text-white'
-                          : 'bg-white text-stone-500 hover:bg-stone-50'}`}>
-                      💵 Al recibir
-                    </button>
-                    <button type="button" onClick={() => setMetodoPago('wompi')}
-                      style={{fontFamily:'Elms Sans, sans-serif'}}
-                      className={`py-3 text-xs font-bold tracking-wide transition-all duration-200 border-l border-stone-200
-                        ${metodoPago === 'wompi'
-                          ? 'bg-red-950 text-white'
-                          : 'bg-white text-stone-500 hover:bg-stone-50'}`}>
-                      💳 En línea
-                    </button>
-                  </div>
-                  {metodoPago === 'wompi' && (
-                    <p className="text-xs text-stone-400 mt-2 font-medium">
-                      🔒 Tarjeta, PSE, Nequi y más — pago seguro con Wompi
-                    </p>
-                  )}
+                {/* Pago en línea */}
+                <div className="bg-stone-50 border border-stone-100 rounded-xl px-4 py-3">
+                  <p className="text-xs font-bold text-stone-600">💳 Pago en línea seguro</p>
+                  <p className="text-xs text-stone-400 mt-0.5 font-medium">
+                    🔒 Tarjeta, PSE, Nequi y más — procesado por Wompi. Tu pedido entra a
+                    preparación al confirmarse el pago.
+                  </p>
                 </div>
 
                 {submitError && (
@@ -771,7 +747,7 @@ export default function Order() {
                 <button type="submit" disabled={submitting}
                   className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase
                              py-4 hover:bg-red-900 active:bg-red-800 transition-colors disabled:opacity-50 mt-2 touch-manipulation">
-                  {submitting ? '⏳ Enviando...' : metodoPago === 'wompi' ? '💳 Confirmar y Pagar' : 'Confirmar Pedido'}
+                  {submitting ? '⏳ Enviando...' : '💳 Confirmar y Pagar'}
                 </button>
               </form>
             </div>

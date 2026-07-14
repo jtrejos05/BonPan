@@ -103,9 +103,11 @@ router.get('/:id', adminOnly, async (req, res) => {
 // POST /api/pedidos  — crear pedido completo
 router.post('/', async (req, res) => {
   const { customer, items, total, usuarioId } = req.body
-  // Con pago en línea, el pedido queda oculto de los paneles hasta que
-  // Wompi apruebe la transacción (ver filtros en los GET y pagos.js)
-  const pagoEnLinea = customer?.metodoPago === 'wompi'
+  // Solo se maneja pago en línea: TODO pedido nace pendiente de pago y queda
+  // oculto de los paneles hasta que Wompi apruebe la transacción (ver filtros
+  // en los GET y pagos.js). Se ignora lo que diga el cliente para que nadie
+  // pueda saltarse el pago manipulando la petición.
+  const pagoEnLinea = true
   const client = await db.connect()
   try {
     await client.query('BEGIN')
