@@ -332,13 +332,21 @@ export default function Order() {
     <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center px-4 py-16">
       <div className="bg-white border border-stone-200 p-6 sm:p-10 max-w-md w-full text-center shadow-xl">
         <div className="text-4xl sm:text-5xl mb-5 sm:mb-6">🎉</div>
-        <h2 className="text-2xl sm:text-3xl text-red-950 mb-2" style={{fontFamily:'Elms Sans, sans-serif'}}>
+        <h2 className="text-2xl sm:text-3xl text-red-950 mb-3" style={{fontFamily:'Elms Sans, sans-serif'}}>
           ¡Pedido Confirmado!
         </h2>
+        <div className="inline-block bg-red-50 border-2 border-red-200 rounded-full px-6 py-2 mb-3">
+          <span className="text-red-900 font-black text-xl" style={{fontFamily:'Elms Sans, sans-serif'}}>
+            Pedido #{confirmed.id}
+          </span>
+        </div>
         <p className="text-stone-400 mb-1 font-medium text-sm sm:text-base">
           Gracias, <strong className="text-stone-700">{confirmed.customer?.name}</strong>
         </p>
-        <p className="text-stone-400 text-sm mb-3">Tu pedido está siendo preparado 🥐</p>
+        <p className="text-stone-400 text-xs mb-3">
+          Guarda este número: con él y tu teléfono puedes consultar cómo va tu pedido
+          cuando quieras en la sección <strong>"Mi pedido"</strong>.
+        </p>
 
         {paymentInfo && (
           <div className={`border rounded px-4 py-3 mb-4 text-sm text-left font-medium
