@@ -42,6 +42,39 @@ router.get('/', adminOnly, async (req, res) => {
   }
 })
 
+// GET /api/pedidos/:id/seguimiento — seguimiento para el cliente.
+// Público, pero exige el teléfono con el que se hizo el pedido como
+// verificación, para que nadie pueda consultar pedidos ajenos.
+router.get('/:id/seguimiento', async (req, res) => {
+  const digits = s => String(s || '').replace(/\D/g, '')
+  const phone = digits(req.query.phone)
+  if (!phone) return res.status(400).json({ error: 'Teléfono requerido' })
+  try {
+    const { rows } = await db.query(`
+      SELECT p.id, p.status, p.total, p.created_at, p.tipo_entrega, p.ciudad_entrega,
+             p.zona_entrega, p.direccion_entrega, p.costo_domicilio, p.payment_status,
+             c.phone AS cliente_phone,
+             pv.nombre AS punto_venta_nombre, pv.direccion AS punto_venta_direccion
+      FROM pedidos p
+      JOIN clientes c ON c.id = p.cliente_id
+      LEFT JOIN puntos_de_venta pv ON pv.id = p.punto_venta_id
+      WHERE p.id = $1`, [req.params.id])
+    const p = rows[0]
+    if (!p || digits(p.cliente_phone) !== phone) {
+      return res.status(404).json({ error: 'No encontramos un pedido con ese número y ese teléfono' })
+    }
+    const { rows: items } = await db.query(
+      'SELECT name, emoji, price, qty FROM pedido_items WHERE pedido_id = $1', [req.params.id])
+    const { rows: historial } = await db.query(
+      'SELECT status, changed_at FROM pedido_estado_historial WHERE pedido_id = $1 ORDER BY changed_at',
+      [req.params.id])
+    const { cliente_phone, ...pedido } = p
+    res.json({ ...pedido, items, statusHistory: historial })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // GET /api/pedidos/:id (admin)
 router.get('/:id', adminOnly, async (req, res) => {
   try {

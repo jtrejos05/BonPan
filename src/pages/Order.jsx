@@ -393,6 +393,12 @@ export default function Order() {
           </div>
         </div>
 
+        <Link
+          to={`/seguimiento?pedido=${confirmed.id}&tel=${encodeURIComponent(confirmed.customer?.phone || '')}`}
+          className="block w-full bg-green-600 text-white font-bold text-xs tracking-widest uppercase py-4
+                     hover:bg-green-700 transition-colors touch-manipulation mb-3">
+          🔎 Seguir mi pedido en vivo
+        </Link>
         <button onClick={() => { setConfirmed(null); setPaymentInfo(null) }}
           className="w-full bg-red-950 text-white font-bold text-xs tracking-widest uppercase py-4
                      hover:bg-red-900 transition-colors touch-manipulation">

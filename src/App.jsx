@@ -54,8 +54,9 @@ import Home      from './pages/Home'
 import Menu      from './pages/Menu'
 import Order     from './pages/Order'
 import Contact   from './pages/Contact'
-import Login     from './pages/Login'
-import Register  from './pages/Register'
+import Login       from './pages/Login'
+import Register    from './pages/Register'
+import Seguimiento from './pages/Seguimiento'
 
 // Admin module
 import AdminLogin       from './admin/AdminLogin'
@@ -132,6 +133,7 @@ function ClientLayout() {
         <Route path="/menu"     element={<Menu />} />
         <Route path="/pedido"   element={<Order />} />
         <Route path="/contacto" element={<Contact />} />
+        <Route path="/seguimiento" element={<Seguimiento />} />
         <Route path="/login"    element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>

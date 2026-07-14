@@ -53,6 +53,7 @@ export const api = {
 
   pedidos: {
     getAll:    ()               => request('/pedidos', { headers: adminAuth() }),
+    seguimiento: (id, phone)    => request(`/pedidos/${id}/seguimiento?phone=${encodeURIComponent(phone)}`),
     create:    (data)           => request('/pedidos',              { method: 'POST', body: JSON.stringify(data) }),
     setStatus: (id, status)     => request(`/pedidos/${id}/estado`, { method: 'PUT',  body: JSON.stringify({ status }), headers: staffAuth() }),
   },
