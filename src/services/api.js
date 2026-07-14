@@ -45,6 +45,7 @@ async function request(path, { headers = {}, ...options } = {}) {
 export const api = {
   productos: {
     getAll:     ()          => request('/productos'),
+    getAllAdmin:()          => request('/productos/admin', { headers: adminAuth() }),
     create:     (data)      => request('/productos',        { method: 'POST',   body: JSON.stringify(data), headers: adminAuth() }),
     update:     (id, data)  => request(`/productos/${id}`,  { method: 'PUT',    body: JSON.stringify(data), headers: adminAuth() }),
     delete:     (id)        => request(`/productos/${id}`,  { method: 'DELETE', headers: adminAuth() }),

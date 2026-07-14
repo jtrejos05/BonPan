@@ -18,7 +18,11 @@ export function AppProvider({ children }) {
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(l => ({ ...l, products: true }))
-      const data = await api.productos.getAll()
+      // El admin ve el catálogo completo (incluidos los productos desactivados,
+      // para poder reactivarlos); los clientes solo ven los activos
+      const data = localStorage.getItem('bonpan_admin_token')
+        ? await api.productos.getAllAdmin().catch(() => api.productos.getAll())
+        : await api.productos.getAll()
       setProducts(data)
     } catch (e) {
       setError('No se pudo conectar al servidor. Verifica que el backend esté corriendo.')

@@ -157,6 +157,10 @@ async function runMigrations() {
         ADD COLUMN IF NOT EXISTS puntos_otorgados BOOLEAN DEFAULT FALSE
     `)
     console.log('✅ Migración: pago antes de preparación listo')
+    // Sanar productos que quedaron con "active" vacío (invisibles en los listados)
+    await db.query(`UPDATE productos SET active = TRUE WHERE active IS NULL`)
+    await db.query(`ALTER TABLE productos ALTER COLUMN active SET DEFAULT TRUE`)
+    console.log('✅ Migración: productos con active vacío recuperados')
   } catch (e) {
     console.error('⚠️ Migración falló:', e.message)
   }

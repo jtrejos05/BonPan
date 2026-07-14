@@ -14,6 +14,16 @@ router.get('/', async (req, res) => {
   }
 })
 
+// GET /api/productos/admin — todos, incluidos los desactivados (admin)
+router.get('/admin', adminOnly, async (_req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM productos ORDER BY category, name')
+    res.json(rows)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 // GET /api/productos/:id
 router.get('/:id', async (req, res) => {
   try {
@@ -29,9 +39,11 @@ router.get('/:id', async (req, res) => {
 router.post('/', adminOnly, async (req, res) => {
   const { name, category, price, description, description_en, emoji, stock, imagen } = req.body
   try {
+    // active se asigna explícitamente: si la columna no tiene valor por defecto
+    // en la base de datos, el producto quedaría "invisible" para los listados
     const { rows } = await db.query(
-      `INSERT INTO productos (name, category, price, description, description_en, emoji, stock, imagen)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      `INSERT INTO productos (name, category, price, description, description_en, emoji, stock, imagen, active)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,TRUE) RETURNING *`,
       [name, category, price, description, description_en || null, emoji || '🥐', stock ?? 0, imagen || null]
     )
     await db.query(

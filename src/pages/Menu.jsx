@@ -356,7 +356,7 @@ export default function Menu() {
   const filtered   = products.filter(p => {
     const matchCat    = activeCategory === ALL || p.category === activeCategory
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
-    return matchCat && matchSearch
+    return p.active !== false && matchCat && matchSearch
   })
 
   function handleAdd(p) {
