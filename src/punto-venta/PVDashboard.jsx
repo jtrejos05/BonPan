@@ -12,6 +12,15 @@ const STATUS_META = {
   'Cancelado':      { color: 'bg-red-100    text-red-700    border-red-200',    icon: '❌' },
 }
 
+function fmtFecha(raw) {
+  if (!raw) return ''
+  const d = new Date(raw)
+  if (isNaN(d)) return ''
+  return d.toLocaleString('es-CO', {
+    day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hour12: true,
+  })
+}
+
 export default function PVDashboard() {
   const navigate  = useNavigate()
   const pvData    = JSON.parse(localStorage.getItem('pv_data') || '{}')
@@ -244,7 +253,9 @@ export default function PVDashboard() {
                       </div>
                       <div>
                         <p className="font-bold text-stone-800">{pedido.customer?.name || pedido.cliente_name}</p>
-                        <p className="text-stone-400 text-xs">{pedido.customer?.phone || pedido.cliente_phone}</p>
+                        <p className="text-stone-400 text-xs">
+                          {pedido.customer?.phone || pedido.cliente_phone} · 🕐 {fmtFecha(pedido.created_at)}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
