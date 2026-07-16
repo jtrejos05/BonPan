@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 import { ChevronDown, ChevronUp, Clock, Copy, CalendarDays, X } from 'lucide-react'
 
@@ -21,23 +21,32 @@ function toDateStr(raw) {
   return d.toISOString().slice(0, 10)
 }
 
-const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Cancelado']
+const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Entregado', 'Cancelado']
 const STATUS_COLORS  = {
   'Pendiente':      'bg-yellow-100 text-yellow-700',
   'En preparación': 'bg-blue-100   text-blue-700',
   'Listo':          'bg-green-100  text-green-700',
+  'Entregado':      'bg-stone-100  text-stone-600',
   'Cancelado':      'bg-red-100    text-red-600',
 }
 const STATUS_ICONS = {
   'Pendiente':      '🕐',
   'En preparación': '👨‍🍳',
   'Listo':          '📦',
+  'Entregado':      '🛵',
   'Cancelado':      '❌',
 }
 
 export default function AdminPedidos() {
-  const { orders, updateOrderStatus, loading } = useApp()
+  const { orders, updateOrderStatus, loading, fetchOrders } = useApp()
   const [filter,    setFilter]    = useState('Todos')
+
+  // Actualización automática: pedidos nuevos y cambios de estado
+  // aparecen solos, sin refrescar la página
+  useEffect(() => {
+    const interval = setInterval(fetchOrders, 30000)
+    return () => clearInterval(interval)
+  }, [])
   const [expanded,  setExpanded]  = useState(null)
   const [search,    setSearch]    = useState('')
   const [dateFrom,  setDateFrom]  = useState('')
@@ -57,7 +66,7 @@ export default function AdminPedidos() {
     return matchStatus && matchSearch && matchFrom && matchTo
   }), [orders, filter, search, dateFrom, dateTo])
 
-  if (loading.orders) return (
+  if (loading.orders && orders.length === 0) return (
     <div className="p-6 flex items-center justify-center h-64">
       <div className="text-center text-stone-400">
         <div className="text-4xl mb-3 animate-pulse">📋</div>
