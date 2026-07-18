@@ -61,7 +61,30 @@ router.post('/firma', async (req, res) => {
 
 // ── Actualizar pedido según transacción de Wompi ──────────────
 async function aplicarTransaccion(tx) {
-  const estado = ESTADOS_PAGO[tx.status] || tx.status
+  let estado = ESTADOS_PAGO[tx.status] || tx.status
+
+  // Defensa adicional: un pago solo se marca Aprobado si el monto pagado
+  // coincide exactamente con el total del pedido (y en pesos colombianos).
+  // La firma de integridad ya protege esto, pero verificarlo también aquí
+  // cierra cualquier rendija de manipulación.
+  if (tx.status === 'APPROVED') {
+    const { rows: check } = await db.query(
+      'SELECT id, total FROM pedidos WHERE payment_reference = $1', [tx.reference]
+    )
+    if (!check.length) return null
+    const montoOk   = Number(check[0].total) * 100 === Number(tx.amount_in_cents)
+    const monedaOk  = !tx.currency || tx.currency === 'COP'
+    if (!montoOk || !monedaOk) {
+      estado = 'Error'
+      await db.query(
+        `INSERT INTO actividad_log (type, description, data) VALUES ($1,$2,$3)`,
+        ['pago', `⚠️ Pago RECHAZADO por monto/moneda que no coincide — Pedido #${check[0].id}`,
+         JSON.stringify({ pedidoId: check[0].id, transactionId: tx.id,
+           esperado: Number(check[0].total) * 100, recibido: tx.amount_in_cents, moneda: tx.currency })]
+      )
+    }
+  }
+
   const { rows } = await db.query(
     `UPDATE pedidos
      SET payment_status = $1, wompi_transaction_id = $2, payment_method = $3
