@@ -53,11 +53,21 @@ export default function Seguimiento() {
     }
   }, [])
 
-  // Consulta automática si llega con los datos en la URL (desde la confirmación)
+  // Consulta automática si llega con los datos en la URL (desde la
+  // confirmación o desde el "Volver al comercio" del widget de Wompi)
   useEffect(() => {
-    if (params.get('pedido') && params.get('tel')) {
-      consultar(params.get('pedido'), params.get('tel'))
+    const init = async () => {
+      // Si Wompi nos devuelve el id de la transacción, verificar el pago
+      // de una vez para que el estado quede al día sin esperar el webhook
+      const txId = params.get('id')
+      if (txId) {
+        try { await api.pagos.verificar(txId) } catch { /* el webhook lo resolverá */ }
+      }
+      if (params.get('pedido') && params.get('tel')) {
+        consultar(params.get('pedido'), params.get('tel'))
+      }
     }
+    init()
   }, [])
 
   // Auto-actualización cada 20s mientras el pedido siga en proceso

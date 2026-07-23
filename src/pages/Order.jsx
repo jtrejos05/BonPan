@@ -305,6 +305,7 @@ export default function Order() {
       setPaymentInfo({ status: 'PENDING', statusLabel: 'Pendiente' })
       openWompiCheckout({
         ...firma,
+        redirectUrl: `${window.location.origin}/seguimiento?pedido=${order.id}&tel=${encodeURIComponent(form.phone)}`,
         customerData: {
           fullName: form.name,
           phoneNumber: form.phone.replace(/\D/g, ''),

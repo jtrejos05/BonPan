@@ -114,7 +114,7 @@ function Gallery() {
   const ref   = useRef(null)
   const inView = useInView(ref, { once: true, amount: 0.05, margin: '0px 0px -40px 0px' })
   const imgs = [
-    { src: 'https://images.unsplash.com/photo-1504093898956-c318a39e9eee?w=800&q=80', alt: 'Pan artesanal' },
+    { src: '/pan-artesanal.jpeg', alt: 'Pan artesanal' },
     { src: 'https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=800&q=80', alt: 'Croissants frescos' },
     { src: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&q=80', alt: 'Pan recién horneado' },
   ]

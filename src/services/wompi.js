@@ -26,7 +26,7 @@ function loadWidgetScript() {
  * usuario completa el pago. Si cierra el widget sin pagar, la promesa
  * no se resuelve (el pedido queda con pago "Pendiente").
  */
-export async function openWompiCheckout({ reference, amountInCents, currency, signature, publicKey, customerData }) {
+export async function openWompiCheckout({ reference, amountInCents, currency, signature, publicKey, customerData, redirectUrl }) {
   await loadWidgetScript()
   return new Promise(resolve => {
     const checkout = new window.WidgetCheckout({
@@ -35,6 +35,9 @@ export async function openWompiCheckout({ reference, amountInCents, currency, si
       reference,
       publicKey,
       signature: { integrity: signature },
+      // Con redirectUrl el widget SIEMPRE ofrece "Volver al comercio",
+      // incluso cuando el pago queda pendiente (PSE, Nequi)
+      ...(redirectUrl ? { redirectUrl } : {}),
       ...(customerData ? { customerData } : {}),
     })
     checkout.open(result => resolve(result.transaction))
