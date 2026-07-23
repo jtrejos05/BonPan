@@ -232,7 +232,7 @@ export default function Order() {
     }
   }
 
-  const descuentoRegistrado = user ? Math.round(cartTotal * 0.05) : 0
+  const descuentoRegistrado = user ? Math.round(cartTotal * 0.10) : 0
   const puntosDisponibles   = user ? (user.puntos || 0) : 0
   const descuentoPuntos     = canjearPuntos && puntosDisponibles >= 100
     ? Math.floor(Math.min(puntosACanjear, puntosDisponibles) / 100) * 10000
@@ -629,7 +629,7 @@ export default function Order() {
                 <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-4 flex items-center gap-3">
                   <Star size={16} className="text-amber-500 shrink-0" />
                   <div className="flex-1">
-                    <p className="text-amber-800 text-xs font-bold">¡Cliente registrado! 5% de descuento aplicado</p>
+                    <p className="text-amber-800 text-xs font-bold">¡Cliente registrado! 10% de descuento aplicado</p>
                     <p className="text-amber-600 text-xs mt-0.5">Tienes <span className="font-black">{puntosDisponibles} puntos</span> acumulados</p>
                   </div>
                 </div>
@@ -670,7 +670,7 @@ export default function Order() {
                 </div>
                 {descuentoRegistrado > 0 && (
                   <div className="flex justify-between text-sm text-green-600 font-bold">
-                    <span>Descuento cliente registrado (5%)</span>
+                    <span>Descuento cliente registrado (10%)</span>
                     <span>-${descuentoRegistrado.toLocaleString()}</span>
                   </div>
                 )}
