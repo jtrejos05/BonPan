@@ -157,6 +157,20 @@ async function runMigrations() {
         ADD COLUMN IF NOT EXISTS puntos_otorgados BOOLEAN DEFAULT FALSE
     `)
     console.log('✅ Migración: pago antes de preparación listo')
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS pv_empleados (
+        id             SERIAL PRIMARY KEY,
+        punto_venta_id INTEGER      NOT NULL REFERENCES puntos_de_venta(id) ON DELETE CASCADE,
+        nombre         VARCHAR(100) NOT NULL,
+        usuario        VARCHAR(50)  NOT NULL UNIQUE,
+        password_hash  TEXT         NOT NULL,
+        activo         BOOLEAN      DEFAULT TRUE,
+        created_at     TIMESTAMPTZ  DEFAULT NOW()
+      )
+    `)
+    await db.query(`ALTER TABLE pv_accesos ADD COLUMN IF NOT EXISTS empleado_id INTEGER`)
+    await db.query(`ALTER TABLE puntos_de_venta ALTER COLUMN pin DROP NOT NULL`)
+    console.log('✅ Migración: empleados con usuario y contraseña listos')
     // Sanar productos que quedaron con "active" vacío (invisibles en los listados)
     await db.query(`UPDATE productos SET active = TRUE WHERE active IS NULL`)
     await db.query(`ALTER TABLE productos ALTER COLUMN active SET DEFAULT TRUE`)

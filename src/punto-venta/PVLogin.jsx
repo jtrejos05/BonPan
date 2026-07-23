@@ -1,65 +1,33 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
-import { Eye, EyeOff, Store, ShieldAlert } from 'lucide-react'
-
-// Identificador único de este navegador/equipo. Se genera una sola vez
-// y el administrador debe aprobarlo para que el login funcione aquí.
-function getDeviceToken() {
-  let t = localStorage.getItem('pv_device_token')
-  if (!t) {
-    t = crypto.randomUUID ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2)}`
-    localStorage.setItem('pv_device_token', t)
-  }
-  return t
-}
-
-function getDeviceName() {
-  const ua = navigator.userAgent
-  const browser = ua.includes('Edg/') ? 'Edge'
-    : ua.includes('Chrome')  ? 'Chrome'
-    : ua.includes('Firefox') ? 'Firefox'
-    : ua.includes('Safari')  ? 'Safari' : 'Navegador'
-  const os = ua.includes('Windows') ? 'Windows'
-    : ua.includes('Android')   ? 'Android'
-    : /iPhone|iPad/.test(ua)   ? 'iPhone/iPad'
-    : ua.includes('Mac')       ? 'Mac' : 'PC'
-  return `${browser} en ${os}`
-}
+import { Eye, EyeOff, User } from 'lucide-react'
 
 export default function PVLogin() {
   const navigate = useNavigate()
-  const [locales,  setLocales]  = useState([])
-  const [pvId,     setPvId]     = useState('')
-  const [pin,      setPin]      = useState('')
+  const [usuario,  setUsuario]  = useState('')
+  const [password, setPassword] = useState('')
   const [error,    setError]    = useState('')
-  const [pending,  setPending]  = useState(null)  // dispositivo pendiente de aprobación
   const [loading,  setLoading]  = useState(false)
-  const [showPin,  setShowPin]  = useState(false)
+  const [showPass, setShowPass] = useState(false)
 
   useEffect(() => {
     // Verificar si ya hay sesión activa
     const token = localStorage.getItem('pv_token')
-    if (token) { navigate('/punto-venta/dashboard'); return }
-    // Cargar locales disponibles
-    api.puntosVenta.getAll()
-      .then(data => setLocales(data.filter(l => l.activo)))
-      .catch(() => {})
+    if (token) navigate('/punto-venta/dashboard')
   }, [])
 
   async function handleSubmit(e) {
     e.preventDefault()
-    if (!pvId) return setError('Selecciona un local')
-    setLoading(true); setError(''); setPending(null)
+    setLoading(true); setError('')
     try {
-      const res = await api.puntosVenta.login(Number(pvId), pin, getDeviceToken(), getDeviceName())
+      const res = await api.puntosVenta.login(usuario.trim(), password)
       localStorage.setItem('pv_token',    res.token)
       localStorage.setItem('pv_data',     JSON.stringify(res.puntoVenta))
+      localStorage.setItem('pv_empleado', JSON.stringify(res.empleado))
       navigate('/punto-venta/dashboard')
     } catch (err) {
-      if (err.data?.pendingDevice) setPending(err.data.dispositivo)
-      else setError(err.message)
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -82,35 +50,31 @@ export default function PVLogin() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Selector de local */}
+            {/* Usuario */}
             <div>
               <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-                <Store size={12} className="inline mr-1"/> Selecciona tu local
+                <User size={12} className="inline mr-1"/> Usuario
               </label>
-              <select value={pvId} onChange={e=>setPvId(e.target.value)} required
+              <input value={usuario} onChange={e=>setUsuario(e.target.value)} required
+                autoComplete="username" placeholder="Tu usuario"
                 className="w-full border-2 border-stone-100 rounded-xl px-4 py-3 text-stone-700
-                           font-medium focus:outline-none focus:border-red-400 bg-white text-sm">
-                <option value="">— Elige un local —</option>
-                {locales.map(l => (
-                  <option key={l.id} value={l.id}>{l.nombre}</option>
-                ))}
-              </select>
+                           font-medium focus:outline-none focus:border-red-400 text-sm"/>
             </div>
 
-            {/* PIN */}
+            {/* Contraseña */}
             <div>
               <label className="block text-xs font-bold tracking-widest uppercase text-stone-400 mb-2">
-                PIN de acceso
+                Contraseña
               </label>
               <div className="relative border-2 border-stone-100 rounded-xl focus-within:border-red-400 transition-colors">
-                <input type={showPin?'text':'password'}
-                  value={pin} onChange={e=>setPin(e.target.value)} required
-                  placeholder="••••"
-                  className="w-full bg-transparent px-4 py-3 text-stone-700 font-mono font-bold
-                             text-xl tracking-widest focus:outline-none pr-12"/>
-                <button type="button" onClick={()=>setShowPin(!showPin)}
+                <input type={showPass?'text':'password'}
+                  value={password} onChange={e=>setPassword(e.target.value)} required
+                  autoComplete="current-password" placeholder="••••••••"
+                  className="w-full bg-transparent px-4 py-3 text-stone-700 font-medium
+                             text-sm focus:outline-none pr-12"/>
+                <button type="button" onClick={()=>setShowPass(!showPass)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600">
-                  {showPin ? <EyeOff size={16}/> : <Eye size={16}/>}
+                  {showPass ? <EyeOff size={16}/> : <Eye size={16}/>}
                 </button>
               </div>
             </div>
@@ -118,19 +82,6 @@ export default function PVLogin() {
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
                 <p className="text-red-600 text-sm font-semibold">{error}</p>
-              </div>
-            )}
-
-            {pending && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-1">
-                <p className="text-amber-800 text-sm font-bold flex items-center gap-2">
-                  <ShieldAlert size={16}/> Dispositivo no autorizado
-                </p>
-                <p className="text-amber-700 text-xs">
-                  Este equipo (<strong>{pending.nombre}</strong>, #{pending.id}) quedó registrado
-                  pero necesita la aprobación del administrador. Pídele que lo apruebe desde
-                  el panel admin en <strong>Puntos de Venta</strong> y vuelve a intentar.
-                </p>
               </div>
             )}
 

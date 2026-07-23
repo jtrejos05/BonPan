@@ -32,6 +32,7 @@ function fmtFecha(raw) {
 export default function PVDashboard() {
   const navigate  = useNavigate()
   const pvData    = JSON.parse(localStorage.getItem('pv_data') || '{}')
+  const empleado  = JSON.parse(localStorage.getItem('pv_empleado') || '{}')
   const [pedidos,  setPedidos]  = useState([])
   const [loading,  setLoading]  = useState(true)
   const [filter,   setFilter]   = useState('Pendiente')
@@ -112,6 +113,7 @@ export default function PVDashboard() {
       if (err.status === 401 || err.status === 403) {
         localStorage.removeItem('pv_token')
         localStorage.removeItem('pv_data')
+        localStorage.removeItem('pv_empleado')
         navigate('/punto-venta')
         return
       }
@@ -147,6 +149,7 @@ export default function PVDashboard() {
   function logout() {
     localStorage.removeItem('pv_token')
     localStorage.removeItem('pv_data')
+    localStorage.removeItem('pv_empleado')
     navigate('/punto-venta')
   }
 
@@ -188,7 +191,9 @@ export default function PVDashboard() {
           <img src="/logo.png" alt="Bon Pan" className="h-10 w-10 object-contain rounded-lg"/>
           <div>
             <p className="font-black text-base" style={{fontFamily:'Elms Sans, sans-serif'}}>{pvData.nombre}</p>
-            <p className="text-red-300 text-xs font-medium">Panel de Ventas</p>
+            <p className="text-red-300 text-xs font-medium">
+              Panel de Ventas{empleado?.nombre ? ` · ${empleado.nombre}` : ''}
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-3">

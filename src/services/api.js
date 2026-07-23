@@ -80,14 +80,16 @@ export const api = {
     update:    (id, data)  => request(`/puntos-venta/${id}`,    { method: 'PUT',    body: JSON.stringify(data), headers: adminAuth() }),
     remove:    (id)        => request(`/puntos-venta/${id}`,    { method: 'DELETE', headers: adminAuth() }),
     setDomicilios: (id)    => request(`/puntos-venta/${id}/domicilios`, { method: 'PATCH', headers: adminAuth() }),
-    login:     (id, pin, deviceToken, deviceName) =>
-      request('/puntos-venta/login', { method: 'POST', body: JSON.stringify({ id, pin, deviceToken, deviceName }) }),
+    login: (usuario, password) =>
+      request('/puntos-venta/login', { method: 'POST', body: JSON.stringify({ usuario, password }) }),
     getPedidos:(id)        => request(`/puntos-venta/${id}/pedidos`, { headers: pvAuth() }),
-    // Seguridad (admin)
-    dispositivos: {
-      getAll:  ()   => request('/puntos-venta/dispositivos',                { headers: adminAuth() }),
-      aprobar: (id) => request(`/puntos-venta/dispositivos/${id}/aprobar`,  { method: 'PATCH',  headers: adminAuth() }),
-      remove:  (id) => request(`/puntos-venta/dispositivos/${id}`,          { method: 'DELETE', headers: adminAuth() }),
+    // Empleados del punto de venta (admin)
+    empleados: {
+      getAll:  ()        => request('/puntos-venta/empleados',              { headers: adminAuth() }),
+      create:  (data)    => request('/puntos-venta/empleados',              { method: 'POST',   body: JSON.stringify(data), headers: adminAuth() }),
+      update:  (id, d)   => request(`/puntos-venta/empleados/${id}`,        { method: 'PUT',    body: JSON.stringify(d),    headers: adminAuth() }),
+      toggle:  (id)      => request(`/puntos-venta/empleados/${id}/toggle`, { method: 'PATCH',  headers: adminAuth() }),
+      remove:  (id)      => request(`/puntos-venta/empleados/${id}`,        { method: 'DELETE', headers: adminAuth() }),
     },
     accesos: (limit = 100) => request(`/puntos-venta/accesos?limit=${limit}`, { headers: adminAuth() }),
   },

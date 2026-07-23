@@ -12,25 +12,26 @@ function verify(req) {
   }
 }
 
-// Un token de empleado solo sirve mientras su dispositivo siga aprobado,
-// el local esté activo y estemos dentro del horario del local. Así, al
-// revocar un dispositivo o llegar la hora de cierre, las sesiones activas
+// Un token de empleado solo sirve mientras el empleado siga activo, el
+// local esté activo y estemos dentro del horario del local. Así, al
+// desactivar un empleado o llegar la hora de cierre, las sesiones activas
 // quedan inválidas de inmediato sin intervención del administrador.
 async function empleadoAutorizado(user) {
   if (user.role !== 'empleado') return { ok: true }
-  if (!user.dispositivo_id) return { ok: false, error: 'El acceso de este dispositivo fue revocado' }
+  if (!user.empleado_id) return { ok: false, error: 'Tu sesión ya no es válida. Vuelve a iniciar sesión.' }
   const { rows } = await db.query(
-    `SELECT d.aprobado, pv.activo, pv.hora_apertura, pv.hora_cierre
-     FROM pv_dispositivos d
-     JOIN puntos_de_venta pv ON pv.id = d.punto_venta_id
-     WHERE d.id = $1`,
-    [user.dispositivo_id]
+    `SELECT e.activo AS empleado_activo, pv.activo AS pv_activo,
+            pv.hora_apertura, pv.hora_cierre
+     FROM pv_empleados e
+     JOIN puntos_de_venta pv ON pv.id = e.punto_venta_id
+     WHERE e.id = $1`,
+    [user.empleado_id]
   )
   const info = rows[0]
-  if (!info || info.aprobado !== true) {
-    return { ok: false, error: 'El acceso de este dispositivo fue revocado' }
+  if (!info || info.empleado_activo !== true) {
+    return { ok: false, error: 'Tu acceso fue desactivado. Habla con el administrador.' }
   }
-  if (info.activo === false) {
+  if (info.pv_activo === false) {
     return { ok: false, error: 'Este punto de venta está inactivo' }
   }
   if (fueraDeHorario(info)) {
