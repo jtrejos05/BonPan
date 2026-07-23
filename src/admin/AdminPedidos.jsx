@@ -13,12 +13,12 @@ function fmtDate(raw) {
   })
 }
 
-/** Convierte timestamp a YYYY-MM-DD para comparar con input date */
+/** Convierte timestamp a YYYY-MM-DD (fecha local de Colombia) para comparar con input date */
 function toDateStr(raw) {
   if (!raw) return ''
   const d = new Date(raw)
   if (isNaN(d)) return ''
-  return d.toISOString().slice(0, 10)
+  return d.toLocaleDateString('en-CA')
 }
 
 const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Entregado', 'Cancelado']

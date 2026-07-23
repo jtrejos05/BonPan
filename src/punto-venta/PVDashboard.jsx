@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../services/api'
-import { LogOut, RefreshCw, Clock, CheckCircle, Package, Bike, Volume2, VolumeX } from 'lucide-react'
+import { LogOut, RefreshCw, Clock, CheckCircle, Package, Bike, Volume2, VolumeX, CalendarDays, X } from 'lucide-react'
 
 const STATUS_OPTIONS = ['Pendiente', 'En preparación', 'Listo', 'Entregado', 'Cancelado']
 const STATUS_META = {
@@ -10,6 +10,14 @@ const STATUS_META = {
   'Listo':          { color: 'bg-green-100  text-green-800  border-green-200',  icon: '✅' },
   'Entregado':      { color: 'bg-stone-100  text-stone-600  border-stone-200',  icon: '🛵' },
   'Cancelado':      { color: 'bg-red-100    text-red-700    border-red-200',    icon: '❌' },
+}
+
+// Fecha local (Colombia) como YYYY-MM-DD para comparar con los filtros
+function toDateStr(raw) {
+  if (!raw) return ''
+  const d = new Date(raw)
+  if (isNaN(d)) return ''
+  return d.toLocaleDateString('en-CA')
 }
 
 function fmtFecha(raw) {
@@ -27,6 +35,8 @@ export default function PVDashboard() {
   const [pedidos,  setPedidos]  = useState([])
   const [loading,  setLoading]  = useState(true)
   const [filter,   setFilter]   = useState('Pendiente')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo,   setDateTo]   = useState('')
   const [updating, setUpdating] = useState(null)
   const [soundOn,  setSoundOn]  = useState(() => localStorage.getItem('pv_sound') !== 'off')
   const [alerta,   setAlerta]   = useState(null)   // cantidad de pedidos nuevos detectados
@@ -152,9 +162,14 @@ export default function PVDashboard() {
     }
   }
 
-  const filtered  = pedidos.filter(p => filter === 'Todos' || p.status === filter)
-  const pendientes = pedidos.filter(p => p.status === 'Pendiente').length
-  const enProc     = pedidos.filter(p => p.status === 'Preparación').length
+  // Pedidos dentro del período elegido: la lista, los filtros de estado
+  // y los contadores trabajan sobre este conjunto
+  const enRango = pedidos.filter(p => {
+    const fecha = toDateStr(p.created_at)
+    return (!dateFrom || fecha >= dateFrom) && (!dateTo || fecha <= dateTo)
+  })
+  const filtered   = enRango.filter(p => filter === 'Todos' || p.status === filter)
+  const pendientes = enRango.filter(p => p.status === 'Pendiente').length
 
   return (
     <div className="min-h-screen bg-gray-50" style={{textAlign:'left'}}>
@@ -200,10 +215,10 @@ export default function PVDashboard() {
         {/* KPIs */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: 'Total hoy',     value: pedidos.length,                                       icon: <Package size={20}/>,    color: 'bg-blue-50 text-blue-700'   },
+            { label: 'Total',         value: enRango.length,                                        icon: <Package size={20}/>,    color: 'bg-blue-50 text-blue-700'   },
             { label: 'Pendientes',    value: pendientes,                                            icon: <Clock size={20}/>,      color: 'bg-yellow-50 text-yellow-700'},
-            { label: 'Listos',        value: pedidos.filter(p=>p.status==='Listo').length,         icon: <CheckCircle size={20}/>, color: 'bg-green-50 text-green-700' },
-            { label: 'Entregados',    value: pedidos.filter(p=>p.status==='Entregado').length,     icon: <Bike size={20}/>,        color: 'bg-stone-50 text-stone-600'  },
+            { label: 'Listos',        value: enRango.filter(p=>p.status==='Listo').length,         icon: <CheckCircle size={20}/>, color: 'bg-green-50 text-green-700' },
+            { label: 'Entregados',    value: enRango.filter(p=>p.status==='Entregado').length,     icon: <Bike size={20}/>,        color: 'bg-stone-50 text-stone-600'  },
           ].map(k => (
             <div key={k.label} className={`rounded-2xl p-5 ${k.color} border border-current/10`}>
               <div className="mb-2 opacity-70">{k.icon}</div>
@@ -222,11 +237,36 @@ export default function PVDashboard() {
               {STATUS_META[s]?.icon} {s}
               {s !== 'Todos' && (
                 <span className="ml-1.5 bg-current/10 px-1.5 py-0.5 rounded-full text-[10px]">
-                  {pedidos.filter(p=>p.status===s).length}
+                  {enRango.filter(p=>p.status===s).length}
                 </span>
               )}
             </button>
           ))}
+        </div>
+
+        {/* Filtro por intervalo de fechas */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <div className="flex items-center gap-1.5 text-stone-400">
+            <CalendarDays size={15}/>
+            <span className="text-xs font-semibold uppercase tracking-wider">Período:</span>
+          </div>
+          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
+            className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700
+                       focus:outline-none focus:border-red-400 bg-white"/>
+          <span className="text-xs text-stone-400">hasta</span>
+          <input type="date" value={dateTo} min={dateFrom} onChange={e => setDateTo(e.target.value)}
+            className="border border-stone-200 rounded-full px-3 py-1.5 text-xs text-stone-700
+                       focus:outline-none focus:border-red-400 bg-white"/>
+          {(dateFrom || dateTo) && (
+            <button onClick={() => { setDateFrom(''); setDateTo('') }}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-red-50 border border-red-200
+                         text-red-600 text-xs font-semibold hover:bg-red-100 transition-colors">
+              <X size={11}/> Limpiar
+            </button>
+          )}
+          <span className="text-xs text-stone-400">
+            {filtered.length} pedido{filtered.length !== 1 ? 's' : ''}
+          </span>
         </div>
 
         {/* Lista de pedidos */}
