@@ -1,6 +1,7 @@
 const router     = require('express').Router()
 const cloudinary = require('cloudinary').v2
 const multer     = require('multer')
+const { requireAdmin } = require('../middleware/authMiddleware')
 
 // Configurar Cloudinary
 cloudinary.config({
@@ -21,7 +22,7 @@ const upload  = multer({
 })
 
 // POST /api/upload/imagen
-router.post('/imagen', upload.single('imagen'), async (req, res) => {
+router.post('/imagen', requireAdmin, upload.single('imagen'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No se recibió ninguna imagen' })
 
   try {
@@ -54,7 +55,7 @@ router.post('/imagen', upload.single('imagen'), async (req, res) => {
 })
 
 // DELETE /api/upload/imagen  — eliminar imagen de Cloudinary
-router.delete('/imagen', async (req, res) => {
+router.delete('/imagen', requireAdmin, async (req, res) => {
   const { public_id } = req.body
   if (!public_id) return res.status(400).json({ error: 'public_id requerido' })
   try {

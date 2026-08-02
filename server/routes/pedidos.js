@@ -1,8 +1,9 @@
 const router = require('express').Router()
 const db     = require('../db')
+const { requireStaff } = require('../middleware/authMiddleware')
 
 // GET /api/pedidos
-router.get('/', async (req, res) => {
+router.get('/', requireStaff, async (req, res) => {
   try {
     // Pedidos con datos del cliente
     const { rows: pedidos } = await db.query(`
@@ -37,7 +38,7 @@ router.get('/', async (req, res) => {
 })
 
 // GET /api/pedidos/:id
-router.get('/:id', async (req, res) => {
+router.get('/:id', requireStaff, async (req, res) => {
   try {
     const { rows } = await db.query(`
       SELECT p.*, c.name AS cliente_name, c.phone AS cliente_phone
@@ -120,7 +121,7 @@ router.post('/', async (req, res) => {
 })
 
 // PUT /api/pedidos/:id/estado  — cambiar estado
-router.put('/:id/estado', async (req, res) => {
+router.put('/:id/estado', requireStaff, async (req, res) => {
   const { status } = req.body
   const VALID = ['Pendiente','En preparación','Listo','Entregado','Cancelado']
   if (!VALID.includes(status)) return res.status(400).json({ error: 'Estado inválido' })

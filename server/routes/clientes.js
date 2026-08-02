@@ -1,8 +1,9 @@
 const router = require('express').Router()
 const db     = require('../db')
+const { requireStaff } = require('../middleware/authMiddleware')
 
 // GET /api/clientes — todos los clientes con sus métricas
-router.get('/', async (req, res) => {
+router.get('/', requireStaff, async (req, res) => {
   try {
     const { rows } = await db.query(`
       SELECT
@@ -26,7 +27,7 @@ router.get('/', async (req, res) => {
 })
 
 // GET /api/clientes/:id/pedidos — historial completo de un cliente
-router.get('/:id/pedidos', async (req, res) => {
+router.get('/:id/pedidos', requireStaff, async (req, res) => {
   try {
     const { rows: pedidos } = await db.query(
       `SELECT * FROM pedidos WHERE cliente_id = $1 ORDER BY created_at DESC`,

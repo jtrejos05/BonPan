@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const db     = require('../db')
+const { requireAdmin } = require('../middleware/authMiddleware')
 
 // GET /api/productos
 router.get('/', async (req, res) => {
@@ -25,7 +26,7 @@ router.get('/:id', async (req, res) => {
 })
 
 // POST /api/productos
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
   const { name, category, price, description, description_en, emoji, stock, imagen } = req.body
   try {
     const { rows } = await db.query(
@@ -44,7 +45,7 @@ router.post('/', async (req, res) => {
 })
 
 // PUT /api/productos/:id
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
   const { name, category, price, description, description_en, emoji, stock, imagen, active } = req.body
   try {
     const { rows } = await db.query(
@@ -65,7 +66,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // DELETE /api/productos/:id  (soft delete)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const { rows } = await db.query(
       'UPDATE productos SET active = FALSE WHERE id = $1 RETURNING name',

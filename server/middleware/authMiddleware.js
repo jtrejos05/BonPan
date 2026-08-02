@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 
-module.exports = function authMiddleware(req, res, next) {
+function authMiddleware(req, res, next) {
   const header = req.headers.authorization
   if (!header || !header.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Token requerido' })
@@ -13,3 +13,22 @@ module.exports = function authMiddleware(req, res, next) {
     res.status(401).json({ error: 'Token inválido o expirado' })
   }
 }
+
+// Exige un token válido y que su rol esté entre los permitidos.
+// Los tokens de cliente (usuarios.js) no llevan rol, así que nunca pasan.
+function requireRole(...roles) {
+  return [
+    authMiddleware,
+    (req, res, next) => {
+      if (!roles.includes(req.user?.role)) {
+        return res.status(403).json({ error: 'No tienes permiso para esta acción' })
+      }
+      next()
+    },
+  ]
+}
+
+module.exports = authMiddleware
+module.exports.requireRole      = requireRole
+module.exports.requireAdmin     = requireRole('admin')
+module.exports.requireStaff     = requireRole('admin', 'empleado')

@@ -1,6 +1,7 @@
 const router = require('express').Router()
 const db     = require('../db')
 const jwt    = require('jsonwebtoken')
+const { requireAdmin, requireStaff } = require('../middleware/authMiddleware')
 
 // ── GET /api/puntos-venta — listar todos (admin) ──────────────
 router.get('/', async (req, res) => {
@@ -15,7 +16,7 @@ router.get('/', async (req, res) => {
 })
 
 // ── POST /api/puntos-venta — crear punto de venta ─────────────
-router.post('/', async (req, res) => {
+router.post('/', requireAdmin, async (req, res) => {
   const { nombre, direccion, telefono, pin } = req.body
   if (!nombre || !pin) return res.status(400).json({ error: 'Nombre y PIN son requeridos' })
   if (pin.length < 4)  return res.status(400).json({ error: 'El PIN debe tener al menos 4 dígitos' })
@@ -36,7 +37,7 @@ router.post('/', async (req, res) => {
 })
 
 // ── PUT /api/puntos-venta/:id — editar ───────────────────────
-router.put('/:id', async (req, res) => {
+router.put('/:id', requireAdmin, async (req, res) => {
   const { nombre, direccion, telefono, pin, activo } = req.body
   try {
     const setParts = ['nombre=$1','direccion=$2','telefono=$3','activo=$4']
@@ -57,7 +58,7 @@ router.put('/:id', async (req, res) => {
 })
 
 // ── DELETE /api/puntos-venta/:id ──────────────────────────────
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', requireAdmin, async (req, res) => {
   try {
     const { rows } = await db.query(
       'UPDATE puntos_de_venta SET activo = FALSE WHERE id=$1 RETURNING nombre',
@@ -94,7 +95,11 @@ router.post('/login', async (req, res) => {
 })
 
 // ── GET /api/puntos-venta/:id/pedidos — pedidos del local ─────
-router.get('/:id/pedidos', async (req, res) => {
+// El admin ve cualquiera; el empleado solo el punto de venta de su token.
+router.get('/:id/pedidos', requireStaff, async (req, res) => {
+  if (req.user.role === 'empleado' && String(req.user.pv_id) !== String(req.params.id)) {
+    return res.status(403).json({ error: 'Solo puedes ver los pedidos de tu punto de venta' })
+  }
   try {
     const { rows: pedidos } = await db.query(`
       SELECT p.*, c.name AS cliente_name, c.phone AS cliente_phone

@@ -1,8 +1,9 @@
 const router = require('express').Router()
 const db     = require('../db')
+const { requireStaff } = require('../middleware/authMiddleware')
 
 // GET /api/actividad?limit=50&type=pedido
-router.get('/', async (req, res) => {
+router.get('/', requireStaff, async (req, res) => {
   const limit = Math.min(parseInt(req.query.limit) || 100, 500)
   const type  = req.query.type
   try {
@@ -20,7 +21,17 @@ router.get('/', async (req, res) => {
 })
 
 // POST /api/actividad — registrar evento manual (ej: carrito desde frontend)
-router.post('/', async (req, res) => {
+// Abierto a visitantes, pero solo para tipos de evento no sensibles.
+// El staff autenticado puede registrar cualquier tipo (ej: 'sistema').
+const TIPOS_PUBLICOS = ['carrito', 'pedido']
+
+function permitirEvento(req, res, next) {
+  if (TIPOS_PUBLICOS.includes(req.body?.type)) return next()
+  const [autenticar, verificarRol] = requireStaff
+  autenticar(req, res, () => verificarRol(req, res, next))
+}
+
+router.post('/', permitirEvento, async (req, res) => {
   const { type, description, data } = req.body
   try {
     const { rows } = await db.query(

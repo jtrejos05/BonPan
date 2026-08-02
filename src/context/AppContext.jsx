@@ -10,7 +10,7 @@ export function AppProvider({ children }) {
   const [clients,     setClients]     = useState([])
   const [activityLog, setActivityLog] = useState([])
   const [cart,        setCart]        = useState([])
-  const [adminAuth,   setAdminAuth]   = useState(false)
+  const [adminAuth,   setAdminAuth]   = useState(() => !!localStorage.getItem('bonpan_admin_token'))
   const [loading,     setLoading]     = useState({ products: true, orders: false, clients: false })
   const [error,       setError]       = useState(null)
 
@@ -62,6 +62,13 @@ export function AppProvider({ children }) {
   }, [])
 
   useEffect(() => { fetchProducts() }, [fetchProducts])
+
+  // Si el token de admin expira, cerramos la sesión del panel
+  useEffect(() => {
+    const onExpirada = () => setAdminAuth(false)
+    window.addEventListener('bonpan:sesion-expirada', onExpirada)
+    return () => window.removeEventListener('bonpan:sesion-expirada', onExpirada)
+  }, [])
 
   // Cuando el admin inicia sesión, carga todo
   useEffect(() => {
@@ -140,7 +147,8 @@ export function AppProvider({ children }) {
   async function adminLogin(username, password) {
     try {
       const res = await api.auth.login(username, password)
-      if (res.ok) {
+      if (res.ok && res.token) {
+        localStorage.setItem('bonpan_admin_token', res.token)
         setAdminAuth(true)
         api.actividad.log('sistema', 'Inicio de sesión en panel admin').catch(() => {})
         return true
@@ -152,8 +160,9 @@ export function AppProvider({ children }) {
   }
 
   function adminLogout() {
-    setAdminAuth(false)
     api.actividad.log('sistema', 'Cierre de sesión en panel admin').catch(() => {})
+    localStorage.removeItem('bonpan_admin_token')
+    setAdminAuth(false)
   }
 
   const cartCount = cart.reduce((s, i) => s + i.qty, 0)
