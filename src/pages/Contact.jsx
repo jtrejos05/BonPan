@@ -23,7 +23,7 @@ function FbIcon() {
 }
 
 const INFO = [
-  { icon: <MapPin size={18} />, title: 'Dirección', lines: ['Crr 6 Sur #66-40, Santafé de Varsovia Local 6', 'Ibagué, Tolima'] },
+  { icon: <MapPin size={18} />, title: 'Dirección', lines: ['¡Estamos cambiando de sede! 🏗️', 'Pronto publicaremos nuestra nueva dirección en Ibagué'] },
   { icon: <Phone size={18} />, title: 'Teléfono', lines: ['+57 305 306 7179'] },
   { icon: <Mail size={18} />, title: 'Correo', lines: ['bon.gerencia@gmail.com'] },
   { icon: <Clock size={18} />, title: 'Horario', lines: [
@@ -92,14 +92,8 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Mapa + Formulario */}
+          {/* Formulario */}
           <div className="space-y-6">
-            <div className="overflow-hidden h-52 sm:h-64 border border-stone-100">
-              <iframe title="Ubicación Bon Pan" width="100%" height="100%" style={{border:0}}
-                loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade"
-                src="https://www.google.com/maps?q=4.430097,-75.197022&output=embed" />
-            </div>
-
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-stone-900 mb-6"
                   style={{fontFamily:'Elms Sans, sans-serif'}}>
